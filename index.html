@@ -1306,8 +1306,8 @@ function switchSource(s){
   source=s;
   document.querySelectorAll(".src-tab").forEach(b=>b.classList.toggle("on",b.dataset.src===s));
   const di=$("#diSection"), ff=$("#ffSection");
-  if(di) di.style.display=s==="di"?"":"none";
-  if(ff) ff.style.display=s==="ff"?"":"none";
+  if(di) di.style.display=s==="di"?"block":"none";
+  if(ff) ff.style.display=s==="ff"?"block":"none";
   if(s==="ff" && FF_DATA) renderFFGrid();
 }
 
@@ -1565,6 +1565,7 @@ initTheme();
 load();
 loadFF();
 initFF();
+switchSource("di"); // 初期状態を明示確定（CSS display:none 問題の保険）
 </script>
 </body>
 </html>
