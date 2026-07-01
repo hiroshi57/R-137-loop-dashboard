@@ -244,7 +244,7 @@
     display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto}
   .overlay.show{display:flex}
   .modal{background:var(--surface);border:1px solid var(--line);border-radius:18px;
-    width:min(840px,100%);box-shadow:0 24px 80px rgba(0,0,0,.35);
+    width:min(1100px,100%);box-shadow:0 24px 80px rgba(0,0,0,.35);
     animation:fadeUp .25s ease;display:flex;flex-direction:column;max-height:90vh}
   .m-head{padding:20px 22px 14px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
   .m-head .m-title{flex:1}
@@ -252,7 +252,18 @@
   .m-close{flex:none;width:34px;height:34px;border-radius:9px;border:1px solid var(--line2);
     background:var(--surface2);color:var(--sub);font-size:15px}
   .m-close:hover{color:var(--ink)}
-  .m-body{padding:18px 22px;overflow-y:auto}
+  /* 2カラムレイアウト */
+  .modal-layout{display:flex;flex:1;overflow:hidden;min-height:0}
+  .m-body{flex:1;padding:18px 22px;overflow-y:auto;min-width:0}
+  .modal-cust{
+    width:300px;flex:none;overflow-y:auto;
+    border-left:1px solid var(--line);background:var(--surface2);
+    padding:16px 14px;
+  }
+  @media(max-width:740px){
+    .modal-layout{flex-direction:column}
+    .modal-cust{width:auto;border-left:none;border-top:1px solid var(--line)}
+  }
   .m-sec{margin-bottom:16px}
   .m-sec > b.lbl{font-size:11px;font-family:"IBM Plex Mono";letter-spacing:.12em;color:var(--faint);
     text-transform:uppercase;display:block;margin-bottom:7px}
@@ -402,38 +413,40 @@
   .ff-result-count{font-size:12px;color:var(--sub);margin-left:auto}
   #ffSection{display:none}
 
-  /* ===== カスタマイザーパネル ===== */
-  .cust-panel{margin-top:22px;padding-top:18px;border-top:2px solid var(--primary-soft)}
-  .cust-toggle{
-    width:100%;display:flex;align-items:center;gap:10px;
-    padding:11px 16px;border-radius:10px;border:none;cursor:pointer;
-    background:var(--primary-soft);color:var(--primary);font-family:inherit;font-size:13px;font-weight:700;
-    transition:.15s;text-align:left;
+  /* ===== カスタマイザー右カラム ===== */
+  .cust-panel{}
+  .cust-col-head{
+    display:flex;align-items:center;gap:7px;
+    font-size:12px;font-weight:700;color:var(--primary);letter-spacing:.05em;
+    margin-bottom:4px;
   }
-  .cust-toggle:hover{background:var(--primary);color:var(--primary-ink)}
-  .cust-body{display:none;margin-top:16px}
-  .cust-body.open{display:block}
-  .cust-row{margin-bottom:14px}
-  .cust-row label{display:block;font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}
-  .cust-hint{font-size:11px;color:var(--faint);margin-bottom:5px;line-height:1.5}
+  .cust-col-sub{
+    font-size:11px;color:var(--faint);line-height:1.6;
+    margin-bottom:14px;padding-bottom:12px;
+    border-bottom:1px solid var(--line);
+  }
+  .cust-row{margin-bottom:12px}
+  .cust-row label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px}
+  .cust-hint{font-size:10.5px;color:var(--faint);margin-bottom:4px;line-height:1.5}
   .cust-input{
-    width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line2);
-    background:var(--surface);color:var(--ink);font-family:inherit;font-size:13px;
-    resize:vertical;min-height:52px;transition:.15s;
+    width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--line2);
+    background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;
+    resize:vertical;min-height:46px;transition:.15s;
   }
   .cust-input:focus{outline:none;border-color:var(--primary)}
   .cust-input::placeholder{color:var(--faint)}
   .cust-generate-btn{
-    width:100%;margin-top:8px;padding:11px;border:none;border-radius:10px;
-    background:var(--primary);color:var(--primary-ink);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+    width:100%;margin-top:10px;padding:11px;border:none;border-radius:10px;
+    background:var(--ok);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+    transition:.15s;
   }
   .cust-generate-btn:hover{opacity:.88}
-  .cust-preview{margin-top:16px;padding:14px;background:var(--surface2);border:1px solid var(--line);border-radius:10px}
-  .cust-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .cust-preview-head b{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+  .cust-preview{margin-top:14px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:9px}
+  .cust-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .cust-preview-head b{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
   pre.cust-out{
-    white-space:pre-wrap;font-family:"IBM Plex Mono";font-size:11.5px;color:var(--ink);
-    line-height:1.75;max-height:320px;overflow-y:auto;
+    white-space:pre-wrap;font-family:"IBM Plex Mono";font-size:11px;color:var(--ink);
+    line-height:1.7;max-height:260px;overflow-y:auto;
   }
 </style>
 </head>
@@ -572,7 +585,10 @@
       </div>
       <button class="m-close" id="mClose" aria-label="閉じる">✕</button>
     </div>
-    <div class="m-body" id="mBody"></div>
+    <div class="modal-layout">
+      <div class="m-body" id="mBody"></div>
+      <div class="modal-cust" id="mCust"></div>
+    </div>
   </div>
 </div>
 
@@ -1215,13 +1231,18 @@ function openModal(l){
     </details>`;
   $("#mPrompt").textContent = l.kickoffPrompt;
   $("#mCopy").addEventListener("click", e=>copyText(l.kickoffPrompt, e.currentTarget));
-  // カスタマイザーパネルを追加
-  $("#mBody").insertAdjacentHTML("beforeend", buildCustPanel());
+  // カスタマイザーを右カラムに注入
+  $("#mCust").innerHTML = buildCustPanel();
   initCustPanel(l.title, l.kickoffPrompt, l.goal, "");
   $("#overlay").classList.add("show");
   document.body.style.overflow="hidden";
 }
-function closeModal(){ $("#overlay").classList.remove("show"); document.body.style.overflow=""; currentLoop=null; }
+function closeModal(){
+  $("#overlay").classList.remove("show");
+  document.body.style.overflow="";
+  const mc=$("#mCust"); if(mc) mc.innerHTML="";
+  currentLoop=null;
+}
 
 /* ========= チャート ========= */
 function buildCharts(){
@@ -1411,10 +1432,11 @@ function openFFModal(loop){
         </div>
         ${relLinks?`<div class="m-sec"><b class="lbl">関連ループ</b><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px">${relLinks}</div></div>`:""}
       </div>
-    </details>
-    ${buildCustPanel()}`;
+    </details>`;
   $("#mPrompt").textContent=loop.prompt||"";
   $("#mCopy").addEventListener("click", e=>copyText(loop.prompt||"", e.currentTarget));
+  // カスタマイザーを右カラムに注入
+  $("#mCust").innerHTML = buildCustPanel();
   initCustPanel(loop.title, loop.prompt||"", loop.description, loop.url||"");
   $("#overlay").classList.add("show");
   document.body.style.overflow="hidden";
@@ -1442,38 +1464,29 @@ function buildCustPanel(){
      hint:"どこをどう変えたいか、疑問点、試したいアイデアなど自由に",ph:""},
   ];
   return `<div class="cust-panel" id="custPanel">
-    <button class="cust-toggle" id="custToggle">
-      ✏️ このループをカスタマイズして自分用に書き換える
-      <span id="custArrow" style="font-size:10px;opacity:.65;margin-left:auto">▼ 開く</span>
-    </button>
-    <div class="cust-body" id="custBody">
-      ${fields.map(f=>`
-        <div class="cust-row">
-          <label for="${f.id}">${f.label}</label>
-          <div class="cust-hint">${f.hint}</div>
-          <textarea class="cust-input" id="${f.id}" placeholder="${esc(f.ph)}" rows="2"></textarea>
-        </div>`).join("")}
-      <button class="cust-generate-btn" id="custGenerate">🔨 オリジナルループを生成する</button>
-      <div class="cust-preview" id="custPreview" style="display:none">
-        <div class="cust-preview-head">
-          <b>生成されたオリジナルループ</b>
-          <button class="btn primary" id="custCopy">📋 エージェントにコピー</button>
-        </div>
-        <pre class="cust-out" id="custOut"></pre>
+    <div class="cust-col-head">✏️ このループをカスタマイズ</div>
+    <div class="cust-col-sub">変えたいところだけ入力してください。空欄は元の設定を使います。</div>
+    ${fields.map(f=>`
+      <div class="cust-row">
+        <label for="${f.id}">${f.label}</label>
+        <div class="cust-hint">${f.hint}</div>
+        <textarea class="cust-input" id="${f.id}" placeholder="${esc(f.ph)}" rows="2"></textarea>
+      </div>`).join("")}
+    <button class="cust-generate-btn" id="custGenerate">🔨 オリジナルループを生成する</button>
+    <div class="cust-preview" id="custPreview" style="display:none">
+      <div class="cust-preview-head">
+        <b>生成されたオリジナルループ</b>
+        <button class="btn primary" id="custCopy">📋 コピー</button>
       </div>
+      <pre class="cust-out" id="custOut"></pre>
     </div>
   </div>`;
 }
 
 function initCustPanel(title, basePrompt, description, sourceUrl){
-  const toggle=$("#custToggle"), body=$("#custBody"), arrow=$("#custArrow");
   const gen=$("#custGenerate"), preview=$("#custPreview");
   const outEl=$("#custOut"), copyBtn=$("#custCopy");
-  if(!toggle) return;
-  toggle.addEventListener("click", ()=>{
-    const open=body.classList.toggle("open");
-    if(arrow) arrow.textContent=open?"▲ 閉じる":"▼ 開く";
-  });
+  if(!gen) return;
   gen.addEventListener("click", ()=>{
     const timing=($("#custTiming")?.value||"").trim();
     const add   =($("#custAdd")?.value   ||"").trim();
