@@ -256,13 +256,16 @@
   .modal-layout{display:flex;flex:1;overflow:hidden;min-height:0}
   .m-body{flex:1;padding:18px 22px;overflow-y:auto;min-width:0}
   .modal-cust{
-    width:300px;flex:none;overflow-y:auto;
+    width:300px;flex:none;
     border-left:1px solid var(--line);background:var(--surface2);
-    padding:16px 14px;
+    display:flex;flex-direction:column;overflow:hidden;
   }
+  .cust-top{padding:14px 14px 0;flex:none}
+  .cust-fields{flex:1;overflow-y:auto;padding:0 14px}
+  .cust-foot{flex:none;padding:10px 14px 14px;background:var(--surface2);border-top:1px solid var(--line)}
   @media(max-width:740px){
     .modal-layout{flex-direction:column}
-    .modal-cust{width:auto;border-left:none;border-top:1px solid var(--line)}
+    .modal-cust{width:auto;border-left:none;border-top:1px solid var(--line);max-height:420px}
   }
   .m-sec{margin-bottom:16px}
   .m-sec > b.lbl{font-size:11px;font-family:"IBM Plex Mono";letter-spacing:.12em;color:var(--faint);
@@ -1464,21 +1467,27 @@ function buildCustPanel(){
      hint:"どこをどう変えたいか、疑問点、試したいアイデアなど自由に",ph:""},
   ];
   return `<div class="cust-panel" id="custPanel">
-    <div class="cust-col-head">✏️ このループをカスタマイズ</div>
-    <div class="cust-col-sub">変えたいところだけ入力してください。空欄は元の設定を使います。</div>
-    ${fields.map(f=>`
-      <div class="cust-row">
-        <label for="${f.id}">${f.label}</label>
-        <div class="cust-hint">${f.hint}</div>
-        <textarea class="cust-input" id="${f.id}" placeholder="${esc(f.ph)}" rows="2"></textarea>
-      </div>`).join("")}
-    <button class="cust-generate-btn" id="custGenerate">🔨 オリジナルループを生成する</button>
-    <div class="cust-preview" id="custPreview" style="display:none">
-      <div class="cust-preview-head">
-        <b>生成されたオリジナルループ</b>
-        <button class="btn primary" id="custCopy">📋 コピー</button>
+    <div class="cust-top">
+      <div class="cust-col-head">✏️ このループをカスタマイズ</div>
+      <div class="cust-col-sub">変えたいところだけ入力。空欄は元の設定を使います。</div>
+    </div>
+    <div class="cust-fields">
+      ${fields.map(f=>`
+        <div class="cust-row">
+          <label for="${f.id}">${f.label}</label>
+          <div class="cust-hint">${f.hint}</div>
+          <textarea class="cust-input" id="${f.id}" placeholder="${esc(f.ph)}" rows="2"></textarea>
+        </div>`).join("")}
+    </div>
+    <div class="cust-foot">
+      <button class="cust-generate-btn" id="custGenerate">✨ オリジナルループを生成する</button>
+      <div class="cust-preview" id="custPreview" style="display:none">
+        <div class="cust-preview-head">
+          <b>生成されたオリジナルループ</b>
+          <button class="btn primary" id="custCopy">📋 コピー</button>
+        </div>
+        <pre class="cust-out" id="custOut"></pre>
       </div>
-      <pre class="cust-out" id="custOut"></pre>
     </div>
   </div>`;
 }
@@ -1529,7 +1538,6 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
     const output=lines.join("\n");
     outEl.textContent=output;
     preview.style.display="";
-    preview.scrollIntoView({behavior:"smooth",block:"nearest"});
     copyBtn.onclick=()=>copyText(output, copyBtn);
   });
 }
