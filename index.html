@@ -1311,6 +1311,12 @@ const FF_CAT_COLORS = {
   "Engineering":"#0E7FA8","Content":"#0E8A5F",
   "Evaluation":"#5A38C9","Operations":"#C77A12","Design":"#B0379B"
 };
+// 日本語優先で値を取り出すヘルパー（日本語訳が無い場合は英語原文にフォールバック）
+const ffTitle = l => l.titleJa || l.title;
+const ffDesc  = l => l.descriptionJa || l.description || "";
+const ffWhen  = l => l.useWhenJa || l.useWhen || "";
+const ffCatLabel = c => c.labelJa || c.label;
+const ffColor = c => FF_CAT_COLORS[c.label] || "#666";
 
 function loadFF(){
   fetch("ff_catalog.json")
@@ -1319,7 +1325,9 @@ function loadFF(){
       FF_DATA = d;
       FF_DATA._bySlug = {};
       d.loops.forEach(l=>{ FF_DATA._bySlug[l.slug]=l; });
-      FF_DATA.catList = [...new Set(d.loops.map(l=>l.category.label))];
+      FF_DATA.catList = (d.categories && d.categories.length)
+        ? d.categories.map(c=>({slug:c.slug, label:c.labelJa||c.label}))
+        : [...new Set(d.loops.map(l=>l.category.slug))].map(s=>({slug:s, label:s}));
       const tEl=$("#ffTabCount"); if(tEl) tEl.textContent="("+d.loops.length+")";
       const kc=$("#ffKpiCount"); if(kc) kc.textContent=d.loops.length;
       const kcat=$("#ffKpiCats"); if(kcat) kcat.textContent=FF_DATA.catList.length;
@@ -1344,19 +1352,21 @@ function renderFFGrid(){
   if(!FF_DATA) return;
   const q=ffSearchQ.toLowerCase().trim();
   let loops=FF_DATA.loops;
-  if(ffCatFilter!=="all") loops=loops.filter(l=>l.category.label===ffCatFilter);
+  if(ffCatFilter!=="all") loops=loops.filter(l=>l.category.slug===ffCatFilter);
   if(q) loops=loops.filter(l=>
+    ffTitle(l).toLowerCase().includes(q)||
+    ffDesc(l).toLowerCase().includes(q)||
+    ffWhen(l).toLowerCase().includes(q)||
     l.title.toLowerCase().includes(q)||
     l.description.toLowerCase().includes(q)||
-    (l.useWhen||"").toLowerCase().includes(q)||
     (l.keywords||[]).some(k=>k.toLowerCase().includes(q))
   );
   const chipsEl=$("#ffCatChips");
   if(chipsEl){
     const allBtn=`<button class="ff-chip${ffCatFilter==="all"?" on":""}" data-ffcat="all">すべて (${FF_DATA.loops.length})</button>`;
     const cats=FF_DATA.catList.map(c=>{
-      const n=FF_DATA.loops.filter(l=>l.category.label===c).length;
-      return `<button class="ff-chip${ffCatFilter===c?" on":""}" data-ffcat="${esc(c)}">${esc(c)} (${n})</button>`;
+      const n=FF_DATA.loops.filter(l=>l.category.slug===c.slug).length;
+      return `<button class="ff-chip${ffCatFilter===c.slug?" on":""}" data-ffcat="${esc(c.slug)}">${esc(c.label)} (${n})</button>`;
     }).join("");
     chipsEl.innerHTML=allBtn+cats;
   }
@@ -1368,16 +1378,17 @@ function renderFFGrid(){
 }
 
 function ffCardHTML(l){
-  const color=FF_CAT_COLORS[l.category.label]||"#666";
-  const desc=(l.description||"").substring(0,120)+(l.description.length>120?"...":"");
-  const when=(l.useWhen||"").substring(0,90)+((l.useWhen||"").length>90?"...":"");
+  const color=ffColor(l.category);
+  const d0=ffDesc(l), w0=ffWhen(l);
+  const desc=d0.substring(0,120)+(d0.length>120?"...":"");
+  const when=w0.substring(0,90)+(w0.length>90?"...":"");
   const isFav=favorites.has("ff:"+l.slug);
   return `<article class="card">
     <div class="badges">
-      <span class="badge cat" style="border-left:3px solid ${color}">${esc(l.category.label)}</span>
+      <span class="badge cat" style="border-left:3px solid ${color}">${esc(ffCatLabel(l.category))}</span>
       <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">FF #${l.number}</span>
     </div>
-    <h4>${esc(l.title)}</h4>
+    <h4>${esc(ffTitle(l))}</h4>
     <div class="goal">${esc(desc)}</div>
     <div class="strat" style="font-size:12px;color:var(--faint)">${esc(when)}</div>
     <div class="kpi-tags">${(l.keywords||[]).slice(0,3).map(k=>`<span class="ktag">${esc(k)}</span>`).join("")}</div>
@@ -1393,12 +1404,12 @@ function ffCardHTML(l){
 // ---- FF モーダル ----
 function openFFModal(loop){
   currentLoop={_ff:true,...loop};
-  const color=FF_CAT_COLORS[loop.category.label]||"#666";
+  const color=ffColor(loop.category);
   $("#mBadges").innerHTML=`
-    <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.label)}</span>
+    <span class="badge cat" style="border-left:3px solid ${color}">${esc(ffCatLabel(loop.category))}</span>
     <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">FF Loop #${loop.number}</span>
     <span style="font-size:11px;color:var(--faint)">${esc(loop.author)} · ${esc(loop.published)}</span>`;
-  $("#mTitle").textContent=loop.title;
+  $("#mTitle").textContent=ffTitle(loop);
   const stepsHTML=(loop.steps||[]).map((s,i)=>
     `<div class="flow-step"><span class="fno">${i+1}</span><div class="ftx"><span>${esc(s)}</span></div></div>`+
     (i<loop.steps.length-1?'<div class="flow-arrow">↓</div>':'')
@@ -1410,10 +1421,10 @@ function openFFModal(loop){
     <div class="m-sec tldr">
       <div class="tldr-lead">
         <b class="lbl">このループがすること</b>
-        <p>${esc(loop.description)}</p>
+        <p>${esc(ffDesc(loop))}</p>
       </div>
       <div class="tldr-meta">
-        <div class="tm"><b>使うタイミング</b><span>${esc((loop.useWhen||"").substring(0,200))}</span></div>
+        <div class="tm"><b>使うタイミング</b><span>${esc(ffWhen(loop).substring(0,200))}</span></div>
         <div class="tm"><b>完了の合図</b><span>${esc(loop.verification&&loop.verification.title||"")}</span></div>
         <div class="tm"><b>確認方法</b><span>${esc(loop.verification&&loop.verification.detail||"")}</span></div>
       </div>
@@ -1444,7 +1455,7 @@ function openFFModal(loop){
   $("#mCopy").addEventListener("click", e=>copyText(loop.prompt||"", e.currentTarget));
   // カスタマイザーを右カラムに注入
   $("#mCust").innerHTML = buildCustPanel();
-  initCustPanel(loop.title, loop.prompt||"", loop.description, loop.url||"");
+  initCustPanel(ffTitle(loop), loop.prompt||"", ffDesc(loop), loop.url||"");
   $("#overlay").classList.add("show");
   document.body.style.overflow="hidden";
 }
