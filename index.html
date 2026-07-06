@@ -1475,6 +1475,9 @@ function buildCustPanel(){
     {id:"custEffect",label:"何に効かせたいか（対象・用途）",
      hint:"このループを使うプロジェクト・チーム・目標",
      ph:"例：ECサイトのCVR改善、営業チームの提案書レビュー"},
+    {id:"custAccept",label:"✅ 完了条件（この出力が“合格”の基準）",
+     hint:"独立検証者が YES/NO で判定できる項目を箇条書きで。曖昧な目標は検証不能＝自己承認の温床になります（空欄なら標準チェックのみ適用）",
+     ph:"例：\n・数値には必ず出典を併記\n・必須項目に空欄なし\n・既存テストが全て通過"},
     {id:"custRisk",label:"制約・リスク・注意事項",
      hint:"予算・権限・期限・技術制約・リスクなど",
      ph:"例：外部データへのアクセス不可、承認は社内のみ"},
@@ -1484,7 +1487,7 @@ function buildCustPanel(){
   return `<div class="cust-panel" id="custPanel">
     <div class="cust-top">
       <div class="cust-col-head">✏️ このループをカスタマイズ</div>
-      <div class="cust-col-sub">変えたいところだけ入力。空欄は元の設定を使います。</div>
+      <div class="cust-col-sub">変えたいところだけ入力。空欄は元の設定を使います。生成物には<b>独立検証ステップ</b>が自動で付きます（自作を自分でレビューすると承認バイアスが出るため）。</div>
     </div>
     <div class="cust-fields">
       ${fields.map(f=>`
@@ -1516,6 +1519,7 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
     const add   =($("#custAdd")?.value   ||"").trim();
     const remove=($("#custRemove")?.value||"").trim();
     const effect=($("#custEffect")?.value||"").trim();
+    const accept=($("#custAccept")?.value||"").trim();
     const risk  =($("#custRisk")?.value  ||"").trim();
     const note  =($("#custNote")?.value  ||"").trim();
     const now=new Date().toLocaleDateString("ja-JP");
@@ -1550,6 +1554,37 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
     } else {
       lines.push(`※ カスタマイズなし。上記のプロンプトをそのまま実行してください。`);
     }
+
+    // ── 独立検証ステップ（常に付与） ──
+    // 出典: Loop Design: A Field Playbook for Agentic Systems
+    //   「エージェントが自作をレビューすると、ほぼ必ず承認する（自己採点バイアス）。
+    //     最も高レバレッジなコンポーネントは独立した検証者である。」
+    lines.push(``);
+    lines.push(SEP);
+    lines.push(`## 🔍 独立検証ステップ（必須・自己承認を防ぐ）`);
+    lines.push(SEP);
+    lines.push(`⚠️ 実行したエージェント自身にレビューさせないこと。生成と評価が同じ文脈を`);
+    lines.push(`   共有すると、評価はほぼ必ず「合格」に偏ります（自己採点バイアス）。`);
+    lines.push(``);
+    lines.push(`1. 別のエージェント／別セッションを「検証者」として立てる。`);
+    lines.push(`2. 検証者には次の敵対的な指示を与える：`);
+    lines.push(`   「この出力は誤っている前提で、却下すべき理由を探せ。`);
+    lines.push(`     理由が1つも見つからない時だけ合格とせよ。」`);
+    lines.push(`3. 下記チェックリストを1項目ずつ YES/NO で判定する（1つでもNOなら却下）：`);
+    if(accept){
+      accept.split(/\r?\n/).map(s=>s.replace(/^[\s・\-*▸]+/,"").trim()).filter(Boolean)
+        .forEach(item=>lines.push(`   ☐ ${item}`));
+      lines.push(`   ── 標準チェック ──`);
+    }
+    lines.push(`   ☐ 主張・数値に出典／根拠が紐づいているか`);
+    lines.push(`   ☐ 必須項目に空欄が残っていないか`);
+    lines.push(`   ☐ タスク固有の受け入れ基準を満たしているか`);
+    lines.push(`   ☐ 既存の成果物にリグレッション（副作用）を起こしていないか`);
+    lines.push(`4. 却下する場合は「最初に失敗した項目」を却下理由として明記し、`);
+    lines.push(`   その理由を添えて差し戻す（reason-carrying requeue）。`);
+    lines.push(`   理由なしの差し戻しは無限ループ（thrashing）の原因になる。`);
+    lines.push(`5. 検証で却下ゼロになった時だけ、この出力を「完了」とみなす。`);
+
     const output=lines.join("\n");
     outEl.textContent=output;
     preview.style.display="";
