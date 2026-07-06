@@ -438,6 +438,7 @@
   }
   .cust-input:focus{outline:none;border-color:var(--primary)}
   .cust-input::placeholder{color:var(--faint)}
+  .cust-select{min-height:0;resize:none;cursor:pointer;appearance:auto}
   .cust-generate-btn{
     width:100%;margin-top:10px;padding:11px;border:none;border-radius:10px;
     background:var(--ok);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
@@ -1463,6 +1464,24 @@ function openFFModal(loop){
 // ---- カスタマイザーパネル ----
 function buildCustPanel(){
   const fields=[
+    {id:"custArch",label:"🧬 ループの型（アーキタイプ）",type:"select",
+     hint:"型を選ぶと、発見面・検証の観点・スケジュールの指針が生成物に付きます",
+     options:[
+       {v:"",t:"自動 / 未選択"},
+       {v:"maintenance",t:"メンテナンス型（既存物を健全に保つ）"},
+       {v:"research",t:"リサーチ型（分析・レポートを作る）"},
+       {v:"monitoring",t:"モニタリング型（信号を監視し反応する）"},
+     ]},
+    {id:"custLevel",label:"🚦 現在の自律レベル",type:"select",
+     hint:"人間がどこまで関与しているか。次に外すべき一手が生成物に付きます",
+     options:[
+       {v:"",t:"未設定"},
+       {v:"1",t:"L1 プロンプト（毎回手で実行）"},
+       {v:"2",t:"L2 手動ループ（毎サイクル run を押す）"},
+       {v:"3",t:"L3 検証付きループ（要注意ケースだけ確認）"},
+       {v:"4",t:"L4 自走（スケジュールを設定し離れる）"},
+       {v:"5",t:"L5 自律（設計するだけ、ほぼ介入しない）"},
+     ]},
     {id:"custTiming",label:"どのタイミングで使うか",
      hint:"例：週次の定例後・KPIが閾値を下回った時・リリース前など（空欄＝元の設定のまま）",
      ph:"空欄のままにすると元のタイミング設定を使います"},
@@ -1494,7 +1513,9 @@ function buildCustPanel(){
         <div class="cust-row">
           <label for="${f.id}">${f.label}</label>
           <div class="cust-hint">${f.hint}</div>
-          <textarea class="cust-input" id="${f.id}" placeholder="${esc(f.ph)}" rows="2"></textarea>
+          ${f.type==="select"
+            ? `<select class="cust-input cust-select" id="${f.id}">${f.options.map(o=>`<option value="${esc(o.v)}">${esc(o.t)}</option>`).join("")}</select>`
+            : `<textarea class="cust-input" id="${f.id}" placeholder="${esc(f.ph)}" rows="2"></textarea>`}
         </div>`).join("")}
     </div>
     <div class="cust-foot">
@@ -1515,6 +1536,8 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
   const outEl=$("#custOut"), copyBtn=$("#custCopy");
   if(!gen) return;
   gen.addEventListener("click", ()=>{
+    const arch  =($("#custArch")?.value  ||"").trim();
+    const level =($("#custLevel")?.value ||"").trim();
     const timing=($("#custTiming")?.value||"").trim();
     const add   =($("#custAdd")?.value   ||"").trim();
     const remove=($("#custRemove")?.value||"").trim();
@@ -1555,6 +1578,33 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
       lines.push(`※ カスタマイズなし。上記のプロンプトをそのまま実行してください。`);
     }
 
+    // ── ループの型（アーキタイプ）指針 ──
+    // 出典: Loop Design §10 — 5つの動作は不変、アーキタイプはその parameterization
+    const ARCH={
+      maintenance:{name:"メンテナンス型",
+        disc:"失敗集合（落ちたテスト・未対応Issue・壊れたビルド・退行）",
+        ver :"修正が完全か。テストスイート＋『修正は不完全』と仮定する敵対的レビュー",
+        sch :"イベント駆動（commit や失敗runをトリガに起動）"},
+      research:{name:"リサーチ型",
+        disc:"タスク一覧（分析対象1件につき1項目）",
+        ver :"全ての数値を引用元と突合。一致しない figure は却下（捏造は尤もらしく不可視）",
+        sch :"単発トリガ実行（常時タイマより都度起動が向く）"},
+      monitoring:{name:"モニタリング型",
+        disc:"メトリクスのストリーム（閾値越えを検知）",
+        ver :"行動前に条件が本物か確認し、誤検知を抑制（不可逆な行動の手前で独立チェック）",
+        sch :"タイトなタイマ or ストリーミングトリガ"},
+    };
+    if(ARCH[arch]){
+      const a=ARCH[arch];
+      lines.push(``);
+      lines.push(SEP);
+      lines.push(`## 🧬 ループの型: ${a.name}`);
+      lines.push(SEP);
+      lines.push(`▸ 発見面(Discovery): ${a.disc}`);
+      lines.push(`▸ 検証の観点(Verifier): ${a.ver}`);
+      lines.push(`▸ スケジュール: ${a.sch}`);
+    }
+
     // ── 独立検証ステップ（常に付与） ──
     // 出典: Loop Design: A Field Playbook for Agentic Systems
     //   「エージェントが自作をレビューすると、ほぼ必ず承認する（自己採点バイアス）。
@@ -1584,6 +1634,41 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
     lines.push(`   その理由を添えて差し戻す（reason-carrying requeue）。`);
     lines.push(`   理由なしの差し戻しは無限ループ（thrashing）の原因になる。`);
     lines.push(`5. 検証で却下ゼロになった時だけ、この出力を「完了」とみなす。`);
+
+    // ── 自律レベルと次の一歩 ──
+    // 出典: Loop Design §3 — L2→L3（独立検証者の導入）が最重要転換点
+    const LV={
+      "1":{name:"L1 プロンプト",next:"次の一歩 → L2: このプロンプトを『オンデマンドで実行できるスクリプト』に包む。"},
+      "2":{name:"L2 手動ループ",next:"次の一歩 → L3: 【最重要転換】上の独立検証ステップを常設し、人は『要注意ケース』だけ確認する。ここで運用者の工数が仕事量に比例しなくなる。"},
+      "3":{name:"L3 検証付きループ",next:"次の一歩 → L4: スケジューラ＋予算上限＋キルスイッチを付け、離れて自走させる。"},
+      "4":{name:"L4 自走",next:"次の一歩 → L5: 発見面を広げ全サイクルを記録。運用者は設計と例外対応のみ。"},
+      "5":{name:"L5 自律",next:"到達点。運用者の判断はチェックリストと発見面の設計に一度だけ投下し、あとは自動で千回強制される。"},
+    };
+    if(LV[level]){
+      lines.push(``);
+      lines.push(SEP);
+      lines.push(`## 🚦 自律レベル: ${LV[level].name}`);
+      lines.push(SEP);
+      lines.push(LV[level].next);
+      if(level==="1"||level==="2"){
+        lines.push(`※ 能力の壁ではなく『ハーネス（仕組み化）』の差。同じモデルでもレベルは上げられる。`);
+      }
+    }
+
+    // ── 運用中に見る4指標 ──
+    // 出典: Loop Design §11 — 消費的な動作ごとに1つ、先行指標として少数に絞る
+    lines.push(``);
+    lines.push(SEP);
+    lines.push(`## 📊 運用中に見る4指標`);
+    lines.push(SEP);
+    lines.push(`① 発見歩留まり(discovery yield): 実際に仕事が見つかったサイクルの割合。`);
+    lines.push(`   0に近い＝空回り（起動しすぎ）／1に近い＝飽和（遅延の恐れ）`);
+    lines.push(`② 検証却下率(verifier rejection rate): 検証者が却下した出力の割合。`);
+    lines.push(`   パスを追うごとに下がれば収束、横ばいは差し戻し情報の不足。`);
+    lines.push(`③ 差し戻し深さ(requeue depth): 合格までの平均差し戻し回数。`);
+    lines.push(`   中央値1〜2が健全。無限に増える＝thrashing（理由なし差し戻し）。`);
+    lines.push(`④ アイドルコスト(idle cost): 何も生まなかったサイクルの消費。`);
+    lines.push(`   スケジューラと発見面のミスマッチの直接コスト。`);
 
     const output=lines.join("\n");
     outEl.textContent=output;
