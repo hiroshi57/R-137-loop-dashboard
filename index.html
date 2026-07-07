@@ -195,6 +195,7 @@
   .badge.svc{color:#fff}
   .badge.ind{color:#fff}
   .badge.cat{background:var(--surface2);border:1px solid var(--line2);color:var(--sub)}
+  .badge.type{background:color-mix(in srgb,var(--primary) 12%,transparent);border:1px solid color-mix(in srgb,var(--primary) 35%,transparent);color:var(--primary)}
   .badge.trg{font-family:"IBM Plex Mono";font-size:10px;border:1px solid var(--line2);color:var(--faint);background:transparent}
   .badge.trg.interval{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
   .card h4{font-size:14px;font-weight:600;line-height:1.45}
@@ -533,6 +534,10 @@
       <span class="f-label">Trigger</span>
       <div class="chips" id="trigChips"></div>
     </div>
+    <div class="f-row" id="typeRow">
+      <span class="f-label">Loop Type</span>
+      <div class="chips" id="typeChips"></div>
+    </div>
     <div class="f-state">
       <span id="activePills" style="display:contents"></span>
       <button class="clear-all" id="clearAll" style="display:none">すべて解除</button>
@@ -568,7 +573,8 @@
       </div>
       <span class="ff-result-count">該当 <b id="ffCount">—</b> 件</span>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px" id="ffCatChips"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="ffCatChips"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="ffTypeChips"></div>
     <div class="grid" id="ffGrid"></div>
   </div><!-- /ffSection -->
 
@@ -626,6 +632,33 @@ const TRIGGER_INFO = {
   interval: { icon:"⏱", label:"定期的に自動起動", short:"定期", note:"決めた間隔（週次など）やKPIの変化をきっかけに、自動で始まる。人の指示を待たず回り続ける。" }
 };
 function trigInfo(t){ return TRIGGER_INFO[t] || { icon:"•", label:t, short:t, note:"" }; }
+// ループタイプ（出典: Claude Code「Getting started with loops」の4分類）
+const LOOP_TYPE_INFO = {
+  turn:      { icon:"💬", label:"ターン型",   note:"ユーザーのプロンプトで起動し、完了判断で停止。探索・意思決定など短いタスク向け。手放すもの=検証（SKILL.md）" },
+  goal:      { icon:"🎯", label:"ゴール型",   note:"検証可能な完了条件を満たすまで反復（最大ターン数で打切）。手放すもの=停止条件。プリミティブ=/goal" },
+  time:      { icon:"⏰", label:"時間型",     note:"時間間隔で自動起動する反復作業・外部連携。手放すもの=トリガー。プリミティブ=/loop, /schedule" },
+  proactive: { icon:"🛰", label:"能動型",     note:"イベント/スケジュールで無人起動する定常ストリーム（トリアージ・移行等）。手放すもの=プロンプト。/schedule+/goal+Dynamic Workflows" },
+};
+const LOOP_TYPE_ORDER = ["turn","goal","time","proactive"];
+function typeInfo(t){ return LOOP_TYPE_INFO[t] || { icon:"•", label:t, note:"" }; }
+// 4分類ロジック（DIは trigger×category の構造判定、FFは英語テキスト＋カテゴリ判定）
+const _PRO_WORDS=["monitor","telemetry","incident","production","continuously","triage","unattended","on failure","alerting"," live ","streaming","24/7","watch "];
+const _SCHED_WORDS=["scheduled","every ","nightly"," daily","weekly","hourly","on a schedule","cron"," cadence","periodic","recurring","reliability pass"];
+const _GOAL_WORDS=["until","passes","tests pass","threshold"," score","coverage","acceptance","checklist","verify","converge","benchmark","regression"];
+function classifyLoopType(l){
+  if(l.trigger){ // DI ループ
+    if(l.trigger==="interval") return l.category==="運用・最適化" ? "proactive" : "time";
+    return (l.category==="戦略立案"||l.category==="調査・分析") ? "turn" : "goal";
+  }
+  const cat=(l.category&&l.category.slug)||""; // FF ループ
+  const b=[l.title,l.useWhen,l.description,l.prompt,l.verification,l.why,l.implementationNote].filter(Boolean).join(" ").toLowerCase();
+  const has=arr=>arr.some(w=>b.includes(w));
+  if(has(_PRO_WORDS)) return "proactive";
+  if(has(_SCHED_WORDS)) return "time";
+  if(cat==="evaluation"||has(_GOAL_WORDS)) return "goal";
+  if(cat==="content"||cat==="design") return "turn";
+  return "goal";
+}
 // triggerDetail 先頭の "manual：" / "interval：" という冗長な英語接頭辞を除去
 function cleanTriggerDetail(s){ return (s||"").replace(/^(manual|interval)\s*[：:]\s*/,""); }
 
@@ -663,7 +696,7 @@ const SYNONYMS = {
 let DATA = null;
 let chartAxis = "service";   // チャートの軸
 let filterAxis = "service";  // 絞り込みの主軸（service/industry/pain）
-let state = { service:"all", industry:"all", pains:[], category:"all", trigger:"all", q:"", page:1 };
+let state = { service:"all", industry:"all", pains:[], category:"all", trigger:"all", type:"all", q:"", page:1 };
 let filtered = [];
 let axisChart = null, catChart = null;
 let favorites = new Set();  // お気に入りループID集合
@@ -730,6 +763,7 @@ async function load(){
       syns.forEach(s=>{ if(base.includes(s.toLowerCase())) extra.push(key); });
     }
     l._search = base + " " + extra.join(" ");
+    l._type = classifyLoopType(l);
   });
   DATA._svc = Object.fromEntries(DATA.services.map(s=>[s.key,s]));
   DATA._ind = Object.fromEntries(DATA.industries.map(s=>[s.key,s]));
@@ -806,6 +840,13 @@ function buildStatic(){
     DATA.triggers.map(t=>`<button class="chip" data-v="${esc(t)}" title="${esc(trigInfo(t).note)}">${trigInfo(t).icon} ${esc(trigInfo(t).label)}</button>`).join("");
   $("#catChips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(b) setFilter("category",b.dataset.v); });
   $("#trigChips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(b) setFilter("trigger",b.dataset.v); });
+  // ループタイプチップ（各タイプの件数付き）
+  $("#typeChips").innerHTML = `<button class="chip" data-v="all">すべて</button>`+
+    LOOP_TYPE_ORDER.map(t=>{
+      const n=DATA.loops.filter(l=>l._type===t).length;
+      return `<button class="chip" data-v="${t}" title="${esc(typeInfo(t).note)}">${typeInfo(t).icon} ${esc(typeInfo(t).label)} (${n})</button>`;
+    }).join("");
+  $("#typeChips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(b) setFilter("type",b.dataset.v); });
 
   // 検索
   const onSearch = debounce(v=>{ state.q=v.trim().toLowerCase(); state.page=1; apply(); },150);
@@ -892,6 +933,7 @@ function apply(){
     (state.pains.length===0 || l.painPoints.some(p=>state.pains.includes(p))) &&
     (state.category==="all" || l.category===state.category) &&
     (state.trigger==="all"  || l.trigger===state.trigger) &&
+    (state.type==="all"     || l._type===state.type) &&
     (!q.length || q.every(group=>group.some(w=>l._search.includes(w))))
   );
   syncControls();
@@ -928,6 +970,7 @@ function syncControls(){
   buildPrimarySelect();
   document.querySelectorAll("#catChips .chip").forEach(b=>b.classList.toggle("on", b.dataset.v===state.category));
   document.querySelectorAll("#trigChips .chip").forEach(b=>b.classList.toggle("on", b.dataset.v===state.trigger));
+  document.querySelectorAll("#typeChips .chip").forEach(b=>b.classList.toggle("on", b.dataset.v===state.type));
   document.querySelectorAll(".pain-card").forEach(b=>b.classList.toggle("on", state.pains.includes(b.dataset.pain)));
   // 複数選択中バッジ
   const painCount = state.pains.length;
@@ -946,6 +989,7 @@ function syncControls(){
   if(state.pains.length)     pills.push(`<button class="active-pill" data-k="pains">課題: ${state.pains.map(p=>esc(DATA._pain[p]?.name||p)).join(" × ")} ✕</button>`);
   if(state.category!=="all") pills.push(`<button class="active-pill" data-k="category">カテゴリ: ${esc(state.category)} ✕</button>`);
   if(state.trigger!=="all")  pills.push(`<button class="active-pill" data-k="trigger">トリガー: ${esc(state.trigger)} ✕</button>`);
+  if(state.type!=="all")     pills.push(`<button class="active-pill" data-k="type">タイプ: ${esc(typeInfo(state.type).label)} ✕</button>`);
   if(state.q)                pills.push(`<button class="active-pill" data-k="q">検索: "${esc(state.q)}" ✕</button>`);
   $("#activePills").innerHTML = pills.join("");
   $("#clearAll").style.display = pills.length ? "inline":"none";
@@ -1000,6 +1044,7 @@ function cardHTML(l){
       <span class="badge svc" style="background:${sc}">${esc(l.service.split("・")[0].split("（")[0])}</span>
       <span class="badge ind" style="background:${ic}">${esc(l.industry.split("（")[0])}</span>
       <span class="badge cat" style="border-left:3px solid ${CAT_COLORS[l.category]||"var(--line2)"}">${esc(l.category)}</span>
+      <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
       <span class="badge trg ${l.trigger}" title="${esc(trigInfo(l.trigger).note)}">${trigInfo(l.trigger).icon} ${esc(trigInfo(l.trigger).label)}</span>
       <span class="badge trg" title="一度で終わらず、完了後も新しい目標で回り続けるループ">${l.loopMode==="continuous"?"♻ 継続して回す":"♻ くり返し回す"}</span>
     </div>
@@ -1055,6 +1100,7 @@ function pushHash(){
   if(state.pains.length)    p.set("pains",state.pains.join(","));
   if(state.category!=="all")p.set("cat",state.category);
   if(state.trigger!=="all") p.set("trg",state.trigger);
+  if(state.type!=="all")    p.set("type",state.type);
   if(state.page>1)          p.set("p",state.page);
   const h=p.toString();
   history.replaceState(null,"",h?"#"+h:location.pathname+location.search);
@@ -1068,6 +1114,7 @@ function parseHash(){
   if(p.has("pains"))state.pains    =p.get("pains").split(",").filter(Boolean);
   if(p.has("cat"))  state.category =p.get("cat");
   if(p.has("trg"))  state.trigger  =p.get("trg");
+  if(p.has("type")) state.type     =p.get("type");
   if(p.has("p"))    state.page     =Math.max(1,+p.get("p")||1);
   if(p.has("svc")||p.has("ind")) filterAxis = p.has("ind")?"industry":"service";
   if(p.has("pains")) filterAxis = "pain";
@@ -1115,6 +1162,7 @@ function openModal(l){
     <span class="badge svc" style="background:${sc}">${esc(l.service)}</span>
     <span class="badge ind" style="background:${ic}">${esc(l.industry)}</span>
     <span class="badge cat">${esc(l.category)}</span>
+    <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
     <span class="badge trg ${l.trigger}" title="${esc(trigInfo(l.trigger).note)}">${trigInfo(l.trigger).icon} ${esc(trigInfo(l.trigger).label)}</span>`;
   $("#mTitle").textContent = l.title;
   const sixEls = [
@@ -1307,6 +1355,7 @@ function rebuildCharts(){
 // ---- FF カタログ読み込み ----
 let FF_DATA = null;
 let ffCatFilter = "all";
+let ffTypeFilter = "all";
 let ffSearchQ = "";
 const FF_CAT_COLORS = {
   "Engineering":"#0E7FA8","Content":"#0E8A5F",
@@ -1325,7 +1374,7 @@ function loadFF(){
     .then(d=>{
       FF_DATA = d;
       FF_DATA._bySlug = {};
-      d.loops.forEach(l=>{ FF_DATA._bySlug[l.slug]=l; });
+      d.loops.forEach(l=>{ l._type=classifyLoopType(l); FF_DATA._bySlug[l.slug]=l; });
       FF_DATA.catList = (d.categories && d.categories.length)
         ? d.categories.map(c=>({slug:c.slug, label:c.labelJa||c.label}))
         : [...new Set(d.loops.map(l=>l.category.slug))].map(s=>({slug:s, label:s}));
@@ -1354,6 +1403,7 @@ function renderFFGrid(){
   const q=ffSearchQ.toLowerCase().trim();
   let loops=FF_DATA.loops;
   if(ffCatFilter!=="all") loops=loops.filter(l=>l.category.slug===ffCatFilter);
+  if(ffTypeFilter!=="all") loops=loops.filter(l=>l._type===ffTypeFilter);
   if(q) loops=loops.filter(l=>
     ffTitle(l).toLowerCase().includes(q)||
     ffDesc(l).toLowerCase().includes(q)||
@@ -1371,6 +1421,16 @@ function renderFFGrid(){
     }).join("");
     chipsEl.innerHTML=allBtn+cats;
   }
+  const typeEl=$("#ffTypeChips");
+  if(typeEl){
+    const allT=`<button class="ff-chip${ffTypeFilter==="all"?" on":""}" data-fftype="all">全タイプ</button>`;
+    const ts=LOOP_TYPE_ORDER.map(t=>{
+      const n=FF_DATA.loops.filter(l=>l._type===t).length;
+      if(!n) return "";
+      return `<button class="ff-chip${ffTypeFilter===t?" on":""}" data-fftype="${t}" title="${esc(typeInfo(t).note)}">${typeInfo(t).icon} ${esc(typeInfo(t).label)} (${n})</button>`;
+    }).join("");
+    typeEl.innerHTML=allT+ts;
+  }
   const cnt=$("#ffCount"); if(cnt) cnt.textContent=loops.length;
   const fkf=$("#ffKpiFiltered"); if(fkf) fkf.textContent=loops.length;
   const grid=$("#ffGrid"); if(!grid) return;
@@ -1387,6 +1447,7 @@ function ffCardHTML(l){
   return `<article class="card">
     <div class="badges">
       <span class="badge cat" style="border-left:3px solid ${color}">${esc(ffCatLabel(l.category))}</span>
+      <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
       <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">FF #${l.number}</span>
     </div>
     <h4>${esc(ffTitle(l))}</h4>
@@ -1408,6 +1469,7 @@ function openFFModal(loop){
   const color=ffColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(ffCatLabel(loop.category))}</span>
+    <span class="badge type" title="${esc(typeInfo(loop._type).note)}">${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span>
     <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">FF Loop #${loop.number}</span>
     <span style="font-size:11px;color:var(--faint)">${esc(loop.author)} · ${esc(loop.published)}</span>`;
   $("#mTitle").textContent=ffTitle(loop);
@@ -1482,6 +1544,15 @@ function buildCustPanel(){
        {v:"4",t:"L4 自走（スケジュールを設定し離れる）"},
        {v:"5",t:"L5 自律（設計するだけ、ほぼ介入しない）"},
      ]},
+    {id:"custType",label:"🔁 ループタイプ（Claude Code）",type:"select",
+     hint:"起動と停止の型。選ぶと対応するプリミティブ(/goal /loop /schedule)と雛形が生成物に付きます",
+     options:[
+       {v:"",t:"自動 / 未選択"},
+       {v:"turn",t:"💬 ターン型（探索・意思決定／都度手動）"},
+       {v:"goal",t:"🎯 ゴール型（完了条件が明確／goal）"},
+       {v:"time",t:"⏰ 時間型（定期・外部連携／loop・schedule）"},
+       {v:"proactive",t:"🛰 能動型（無人の定常ストリーム）"},
+     ]},
     {id:"custTiming",label:"どのタイミングで使うか",
      hint:"例：週次の定例後・KPIが閾値を下回った時・リリース前など（空欄＝元の設定のまま）",
      ph:"空欄のままにすると元のタイミング設定を使います"},
@@ -1538,6 +1609,7 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
   gen.addEventListener("click", ()=>{
     const arch  =($("#custArch")?.value  ||"").trim();
     const level =($("#custLevel")?.value ||"").trim();
+    const ltype =($("#custType")?.value  ||"").trim();
     const timing=($("#custTiming")?.value||"").trim();
     const add   =($("#custAdd")?.value   ||"").trim();
     const remove=($("#custRemove")?.value||"").trim();
@@ -1603,6 +1675,46 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
       lines.push(`▸ 発見面(Discovery): ${a.disc}`);
       lines.push(`▸ 検証の観点(Verifier): ${a.ver}`);
       lines.push(`▸ スケジュール: ${a.sch}`);
+    }
+
+    // ── ループタイプ（Claude Code プリミティブと雛形） ──
+    // 出典: Claude Code「Getting started with loops」の4分類
+    const TYPE={
+      turn:{name:"💬 ターン型 (Turn-based)",
+        trg:"ユーザーのプロンプト（都度手動）",stop:"Claudeが完了と判断／文脈不足で停止",
+        prim:"検証スキル(SKILL.md)",
+        tmpl:["上記プロンプトを1回実行し、SKILL.md に沿って自己チェック後に結果を返す。",
+              "※ 検証はできるだけ定量的に（テスト・スクリーンショット・コンソール0エラー等）。"]},
+      goal:{name:"🎯 ゴール型 (Goal-based)",
+        trg:"リアルタイムの手動プロンプト",stop:"ゴール達成 or 最大ターン数",
+        prim:"/goal",
+        tmpl:["/goal <上の完了条件を満たす>, stop after 5 tries",
+              "※ 評価モデルが毎回 完了条件を判定し、満たすまで戻す（早期終了を防ぐ）。"]},
+      time:{name:"⏰ 時間型 (Time-based)",
+        trg:"指定した時間間隔",stop:"手動キャンセル or 作業完了（PRマージ・キュー空）",
+        prim:"/loop, /schedule",
+        tmpl:["/loop 30m <上記プロンプト>   （自分のPCで回す。オフにすると停止）",
+              "クラウドで常設するなら /schedule でルーチン化。",
+              "※ 監視対象が変わる頻度に間隔を合わせる（空サイクルの浪費を防ぐ）。"]},
+      proactive:{name:"🛰 能動型 (Proactive)",
+        trg:"イベント/スケジュール（人はリアルタイム非関与）",stop:"各タスクはゴール達成で終了、ルーチンは停止まで継続",
+        prim:"/schedule + /goal + Dynamic Workflows + auto mode",
+        tmpl:["/schedule every hour: <新規の検知>。",
+              "/goal: この回で見つけた項目を全て 処理・対応・返信 するまで止まらない。",
+              "修正時は並列 worktree で複数案を試し、judge が敵対的にレビューする。",
+              "※ 判断は上位モデル、定型処理は小型・高速モデルへ振り分ける。"]},
+    };
+    if(TYPE[ltype]){
+      const ty=TYPE[ltype];
+      lines.push(``);
+      lines.push(SEP);
+      lines.push(`## 🔁 ループタイプ: ${ty.name}`);
+      lines.push(SEP);
+      lines.push(`▸ トリガー: ${ty.trg}`);
+      lines.push(`▸ 停止条件: ${ty.stop}`);
+      lines.push(`▸ 使うプリミティブ: ${ty.prim}`);
+      lines.push(`▸ 実行雛形:`);
+      ty.tmpl.forEach(t=>lines.push(`   ${t}`));
     }
 
     // ── 独立検証ステップ（常に付与） ──
@@ -1704,6 +1816,13 @@ function initFF(){
     const chip=e.target.closest("[data-ffcat]");
     if(!chip) return;
     ffCatFilter=chip.dataset.ffcat; renderFFGrid();
+  });
+  // ループタイプチップ委譲
+  const typeChipsEl=$("#ffTypeChips");
+  if(typeChipsEl) typeChipsEl.addEventListener("click", e=>{
+    const chip=e.target.closest("[data-fftype]");
+    if(!chip) return;
+    ffTypeFilter=chip.dataset.fftype; renderFFGrid();
   });
   // FF 検索ボックス
   const ffQEl=$("#ffQ");
