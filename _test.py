@@ -45,7 +45,7 @@ ok('D-14','ゼロ件メッセージ') if '該当するループがありませ�
 
 # E: カード・ページネーション
 ok('E-1','24件/ページ') if 'PER_PAGE = 24' in html else fail('E-1','PER_PAGE欠損')
-ok('E-2','カードホバー') if 'translateY(-2px)' in html and 'card:hover' in html else fail('E-2','カードホバー欠損')
+ok('E-2','カードホバー') if re.search(r'\.card:hover\{[^}]*translateY\(-\d', html) else fail('E-2','カードホバー欠損')
 ok('E-3','スクロール') if 'scrollIntoView' in html else fail('E-3','スクロール欠損')
 ok('E-4','first/lastDisabled') if 'p===1?"disabled":""' in html and 'p===total?"disabled":""' in html else fail('E-4','disabled欠損')
 ok('E-5','ページ情報') if 'pinfo' in html and 'filtered.length' in html else fail('E-5','ページ情報欠損')
