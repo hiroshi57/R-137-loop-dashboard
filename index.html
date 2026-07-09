@@ -1403,6 +1403,10 @@ const FF_CAT_COLORS = {
 const ffTitle = l => l.titleJa || l.title;
 const ffDesc  = l => l.descriptionJa || l.description || "";
 const ffWhen  = l => l.useWhenJa || l.useWhen || "";
+const ffWhy   = l => l.whyJa || l.why || "";
+const ffNote  = l => l.implementationNoteJa || l.implementationNote || "";
+const ffSteps = l => (l.stepsJa && l.stepsJa.length) ? l.stepsJa : (l.steps || []);
+const ffVer   = l => l.verificationJa || l.verification || {};
 const ffCatLabel = c => c.labelJa || c.label;
 const ffColor = c => FF_CAT_COLORS[c.label] || "#666";
 
@@ -1512,9 +1516,10 @@ function openFFModal(loop){
     <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">FF Loop #${loop.number}</span>
     <span style="font-size:11px;color:var(--faint)">${esc(loop.author)} · ${esc(loop.published)}</span>`;
   $("#mTitle").textContent=ffTitle(loop);
-  const stepsHTML=(loop.steps||[]).map((s,i)=>
+  const _steps=ffSteps(loop);
+  const stepsHTML=_steps.map((s,i)=>
     `<div class="flow-step"><span class="fno">${i+1}</span><div class="ftx"><span>${esc(s)}</span></div></div>`+
-    (i<loop.steps.length-1?'<div class="flow-arrow">↓</div>':'')
+    (i<_steps.length-1?'<div class="flow-arrow">↓</div>':'')
   ).join("");
   const relLinks=(loop.related||[]).slice(0,3).map(r=>
     `<a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--primary);font-size:12px">${esc(r.title)}</a>`
@@ -1527,12 +1532,12 @@ function openFFModal(loop){
       </div>
       <div class="tldr-meta">
         <div class="tm"><b>使うタイミング</b><span>${esc(ffWhen(loop).substring(0,200))}</span></div>
-        <div class="tm"><b>完了の合図</b><span>${esc(loop.verification&&loop.verification.title||"")}</span></div>
-        <div class="tm"><b>確認方法</b><span>${esc(loop.verification&&loop.verification.detail||"")}</span></div>
+        <div class="tm"><b>完了の合図</b><span>${esc(ffVer(loop).title||"")}</span></div>
+        <div class="tm"><b>確認方法</b><span>${esc(ffVer(loop).detail||"")}</span></div>
       </div>
     </div>
     <div class="m-sec">
-      <b class="lbl">進め方の流れ（${(loop.steps||[]).length}ステップ）</b>
+      <b class="lbl">進め方の流れ（${_steps.length}ステップ）</b>
       <div class="flow">
         ${stepsHTML}
         <div class="flow-loop"><span class="lc">↺</span><span><b>完了条件を満たすまでループ</b></span></div>
@@ -1540,12 +1545,12 @@ function openFFModal(loop){
     </div>
     <div class="m-sec">
       <b class="lbl">なぜこのループが効くか</b>
-      <p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(loop.why||"")}</p>
+      <p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(ffWhy(loop))}</p>
     </div>
     <details class="more">
       <summary>もっと詳しく見る（実装ノート・英語プロンプト・関連ループ）</summary>
       <div class="more-body">
-        ${loop.implementationNote?`<div class="m-sec"><b class="lbl">実装上の注意</b><p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(loop.implementationNote)}</p></div>`:""}
+        ${ffNote(loop)?`<div class="m-sec"><b class="lbl">実装上の注意</b><p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(ffNote(loop))}</p></div>`:""}
         <div class="m-sec">
           <div class="prompt-head"><b>ループ・プロンプト（英語原文）</b><button class="btn primary" id="mCopy">Copy</button></div>
           <pre class="prompt" id="mPrompt"></pre>
