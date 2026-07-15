@@ -740,6 +740,16 @@ function toast(msg){
   const t = $("#toast"); t.textContent = msg; t.classList.add("show");
   clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 1600);
 }
+
+/* ========= 利用状況トラッキング ========= */
+function trackEvent(event, extra){
+  try{
+    navigator.sendBeacon
+      ? navigator.sendBeacon("/api/track", new Blob([JSON.stringify({ event, ...extra })], { type: "application/json" }))
+      : fetch("/api/track", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ event, ...extra }), keepalive:true }).catch(()=>{});
+  }catch(e){ /* トラッキング失敗はユーザー体験に影響させない */ }
+}
+
 async function copyText(text, btn){
   let ok = false;
   try{ await navigator.clipboard.writeText(text); ok = true; }
@@ -855,7 +865,7 @@ function buildStatic(){
     const b=e.target.closest(".pain-card"); if(!b) return;
     const k=b.dataset.pain;
     const idx=state.pains.indexOf(k);
-    if(idx>=0) state.pains.splice(idx,1); else state.pains.push(k);
+    if(idx>=0) state.pains.splice(idx,1); else { state.pains.push(k); trackEvent("pain_select", { painId: k }); }
     state.page=1; apply();
     $("#browse").scrollIntoView({behavior:"smooth"});
   });
@@ -1184,6 +1194,7 @@ function exportFavorites(){
 let currentLoop=null;
 function openModal(l){
   currentLoop=l;
+  trackEvent("loop_view", { loopId: l.id ?? l.title });
   const sc=SVC_COLORS[l.serviceKey]||"#666", ic=IND_COLORS[l.industryKey]||"#666";
   $("#mBadges").innerHTML = `
     <span class="badge svc" style="background:${sc}">${esc(l.service)}</span>
@@ -1313,7 +1324,7 @@ function openModal(l){
       </div>
     </details>`;
   $("#mPrompt").textContent = l.kickoffPrompt;
-  $("#mCopy").addEventListener("click", e=>copyText(l.kickoffPrompt, e.currentTarget));
+  $("#mCopy").addEventListener("click", e=>{ copyText(l.kickoffPrompt, e.currentTarget); trackEvent("loop_copy", { loopId: l.id ?? l.title }); });
   // カスタマイザーを右カラムに注入
   $("#mCust").innerHTML = buildCustPanel();
   initCustPanel(l.title, l.kickoffPrompt, l.goal, "");
@@ -1493,6 +1504,7 @@ function ffCardHTML(l){
 // ---- FF モーダル ----
 function openFFModal(loop){
   currentLoop={_ff:true,...loop};
+  trackEvent("loop_view", { loopId: loop.slug ?? ffTitle(loop) });
   const color=ffColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(ffCatLabel(loop.category))}</span>
@@ -1542,7 +1554,7 @@ function openFFModal(loop){
       </div>
     </details>`;
   $("#mPrompt").textContent=loop.prompt||"";
-  $("#mCopy").addEventListener("click", e=>copyText(loop.prompt||"", e.currentTarget));
+  $("#mCopy").addEventListener("click", e=>{ copyText(loop.prompt||"", e.currentTarget); trackEvent("loop_copy", { loopId: loop.slug ?? ffTitle(loop) }); });
   // カスタマイザーを右カラムに注入
   $("#mCust").innerHTML = buildCustPanel();
   initCustPanel(ffTitle(loop), loop.prompt||"", ffDesc(loop), loop.url||"");

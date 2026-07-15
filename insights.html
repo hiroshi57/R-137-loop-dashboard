@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>利用状況解析 | Design It 100 Loops</title>
+<style>
+  :root{ --bg:#0b0d12; --card:#151822; --border:#262b3a; --text:#e8eaf0; --sub:#9aa1b5; --accent:#6ea8ff; }
+  [data-theme="light"]{ --bg:#f5f6f9; --card:#fff; --border:#e2e5ee; --text:#1a1d29; --sub:#6b7185; --accent:#3a6fd8; }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,"Segoe UI",Hiragino Sans,sans-serif; padding:24px; }
+  h1{ font-size:20px; margin:0 0 4px; }
+  .sub{ color:var(--sub); font-size:13px; margin-bottom:24px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:32px; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .card h2{ font-size:14px; margin:0 0 12px; color:var(--sub); font-weight:600; }
+  .stat{ font-size:28px; font-weight:700; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
+  th{ color:var(--sub); font-weight:600; }
+  .count{ color:var(--accent); font-weight:600; text-align:right; }
+  .empty{ color:var(--sub); font-size:13px; padding:12px 0; }
+  a{ color:var(--accent); text-decoration:none; }
+  .section-title{ font-size:16px; margin:32px 0 12px; }
+</style>
+</head>
+<body>
+  <h1>利用状況解析</h1>
+  <div class="sub" id="range">読み込み中...</div>
+
+  <div class="grid">
+    <div class="card"><h2>ページビュー</h2><div class="stat" id="pv">-</div></div>
+    <div class="card"><h2>ループ閲覧（詳細を開いた回数）</h2><div class="stat" id="lv">-</div></div>
+    <div class="card"><h2>キックオフプロンプトのコピー</h2><div class="stat" id="lc">-</div></div>
+  </div>
+
+  <div class="section-title">よく見られているループ TOP10</div>
+  <div class="card"><table id="topTable"><thead><tr><th>ループ</th><th class="count">閲覧数</th></tr></thead><tbody></tbody></table></div>
+
+  <div class="section-title">一度も見られていないループ（要テコ入れ候補）</div>
+  <div class="card"><div id="unseenList" class="empty">読み込み中...</div></div>
+
+  <div class="section-title">よく選ばれている課題（Pain）</div>
+  <div class="card"><table id="painTable"><thead><tr><th>課題</th><th class="count">選択数</th></tr></thead><tbody></tbody></table></div>
+
+<script>
+async function main(){
+  const [insightsRes, loopsRes] = await Promise.all([
+    fetch("/api/insights").then(r=>r.json()).catch(()=>null),
+    fetch("./loops_1000.json").then(r=>r.json()).catch(()=>null),
+  ]);
+
+  if(!insightsRes){
+    document.getElementById("range").textContent = "解析データを取得できませんでした（/api/insights）";
+    return;
+  }
+
+  const loops = loopsRes && loopsRes.loops ? loopsRes.loops : [];
+  const loopById = Object.fromEntries(loops.map(l => [l.id, l]));
+
+  document.getElementById("range").textContent =
+    insightsRes.range && insightsRes.range.from
+      ? `集計期間: ${insightsRes.range.from.slice(0,10)} 〜 ${insightsRes.range.to.slice(0,10)}（全 ${insightsRes.totalEvents} イベント）`
+      : "まだ記録がありません";
+
+  document.getElementById("pv").textContent = insightsRes.pageViews ?? 0;
+  document.getElementById("lv").textContent = Object.values(insightsRes.loopViews||{}).reduce((a,b)=>a+b,0);
+  document.getElementById("lc").textContent = Object.values(insightsRes.loopCopies||{}).reduce((a,b)=>a+b,0);
+
+  // TOP10
+  const topEntries = Object.entries(insightsRes.loopViews||{}).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const topBody = document.querySelector("#topTable tbody");
+  topBody.innerHTML = topEntries.length
+    ? topEntries.map(([id,count])=>{
+        const l = loopById[id];
+        const title = l ? l.title : id;
+        return `<tr><td>${escapeHtml(title)}</td><td class="count">${count}</td></tr>`;
+      }).join("")
+    : `<tr><td colspan="2" class="empty">まだ記録がありません</td></tr>`;
+
+  // 見られていないループ
+  const viewedIds = new Set(Object.keys(insightsRes.loopViews||{}));
+  const unseen = loops.filter(l => !viewedIds.has(l.id));
+  const unseenEl = document.getElementById("unseenList");
+  if(loops.length === 0){
+    unseenEl.textContent = "loops_1000.json を読み込めませんでした";
+  } else if(unseen.length === 0){
+    unseenEl.textContent = "全ループが少なくとも1回は閲覧されています";
+  } else {
+    unseenEl.innerHTML = `<div class="sub" style="margin-bottom:8px">${unseen.length} / ${loops.length} 件が未閲覧</div>` +
+      `<table><tbody>${unseen.slice(0,50).map(l=>`<tr><td>${escapeHtml(l.title)}</td><td class="count">${escapeHtml(l.category||"")}</td></tr>`).join("")}</tbody></table>` +
+      (unseen.length > 50 ? `<div class="sub" style="margin-top:8px">他 ${unseen.length-50} 件</div>` : "");
+  }
+
+  // Pain
+  const painEntries = Object.entries(insightsRes.painSelects||{}).sort((a,b)=>b[1]-a[1]);
+  const painBody = document.querySelector("#painTable tbody");
+  painBody.innerHTML = painEntries.length
+    ? painEntries.map(([id,count])=>`<tr><td>${escapeHtml(id)}</td><td class="count">${count}</td></tr>`).join("")
+    : `<tr><td colspan="2" class="empty">まだ記録がありません</td></tr>`;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+main();
+</script>
+</body>
+</html>
