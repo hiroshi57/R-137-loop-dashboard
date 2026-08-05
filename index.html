@@ -1303,6 +1303,7 @@ function openModal(l){
         ${(l.guardrails&&l.guardrails.length)?`<div class="row"><span class="tag warn">守ること</span> ${l.guardrails.map(esc).join("　／　")}</div>`:""}
       </div>
     </div>
+    ${loopGraphBlock(steps.map(s=>({label:s.label, sub:s.hint||""})))}
     <div class="m-sec">
       <b class="lbl">進め方の流れ（1つずつ進み、最後に1へ戻ってくり返す）<span class="lbl-note">＝業種共通の定石</span></b>
       ${flowHTML}
@@ -1586,30 +1587,45 @@ function elCardHTML(l){
   </article>`;
 }
 
-// ループを「有向グラフ（ステップのノード＋辺）」として描画。最後のステップから最初へ戻る辺でループを表現。
-function loopGraphSVG(steps){
-  const n=steps.length; if(!n) return "";
-  const NW=190, NH=54, GAP=30, PADX=20, PADY=16, BACK=44;
+// ループを「有向グラフ（ステップのノード＋辺）」として描画。最後→最初へ戻る辺でループを表現。
+// nodes: [{label, sub}]（sub はコマンドや補足。省略可）
+function loopGraphSVG(nodes){
+  const n=nodes.length; if(!n) return "";
+  const NW=200, NH=54, GAP=30, PADX=20, PADY=16, BACK=44;
   const W=PADX*2+NW, H=PADY+n*(NH+GAP)-GAP+PADY;
-  const nodes=steps.map((s,i)=>{
+  const nodeSVG=nodes.map((nd,i)=>{
     const x=PADX, y=PADY+i*(NH+GAP);
-    const nm=elStepName(s), cmd=(s.shellCheck||"");
-    const sub=cmd?`<text class="lg-sub" x="${x+12}" y="${y+38}">$ ${esc(cmd.substring(0,26))}</text>`:"";
+    const sub=nd.sub?`<text class="lg-sub" x="${x+12}" y="${y+38}">${esc(String(nd.sub).substring(0,30))}</text>`:"";
     return `<g class="lg-node"><rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="10"/>`+
-      `<text x="${x+12}" y="${y+22}">${i+1}. ${esc(nm.substring(0,20))}</text>${sub}</g>`;
+      `<text x="${x+12}" y="${y+22}">${i+1}. ${esc(String(nd.label||"").substring(0,22))}</text>${sub}</g>`;
   }).join("");
-  // 前進辺
   let edges="";
   for(let i=0;i<n-1;i++){
     const x=PADX+NW/2, y1=PADY+i*(NH+GAP)+NH, y2=PADY+(i+1)*(NH+GAP);
     edges+=`<path class="lg-edge" d="M${x} ${y1} L${x} ${y2-8}"/><polygon class="lg-arrowhead" points="${x-5},${y2-8} ${x+5},${y2-8} ${x},${y2}"/>`;
   }
-  // 戻り辺（最後→最初）：右側を回り込むループ
   const rx=PADX+NW, topY=PADY+NH/2, botY=PADY+(n-1)*(NH+GAP)+NH/2, ex=rx+BACK;
   const back=`<path class="lg-edge back" d="M${rx} ${botY} L${ex} ${botY} L${ex} ${topY} L${rx+2} ${topY}"/>`+
     `<polygon class="lg-arrowhead back" points="${rx+2},${topY-5} ${rx+2},${topY+5} ${rx-6},${topY}"/>`+
     `<text class="lg-sub" x="${ex-2}" y="${(topY+botY)/2}" transform="rotate(90 ${ex-2} ${(topY+botY)/2})" style="fill:var(--primary)">未達なら再実行 ↺</text>`;
-  return `<svg class="lg-svg" viewBox="0 0 ${W+BACK+30} ${H}" role="img" aria-label="ループのグラフ表現">${edges}${back}${nodes}</svg>`;
+  return `<svg class="lg-svg" viewBox="0 0 ${W+BACK+30} ${H}" role="img" aria-label="ループのグラフ表現">${edges}${back}${nodeSVG}</svg>`;
+}
+// 「プロンプト→エージェント→ループ→グラフ」の共通ブロック（DI/FF/EL 共用）
+function loopGraphBlock(nodes){
+  if(!nodes||!nodes.length) return "";
+  return `<div class="m-sec">
+    <b class="lbl">構造 <span class="lbl-note">プロンプト → エージェント → ループ → グラフ</span></b>
+    <div class="flowchain">
+      <span class="fc-node">📝 プロンプト</span><span class="fc-arr">→</span>
+      <span class="fc-node">🤖 エージェント</span><span class="fc-arr">→</span>
+      <span class="fc-node on">🔁 ループ</span><span class="fc-arr">＝</span>
+      <span class="fc-node on">🕸 グラフ</span>
+    </div>
+    <div class="loopgraph">
+      ${loopGraphSVG(nodes)}
+      <div class="lg-legend"><i><span class="swatch"></span>各パスの進行</i><i><span class="swatch back"></span>終了条件を満たすまで再実行（ループ＝閉じたグラフ）</i></div>
+    </div>
+  </div>`;
 }
 
 function openELModal(loop){
@@ -1635,19 +1651,7 @@ function openELModal(loop){
         <div class="tm"><b>チェック</b><span class="mono">${esc(loop.checkCommand||"—")}</span></div>
       </div>
     </div>
-    <div class="m-sec">
-      <b class="lbl">構造 <span class="lbl-note">プロンプト → エージェント → ループ → グラフ</span></b>
-      <div class="flowchain">
-        <span class="fc-node">📝 プロンプト</span><span class="fc-arr">→</span>
-        <span class="fc-node">🤖 エージェント</span><span class="fc-arr">→</span>
-        <span class="fc-node on">🔁 ループ</span><span class="fc-arr">＝</span>
-        <span class="fc-node on">🕸 グラフ</span>
-      </div>
-      <div class="loopgraph">
-        ${loopGraphSVG(loop.steps||[])}
-        <div class="lg-legend"><i><span class="swatch"></span>各パスの進行</i><i><span class="swatch back"></span>終了条件を満たすまで再実行（ループ＝閉じたグラフ）</i></div>
-      </div>
-    </div>
+    ${loopGraphBlock((loop.steps||[]).map(s=>({label:elStepName(s), sub:s.shellCheck?("$ "+s.shellCheck):""})))}
     <div class="m-sec">
       <b class="lbl">進め方の流れ（${(loop.steps||[]).length}ステップ）</b>
       <div class="flow">${stepsList}<div class="flow-loop"><span class="lc">↺</span><span><b>${esc(elExit(loop))} まで反復</b></span></div></div>
@@ -1792,6 +1796,7 @@ function openFFModal(loop){
         <div class="tm"><b>確認方法</b><span>${esc(ffVer(loop).detail||"")}</span></div>
       </div>
     </div>
+    ${loopGraphBlock(_steps.map(s=>({label:String(s), sub:""})))}
     <div class="m-sec">
       <b class="lbl">進め方の流れ（${_steps.length}ステップ）</b>
       <div class="flow">
