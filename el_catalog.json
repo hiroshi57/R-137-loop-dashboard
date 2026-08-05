@@ -1,0 +1,769 @@
+{
+ "schemaVersion": 1,
+ "name": "loops! agent loops",
+ "publisher": "loops.elorm.xyz",
+ "description": "loops.elorm.xyz のプリビルド・エージェントループ集（日本語訳付き）",
+ "url": "https://loops.elorm.xyz/",
+ "loopCount": 13,
+ "categories": [
+  {
+   "slug": "quality",
+   "label": "Quality",
+   "labelJa": "品質"
+  },
+  {
+   "slug": "ci",
+   "label": "CI",
+   "labelJa": "CI"
+  },
+  {
+   "slug": "maintenance",
+   "label": "Maintenance",
+   "labelJa": "保守"
+  },
+  {
+   "slug": "testing",
+   "label": "Testing",
+   "labelJa": "テスト"
+  },
+  {
+   "slug": "automation",
+   "label": "Automation",
+   "labelJa": "自動化"
+  },
+  {
+   "slug": "security",
+   "label": "Security",
+   "labelJa": "セキュリティ"
+  }
+ ],
+ "loops": [
+  {
+   "number": "01",
+   "slug": "a11y-audit-until-clean",
+   "title": "A11y Audit Until Clean",
+   "titleJa": "アクセシビリティ監査ループ（クリーンまで）",
+   "url": "https://loops.elorm.xyz/loops/a11y-audit-until-clean",
+   "category": {
+    "slug": "quality",
+    "label": "Quality",
+    "labelJa": "品質"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run automated accessibility checks on changed routes, fix violations, and repeat until the audit is clean.",
+   "descriptionJa": "変更したルートに自動アクセシビリティチェックを実行し、違反を修正し、監査がクリーンになるまで繰り返す。",
+   "exitCondition": "Accessibility audit reports zero violations",
+   "exitConditionJa": "アクセシビリティ監査が違反ゼロを報告する",
+   "checkCommand": "npm run test:a11y",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Run a11y audit",
+     "nameJa": "監査を実行",
+     "prompt": "Run axe, pa11y, or eslint-plugin-jsx-a11y on changed pages. List violations with selectors.",
+     "promptJa": "変更ページに axe / pa11y / eslint-plugin-jsx-a11y を実行し、違反をセレクタ付きで一覧化する。",
+     "shellCheck": "npm run test:a11y"
+    },
+    {
+     "name": "Fix violations",
+     "nameJa": "違反を修正",
+     "prompt": "Fix labels, contrast, focus order, and ARIA roles. Prefer semantic HTML over aria hacks.",
+     "promptJa": "ラベル・コントラスト・フォーカス順・ARIAロールを修正する。aria のハックより意味的なHTMLを優先する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"A11y Audit Until Clean\" loop.\n\nGoal: zero serious accessibility violations on changed UI\nMax iterations: 8\nBetween iterations run: npm run test:a11y\nExit when: a11y audit exits 0\n\nStep 1: Run the a11y audit on changed routes. Fix each violation, prioritizing keyboard and screen reader issues.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "a11y",
+    "quality",
+    "frontend"
+   ],
+   "copies": 1057,
+   "views": 1981
+  },
+  {
+   "number": "02",
+   "slug": "ci-failure-watcher",
+   "title": "CI Failure Watcher",
+   "titleJa": "CI失敗ウォッチャー",
+   "url": "https://loops.elorm.xyz/loops/ci-failure-watcher",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "loops!",
+   "trigger": "interval",
+   "triggerType": "interval",
+   "description": "Poll CI on an interval, investigate failures when checks go red, and push fixes until green.",
+   "descriptionJa": "一定間隔でCIをポーリングし、チェックが赤になったら失敗を調査し、緑になるまで修正をpushする。",
+   "exitCondition": "Latest CI run conclusion is success",
+   "exitConditionJa": "最新のCI実行の結論が成功",
+   "checkCommand": "gh run list --branch $(git branch --show-current) --limit 1 --json conclusion -q '.[0].conclusion'",
+   "maxIterations": 12,
+   "steps": [
+    {
+     "name": "Check CI status",
+     "nameJa": "CI状態を確認",
+     "prompt": "Check the latest CI run for the current branch using gh CLI.",
+     "promptJa": "gh CLI で現在のブランチの最新CI実行を確認する。",
+     "shellCheck": "gh run list --branch $(git branch --show-current) --limit 1"
+    },
+    {
+     "name": "Investigate failure",
+     "nameJa": "失敗を調査",
+     "prompt": "If CI failed, read logs, identify the root cause, and apply the smallest fix.",
+     "promptJa": "CIが失敗したらログを読み、根本原因を特定し、最小の修正を適用する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify locally",
+     "nameJa": "ローカルで検証",
+     "prompt": "Run the failing CI step locally before pushing again.",
+     "promptJa": "再pushの前に、失敗したCIステップをローカルで実行する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "/loop 5m Start the \"CI Failure Watcher\" loop.\n\nGoal: latest CI run on this branch is green.\nMax iterations: 12.\nBetween iterations run: gh run list --branch $(git branch --show-current) --limit 1\nExit when: latest run conclusion is success.\n\nStep 1: Check CI status. If failed, read logs, fix root cause, verify locally, and push if needed.",
+   "keywords": [
+    "ci",
+    "github",
+    "devops"
+   ],
+   "copies": 967,
+   "views": 1952
+  },
+  {
+   "number": "03",
+   "slug": "docs-sync-after-edits",
+   "title": "Docs Sync After Edits",
+   "titleJa": "編集後のドキュメント同期",
+   "url": "https://loops.elorm.xyz/loops/docs-sync-after-edits",
+   "category": {
+    "slug": "maintenance",
+    "label": "Maintenance",
+    "labelJa": "保守"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "After code changes, find affected docs and update README, API references, and inline comments to match.",
+   "descriptionJa": "コード変更後、影響を受けるドキュメントを見つけ、README・APIリファレンス・インラインコメントを実装に合わせて更新する。",
+   "exitCondition": "All affected documentation updated and verified against the diff",
+   "exitConditionJa": "影響を受ける全ドキュメントが更新され、差分と照合済み",
+   "checkCommand": "",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "Identify changed areas",
+     "nameJa": "変更箇所を特定",
+     "prompt": "Review the current diff. List public APIs, config options, and behaviors that changed.",
+     "promptJa": "現在の差分をレビューし、変わった公開API・設定オプション・挙動を列挙する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Find stale docs",
+     "nameJa": "古いドキュメントを探す",
+     "prompt": "Search README, docs/, and code comments for references to changed behavior. Flag outdated sections.",
+     "promptJa": "README・docs/・コードコメントで変更挙動への言及を検索し、古い箇所にフラグを立てる。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Update documentation",
+     "nameJa": "ドキュメントを更新",
+     "prompt": "Update docs to match the code. Keep examples runnable and accurate. Remove obsolete sections.",
+     "promptJa": "ドキュメントをコードに合わせて更新する。例は実行可能で正確に保ち、不要な箇所は削除する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify accuracy",
+     "nameJa": "正確性を検証",
+     "prompt": "Re-read updated docs against the diff. Confirm no contradictions remain.",
+     "promptJa": "更新後のドキュメントを差分に照らして読み直し、矛盾が残っていないことを確認する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Docs Sync After Edits\" loop.\n\nGoal: documentation matches the current code changes\nMax iterations: 3\nBetween iterations run: git diff main...HEAD --name-only\nExit when: all affected docs are updated and verified\n\nStep 1: Review the diff, find stale docs, update them, and verify accuracy.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "docs",
+    "maintenance",
+    "sync"
+   ],
+   "copies": 1091,
+   "views": 1690
+  },
+  {
+   "number": "04",
+   "slug": "flaky-test-triage",
+   "title": "Flaky Test Triage",
+   "titleJa": "フレーキーテストのトリアージ",
+   "url": "https://loops.elorm.xyz/loops/flaky-test-triage",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run failing tests repeatedly, classify each failure as flaky or real, and fix only confirmed regressions.",
+   "descriptionJa": "失敗テストを繰り返し実行し、各失敗をフレーキーか本物かに分類し、確認済みのリグレッションだけを修正する。",
+   "exitCondition": "All failures classified; real regressions fixed; flaky tests documented or stabilized",
+   "exitConditionJa": "全失敗を分類済み。本物のリグレッションは修正、フレーキーは文書化または安定化",
+   "checkCommand": "",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "Run failing tests",
+     "nameJa": "失敗テストを実行",
+     "prompt": "Run the failing test file or suite 3–5 times. Record pass/fail pattern per test.",
+     "promptJa": "失敗するテストファイル/スイートを3〜5回実行し、テストごとの成否パターンを記録する。",
+     "shellCheck": "npm test -- --testPathPattern=<failing-suite>"
+    },
+    {
+     "name": "Classify failures",
+     "nameJa": "失敗を分類",
+     "prompt": "Label each failure as flaky (intermittent) or real (consistent). Note timing, ordering, or env dependencies.",
+     "promptJa": "各失敗をフレーキー（断続的）か本物（一貫）かでラベル付けし、タイミング・順序・環境依存をメモする。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Fix real failures",
+     "nameJa": "本物の失敗を修正",
+     "prompt": "Fix confirmed real failures with minimal changes. For flaky tests, propose stabilization (retries, isolation, mocks).",
+     "promptJa": "確認済みの本物の失敗を最小変更で修正する。フレーキーには安定化（リトライ・隔離・モック）を提案する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Confirm stability",
+     "nameJa": "安定性を確認",
+     "prompt": "Re-run the suite multiple times to confirm real failures are gone and flakiness is reduced or documented.",
+     "promptJa": "スイートを複数回再実行し、本物の失敗が消え、フレーキーが軽減または文書化されたことを確認する。",
+     "shellCheck": "npm test -- --testPathPattern=<failing-suite>"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Flaky Test Triage\" loop.\n\nGoal: classify failing tests as flaky vs real and fix only real regressions\nMax iterations: 5\nBetween iterations run: npm test -- --testPathPattern=<failing-suite>\nExit when: every failure is classified and real regressions are fixed or explicitly deferred\n\nStep 1: Run the failing suite multiple times. Classify each failure, fix real ones, and document flaky behavior.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "testing",
+    "flaky",
+    "triage"
+   ],
+   "copies": 1088,
+   "views": 2034
+  },
+  {
+   "number": "05",
+   "slug": "guardrails-learning-loop",
+   "title": "Guardrails Learning Loop",
+   "titleJa": "ガードレール学習ループ",
+   "url": "https://loops.elorm.xyz/loops/guardrails-learning-loop",
+   "category": {
+    "slug": "automation",
+    "label": "Automation",
+    "labelJa": "自動化"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "When a check fails twice the same way, append a guardrail sign to .ralph/guardrails.md so the next iteration avoids repeating it.",
+   "descriptionJa": "同じ失敗が2回起きたら .ralph/guardrails.md にガードレールの標識を追記し、次の反復で同じ失敗を繰り返さないようにする。",
+   "exitCondition": "Checks pass and no repeated failure pattern remains",
+   "exitConditionJa": "チェックが通り、繰り返す失敗パターンが残っていない",
+   "checkCommand": "npm test && npm run lint",
+   "maxIterations": 12,
+   "steps": [
+    {
+     "name": "Read guardrails",
+     "nameJa": "ガードレールを読む",
+     "prompt": "Read .ralph/guardrails.md before any work. Treat each sign as a hard constraint.",
+     "promptJa": "作業前に .ralph/guardrails.md を読み、各標識を厳格な制約として扱う。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Run checks",
+     "nameJa": "チェックを実行",
+     "prompt": "Run the project's backpressure commands.",
+     "promptJa": "プロジェクトのバックプレッシャー（検証）コマンドを実行する。",
+     "shellCheck": "npm test && npm run lint"
+    },
+    {
+     "name": "Record failure sign",
+     "nameJa": "失敗の標識を記録",
+     "prompt": "If the same error occurred before, append a concise sign to guardrails.md: what failed and how to avoid it.",
+     "promptJa": "同じエラーが以前も起きたなら、guardrails.md に「何が失敗し、どう避けるか」を簡潔に追記する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Fix with guardrails",
+     "nameJa": "ガードレール順守で修正",
+     "prompt": "Apply a fix that respects all guardrail signs. Do not repeat prior failed approaches.",
+     "promptJa": "全ガードレール標識を尊重した修正を適用する。過去に失敗したアプローチを繰り返さない。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Guardrails Learning Loop\" loop.\n\nGoal: tests and lint pass without repeating prior failure patterns\nMax iterations: 12\nBetween iterations run: npm test && npm run lint\nExit when: all checks pass\n\nStep 1: Read .ralph/guardrails.md, run checks, and if a failure repeats, add a sign before fixing.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "ralph",
+    "guardrails",
+    "learning"
+   ],
+   "copies": 1108,
+   "views": 2405
+  },
+  {
+   "number": "06",
+   "slug": "independent-verifier-pass",
+   "title": "Independent Verifier Pass",
+   "titleJa": "独立検証パス",
+   "url": "https://loops.elorm.xyz/loops/independent-verifier-pass",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "When implementation claims done, a separate verifier pass runs build, lint, and tests with no access to the implementer's rationale.",
+   "descriptionJa": "実装が「完了」と主張したら、実装者の論拠にアクセスできない別の検証者がビルド・lint・テストを実行する。",
+   "exitCondition": "Build, lint, and tests all pass under independent verification",
+   "exitConditionJa": "独立検証の下でビルド・lint・テストがすべて通過",
+   "checkCommand": "npm run build && npm run lint && npm test",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Run verifier checks",
+     "nameJa": "検証チェックを実行",
+     "prompt": "As an independent verifier, run build, lint, and tests. Do not assume the prior pass was correct.",
+     "promptJa": "独立した検証者として、ビルド・lint・テストを実行する。前のパスが正しいと仮定しない。",
+     "shellCheck": "npm run build && npm run lint && npm test"
+    },
+    {
+     "name": "Report gaps",
+     "nameJa": "欠落を報告",
+     "prompt": "List every failing check with file paths and error excerpts. No self-reporting — only command output counts.",
+     "promptJa": "失敗したチェックをすべてファイルパスとエラー抜粋付きで列挙する。自己申告は不可、コマンド出力だけを根拠とする。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Fix or hand back",
+     "nameJa": "修正または差し戻し",
+     "prompt": "If failures exist, fix them or produce a concise failure report for the implementer to continue.",
+     "promptJa": "失敗があれば修正するか、実装者が続行できるよう簡潔な失敗レポートを作る。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Independent Verifier Pass\" loop.\n\nGoal: build, lint, and tests pass under independent verification\nMax iterations: 8\nBetween iterations run: npm run build && npm run lint && npm test\nExit when: all verifier commands exit 0\n\nStep 1: Run build, lint, and tests as a verifier. Trust only command output, not prior claims.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "verification",
+    "testing",
+    "letitloop"
+   ],
+   "copies": 1048,
+   "views": 1443
+  },
+  {
+   "number": "07",
+   "slug": "npm-audit-fix-loop",
+   "title": "npm Audit Fix Loop",
+   "titleJa": "npm audit 修正ループ",
+   "url": "https://loops.elorm.xyz/loops/npm-audit-fix-loop",
+   "category": {
+    "slug": "security",
+    "label": "Security",
+    "labelJa": "セキュリティ"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Fix high/critical npm audit findings one at a time with test verification — not a blind npm audit fix --force.",
+   "descriptionJa": "npm audit の高/重大の指摘を、盲目的な npm audit fix --force ではなく、テスト検証しながら1件ずつ修正する。",
+   "exitCondition": "No high or critical npm audit vulnerabilities remain",
+   "exitConditionJa": "高または重大の npm audit 脆弱性が残っていない",
+   "checkCommand": "npm audit --audit-level=high",
+   "maxIterations": 10,
+   "steps": [
+    {
+     "name": "List vulnerabilities",
+     "nameJa": "脆弱性を列挙",
+     "prompt": "Run npm audit --json. Pick the highest severity fixable issue (one at a time).",
+     "promptJa": "npm audit --json を実行し、修正可能な最高重大度の問題を1件選ぶ。",
+     "shellCheck": "npm audit --audit-level=high"
+    },
+    {
+     "name": "Apply safe fix",
+     "nameJa": "安全な修正を適用",
+     "prompt": "Use npm audit fix for that advisory or bump the direct dependency. Avoid --force unless unavoidable.",
+     "promptJa": "その勧告に npm audit fix を使うか直接依存を上げる。避けられない限り --force は使わない。",
+     "shellCheck": "npm test"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"npm Audit Fix Loop\" loop.\n\nGoal: no high or critical npm audit vulnerabilities\nMax iterations: 10\nBetween iterations run: npm audit --audit-level=high && npm test\nExit when: npm audit reports no high/critical issues\n\nStep 1: Pick one high/critical advisory, apply the safest fix, run tests, and repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "security",
+    "npm",
+    "audit"
+   ],
+   "copies": 1083,
+   "views": 1871
+  },
+  {
+   "number": "08",
+   "slug": "post-edit-test-guard",
+   "title": "Post-Edit Test Guard",
+   "titleJa": "編集後テストガード",
+   "url": "https://loops.elorm.xyz/loops/post-edit-test-guard",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "event",
+   "triggerType": "event",
+   "description": "Hook-based loop that runs related tests after file edits to catch regressions early.",
+   "descriptionJa": "ファイル編集後に関連テストを実行し、リグレッションを早期に捉えるフック型ループ。",
+   "exitCondition": "Related tests pass after each edit batch",
+   "exitConditionJa": "各編集バッチの後、関連テストが通過",
+   "checkCommand": "npm test -- --findRelatedTests",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "Detect edited files",
+     "nameJa": "編集ファイルを検出",
+     "prompt": "Identify which source files were edited in the last turn.",
+     "promptJa": "直前のターンで編集されたソースファイルを特定する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Run related tests",
+     "nameJa": "関連テストを実行",
+     "prompt": "Run the smallest relevant test subset for edited files. Fix failures before continuing.",
+     "promptJa": "編集ファイルに関連する最小のテスト部分集合を実行し、続行前に失敗を修正する。",
+     "shellCheck": "npm test -- --findRelatedTests"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Install and run the \"Post-Edit Test Guard\" loop.\n\nGoal: after each batch of file edits, related tests must pass before continuing.\nBetween iterations run: npm test -- --findRelatedTests <edited files>\nExit when: related tests exit 0.\n\nStep 1: After edits, run related tests. If they fail, fix before making more changes.",
+   "keywords": [
+    "hooks",
+    "testing",
+    "regression"
+   ],
+   "copies": 1027,
+   "views": 1494
+  },
+  {
+   "number": "09",
+   "slug": "post-merge-regression-guard",
+   "title": "Post-Merge Regression Guard",
+   "titleJa": "マージ後リグレッションガード",
+   "url": "https://loops.elorm.xyz/loops/post-merge-regression-guard",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "event",
+   "triggerType": "event",
+   "description": "Hook that runs smoke tests after git merge or rebase to catch integration regressions immediately.",
+   "descriptionJa": "git merge / rebase の後にスモークテストを実行し、統合時のリグレッションを即座に捉えるフック。",
+   "exitCondition": "Smoke tests pass after merge",
+   "exitConditionJa": "マージ後にスモークテストが通過",
+   "checkCommand": "npm run test:smoke",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "Detect merge",
+     "nameJa": "マージを検出",
+     "prompt": "Confirm a merge or rebase just completed. Identify affected areas from the diff stat.",
+     "promptJa": "merge か rebase が完了したことを確認し、差分統計から影響範囲を特定する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Run smoke suite",
+     "nameJa": "スモークスイートを実行",
+     "prompt": "Run the fast smoke test suite. Fix any failures before starting new feature work.",
+     "promptJa": "高速なスモークテストを実行する。新機能に着手する前に失敗を修正する。",
+     "shellCheck": "npm run test:smoke"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Install and run the \"Post-Merge Regression Guard\" loop.\n\nGoal: smoke tests pass immediately after every merge or rebase.\nBetween iterations run: npm run test:smoke\nExit when: smoke suite exits 0.\n\nStep 1: After a merge, run smoke tests. Fix regressions before continuing other work.",
+   "keywords": [
+    "hooks",
+    "testing",
+    "git",
+    "merge"
+   ],
+   "copies": 985,
+   "views": 1711
+  },
+  {
+   "number": "10",
+   "slug": "pre-commit-guard",
+   "title": "Pre-Commit Guard",
+   "titleJa": "コミット前ガード",
+   "url": "https://loops.elorm.xyz/loops/pre-commit-guard",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "event",
+   "triggerType": "event",
+   "description": "Hook that runs tests before git commit commands to block commits when the suite is red.",
+   "descriptionJa": "git commit の前にテストを実行し、スイートが赤ならコミットをブロックするフック。",
+   "exitCondition": "Tests pass before each git commit",
+   "exitConditionJa": "各 git commit の前にテストが通過",
+   "checkCommand": "npm test",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "Detect commit intent",
+     "nameJa": "コミット意図を検出",
+     "prompt": "When a git commit command is about to run, pause and run the test suite first.",
+     "promptJa": "git commit が実行されようとしたら一時停止し、先にテストスイートを実行する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Run tests",
+     "nameJa": "テストを実行",
+     "prompt": "Run the full test suite before allowing the commit to proceed.",
+     "promptJa": "コミットを進める前に全テストスイートを実行する。",
+     "shellCheck": "npm test"
+    },
+    {
+     "name": "Block or allow",
+     "nameJa": "ブロックまたは許可",
+     "prompt": "If tests fail, fix failures and re-run. Only allow the commit when tests pass.",
+     "promptJa": "テストが失敗したら修正して再実行する。テストが通ったときだけコミットを許可する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Install and run the \"Pre-Commit Guard\" loop.\n\nGoal: block git commits when tests are failing.\nBetween iterations run: npm test\nExit when: tests exit 0 before each commit.\n\nStep 1: Before any git commit, run tests. Fix failures before committing.",
+   "keywords": [
+    "hooks",
+    "testing",
+    "git",
+    "pre-commit"
+   ],
+   "copies": 1196,
+   "views": 2173
+  },
+  {
+   "number": "11",
+   "slug": "ralph-story-executor",
+   "title": "Ralph Story Executor",
+   "titleJa": "Ralph ストーリー実行ループ",
+   "url": "https://loops.elorm.xyz/loops/ralph-story-executor",
+   "category": {
+    "slug": "automation",
+    "label": "Automation",
+    "labelJa": "自動化"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Fresh-context loop: pick one incomplete story from prd.json, implement it, run backpressure checks, commit, and update progress before the next iteration.",
+   "descriptionJa": "新鮮な文脈のループ：prd.json から未完了のストーリーを1つ選び、実装し、バックプレッシャーチェックを実行し、コミットし、次の反復前に進捗を更新する。",
+   "exitCondition": "All stories in prd.json have passes: true",
+   "exitConditionJa": "prd.json の全ストーリーが passes: true になっている",
+   "checkCommand": "cat .ralph/prd.json | grep -c '\"passes\": false' || true",
+   "maxIterations": 20,
+   "steps": [
+    {
+     "name": "Read state",
+     "nameJa": "状態を読む",
+     "prompt": "Read .ralph/prd.json and .ralph/progress.md. Resume any story marked inProgress, else pick the lowest-priority story with passes: false.",
+     "promptJa": ".ralph/prd.json と .ralph/progress.md を読む。inProgress のストーリーを再開するか、なければ passes: false の最低優先度のストーリーを選ぶ。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Implement one story",
+     "nameJa": "1ストーリー実装",
+     "prompt": "Implement exactly one user story with minimal scope. Mark it inProgress in prd.json before coding.",
+     "promptJa": "最小スコープでユーザーストーリーをちょうど1つ実装する。コーディング前に prd.json で inProgress にする。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Run backpressure",
+     "nameJa": "バックプレッシャー実行",
+     "prompt": "Run the project's test, lint, and build commands from AGENTS.md. Fix failures before committing.",
+     "promptJa": "AGENTS.md のテスト・lint・ビルドコマンドを実行する。コミット前に失敗を修正する。",
+     "shellCheck": "npm test && npm run lint && npm run build"
+    },
+    {
+     "name": "Commit and record",
+     "nameJa": "コミットと記録",
+     "prompt": "Commit with a story-scoped message. Set passes: true in prd.json and append learnings to progress.md.",
+     "promptJa": "ストーリー単位のメッセージでコミットする。prd.json で passes: true にし、progress.md に学びを追記する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Ralph Story Executor\" loop.\n\nGoal: every story in .ralph/prd.json has passes: true\nMax iterations: 20\nBetween iterations run: npm test && npm run lint && npm run build\nExit when: no stories remain with passes: false (respond \"ALL STORIES ARE COMPLETE\")\n\nStep 1: Read .ralph/prd.json and .ralph/progress.md. Pick one incomplete story, implement it, run backpressure checks, commit, update prd.json and progress.md, then stop this iteration.\n\nSelf-pace this loop. Each iteration does exactly one story. State lives on disk, not in chat history.",
+   "keywords": [
+    "ralph",
+    "automation",
+    "prd",
+    "fresh-context"
+   ],
+   "copies": 714,
+   "views": 1410
+  },
+  {
+   "number": "12",
+   "slug": "ship-pr-until-green",
+   "title": "Ship PR Until Green",
+   "titleJa": "PRがグリーンになるまで出荷",
+   "url": "https://loops.elorm.xyz/loops/ship-pr-until-green",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Implement on a branch, run tests, push, open a PR, wait for CI, and loop until checks pass and the PR is ready to merge.",
+   "descriptionJa": "ブランチで実装し、テストを実行し、pushしてPRを開き、CIを待ち、チェックが通ってPRがマージ可能になるまでループする。",
+   "exitCondition": "PR checks pass and PR is merge-ready",
+   "exitConditionJa": "PRのチェックが通り、PRがマージ可能",
+   "checkCommand": "gh pr checks --watch",
+   "maxIterations": 10,
+   "steps": [
+    {
+     "name": "Implement and test",
+     "nameJa": "実装とテスト",
+     "prompt": "Make the scoped change and run local tests.",
+     "promptJa": "スコープを絞った変更を行い、ローカルテストを実行する。",
+     "shellCheck": "npm test"
+    },
+    {
+     "name": "Commit and push",
+     "nameJa": "コミットとpush",
+     "prompt": "Commit with a clear message and push the branch.",
+     "promptJa": "明確なメッセージでコミットし、ブランチをpushする。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Open or update PR",
+     "nameJa": "PRを作成/更新",
+     "prompt": "Open a PR with summary and test plan, or update existing PR.",
+     "promptJa": "概要とテスト計画付きでPRを開くか、既存PRを更新する。",
+     "shellCheck": "gh pr view --json statusCheckRollup,url"
+    },
+    {
+     "name": "Fix CI",
+     "nameJa": "CIを修正",
+     "prompt": "If CI fails, read logs, fix once locally, push, and re-wait.",
+     "promptJa": "CIが失敗したらログを読み、ローカルで一度修正し、pushして再度待つ。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Ship PR Until Green\" loop.\n\nGoal: PR is open with all CI checks passing\nMax iterations: 10\nBetween iterations run: gh pr checks\nExit when: all PR checks are success\n\nStep 1: Implement the change, test locally, push, open PR, and fix CI until green.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "pr",
+    "ci",
+    "ship",
+    "continuous-claude"
+   ],
+   "copies": 1900,
+   "views": 3427
+  },
+  {
+   "number": "13",
+   "slug": "test-until-green",
+   "title": "Test Until Green",
+   "titleJa": "テストがグリーンになるまで",
+   "url": "https://loops.elorm.xyz/loops/test-until-green",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run your test suite, fix the smallest root cause on failure, and repeat until every test passes.",
+   "descriptionJa": "テストスイートを実行し、失敗したら最小の根本原因を修正し、全テストが通るまで繰り返す。",
+   "exitCondition": "All tests pass (exit code 0)",
+   "exitConditionJa": "全テストが通過（終了コード0）",
+   "checkCommand": "npm test",
+   "maxIterations": 10,
+   "steps": [
+    {
+     "name": "Run tests",
+     "nameJa": "テストを実行",
+     "prompt": "Run the project test command and capture failures.",
+     "promptJa": "プロジェクトのテストコマンドを実行し、失敗を捕捉する。",
+     "shellCheck": "npm test"
+    },
+    {
+     "name": "Fix failures",
+     "nameJa": "失敗を修正",
+     "prompt": "Fix the smallest root cause for the current failing tests. Prefer minimal diffs.",
+     "promptJa": "現在失敗しているテストの最小の根本原因を修正する。最小限の差分を優先する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Re-run tests",
+     "nameJa": "テスト再実行",
+     "prompt": "Run tests again and verify progress toward zero failures.",
+     "promptJa": "再度テストを実行し、失敗ゼロへの前進を検証する。",
+     "shellCheck": "npm test"
+    }
+   ],
+   "guardrails": [
+    "Do not modify the check command or exit criteria to force success",
+    "Do not skip, disable, or bypass checks to pass the exit condition",
+    "If stuck after several iterations, stop and report blockers instead of gaming metrics",
+    "Do not weaken, delete, or skip tests to make the suite pass",
+    "Do not replace real assertions with trivial always-pass tests",
+    "Prefer fixing production code over patching tests to go green"
+   ],
+   "guardrailsJa": [
+    "成功を強いるためにチェックコマンドや終了基準を変更しない",
+    "終了条件を通すためにチェックをスキップ・無効化・回避しない",
+    "数回反復して行き詰まったら、指標をごまかさず停止してブロッカーを報告する",
+    "スイートを通すためにテストを弱体化・削除・スキップしない",
+    "本物のアサーションを常に通る自明なテストで置き換えない",
+    "グリーンにするために、テストを取り繕うより本番コードの修正を優先する"
+   ],
+   "kickoffPrompt": "Start the \"Test Until Green\" loop.\n\nGoal: all tests pass\nMax iterations: 10\nBetween iterations run: npm test\nExit when: tests exit 0\n\nStep 1: Run tests. If there are failures, fix the smallest root cause, then repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "testing",
+    "tdd",
+    "ci"
+   ],
+   "copies": 832,
+   "views": 1789
+  }
+ ]
+}
