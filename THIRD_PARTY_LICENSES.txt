@@ -47,7 +47,7 @@ SOFTWARE.
 ----------------------------------------
 
 ----------------------------------------
-4. loops! (EL Loops, 13 loops + Japanese translations as derivative work)
+4. loops! (EL Loops, 40 loops + Japanese translations as derivative work)
    Source: https://loops.elorm.xyz/
 ----------------------------------------
 

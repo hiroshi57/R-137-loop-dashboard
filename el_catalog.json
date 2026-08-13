@@ -4,7 +4,7 @@
  "publisher": "loops.elorm.xyz",
  "description": "loops.elorm.xyz のプリビルド・エージェントループ集（日本語訳付き）",
  "url": "https://loops.elorm.xyz/",
- "loopCount": 13,
+ "loopCount": 40,
  "categories": [
   {
    "slug": "quality",
@@ -35,6 +35,51 @@
    "slug": "security",
    "label": "Security",
    "labelJa": "セキュリティ"
+  },
+  {
+   "slug": "api",
+   "label": "API",
+   "labelJa": "API"
+  },
+  {
+   "slug": "performance",
+   "label": "Performance",
+   "labelJa": "性能"
+  },
+  {
+   "slug": "docs",
+   "label": "Docs",
+   "labelJa": "ドキュメント"
+  },
+  {
+   "slug": "review",
+   "label": "Review",
+   "labelJa": "レビュー"
+  },
+  {
+   "slug": "devops",
+   "label": "DevOps",
+   "labelJa": "DevOps"
+  },
+  {
+   "slug": "debugging",
+   "label": "Debugging",
+   "labelJa": "デバッグ"
+  },
+  {
+   "slug": "git",
+   "label": "Git",
+   "labelJa": "Git"
+  },
+  {
+   "slug": "database",
+   "label": "Database",
+   "labelJa": "DB"
+  },
+  {
+   "slug": "planning",
+   "label": "Planning",
+   "labelJa": "計画"
   }
  ],
  "loops": [
@@ -764,6 +809,1449 @@
    ],
    "copies": 832,
    "views": 1789
+  },
+  {
+   "number": "14",
+   "slug": "api-contract-until-match",
+   "title": "API Contract Until Match",
+   "titleJa": "APIコントラクト一致まで",
+   "url": "https://loops.elorm.xyz/loops/api-contract-until-match",
+   "category": {
+    "slug": "api",
+    "label": "API",
+    "labelJa": "API"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Loop until API responses match the OpenAPI or JSON Schema contract — catch drift between docs and implementation.",
+   "descriptionJa": "APIレスポンスが OpenAPI や JSON Schema の契約に一致するまでループし、ドキュメントと実装の乖離を捉える。",
+   "exitCondition": "All API contract tests pass",
+   "exitConditionJa": "全てのAPIコントラクトテストが通過",
+   "checkCommand": "npm run test:contract",
+   "maxIterations": 10,
+   "steps": [
+    {
+     "name": "Run contract tests",
+     "nameJa": "コントラクトテストを実行",
+     "prompt": "Run contract tests against openapi.yaml or schema fixtures. List every mismatch with endpoint and field.",
+     "promptJa": "openapi.yaml やスキーマのフィクスチャに対してコントラクトテストを実行し、エンドポイントとフィールド単位で不一致を全て列挙する。",
+     "shellCheck": "npm run test:contract"
+    },
+    {
+     "name": "Fix implementation or spec",
+     "nameJa": "実装か仕様を修正",
+     "prompt": "Fix the smallest change: update handler types/validation or correct the spec if the code is canonical.",
+     "promptJa": "最小の変更で直す。ハンドラの型・バリデーションを更新するか、コードが正なら仕様側を修正する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"API Contract Until Match\" loop.\n\nGoal: API implementation matches the published contract\nMax iterations: 10\nBetween iterations run: npm run test:contract\nExit when: contract test suite exits 0\n\nStep 1: Run contract tests. Fix each schema/response mismatch with minimal diffs, then re-run.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "api",
+    "openapi",
+    "contract-testing"
+   ],
+   "copies": 553,
+   "views": 1845
+  },
+  {
+   "number": "15",
+   "slug": "autoloop-tdd",
+   "title": "Autoloop TDD",
+   "titleJa": "オートループTDD",
+   "url": "https://loops.elorm.xyz/loops/autoloop-tdd",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Test-first loop: write a failing test, implement the minimum code to pass, refactor, and repeat.",
+   "descriptionJa": "テストファーストのループ。失敗するテストを書き、通す最小限の実装を行い、リファクタして繰り返す。",
+   "exitCondition": "Target behavior covered by tests and full suite passes",
+   "exitConditionJa": "対象の挙動がテストで網羅され、全スイートが通過",
+   "checkCommand": "npm test",
+   "maxIterations": 12,
+   "steps": [
+    {
+     "name": "Write failing test",
+     "nameJa": "失敗するテストを書く",
+     "prompt": "Write a focused test for the next behavior. Run it and confirm it fails for the right reason.",
+     "promptJa": "次の挙動に絞ったテストを書く。実行して、正しい理由で失敗することを確認する。",
+     "shellCheck": "npm test -- --testPathPattern=<new-test>"
+    },
+    {
+     "name": "Implement minimum code",
+     "nameJa": "最小限の実装",
+     "prompt": "Write the smallest implementation that makes the new test pass. No extra features.",
+     "promptJa": "新しいテストを通す最小の実装を書く。余計な機能は足さない。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify green",
+     "nameJa": "グリーンを確認",
+     "prompt": "Run the new test and full suite to confirm everything passes.",
+     "promptJa": "新テストと全スイートを実行し、すべて通過することを確認する。",
+     "shellCheck": "npm test"
+    },
+    {
+     "name": "Refactor",
+     "nameJa": "リファクタ",
+     "prompt": "Clean up duplication and naming while keeping tests green. Run tests after each refactor.",
+     "promptJa": "テストをグリーンに保ったまま重複と命名を整理する。各リファクタ後にテストを実行する。",
+     "shellCheck": "npm test"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Autoloop TDD\" loop.\n\nGoal: implement the target behavior test-first with a green suite\nMax iterations: 12\nBetween iterations run: npm test\nExit when: target behavior is covered and all tests pass\n\nStep 1: Write a failing test for the next behavior, implement the minimum code to pass, refactor, and repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "tdd",
+    "testing",
+    "red-green-refactor"
+   ],
+   "copies": 690,
+   "views": 1628
+  },
+  {
+   "number": "16",
+   "slug": "build-until-green",
+   "title": "Build Until Green",
+   "titleJa": "ビルドがグリーンになるまで",
+   "url": "https://loops.elorm.xyz/loops/build-until-green",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run the production build, fix compile and bundling errors, and loop until the build succeeds.",
+   "descriptionJa": "本番ビルドを実行し、コンパイルとバンドルのエラーを修正し、ビルドが成功するまでループする。",
+   "exitCondition": "Production build completes with exit code 0",
+   "exitConditionJa": "本番ビルドが終了コード0で完了",
+   "checkCommand": "npm run build",
+   "maxIterations": 10,
+   "steps": [
+    {
+     "name": "Run build",
+     "nameJa": "ビルドを実行",
+     "prompt": "Run the project build command and capture all errors.",
+     "promptJa": "プロジェクトのビルドコマンドを実行し、全エラーを収集する。",
+     "shellCheck": "npm run build"
+    },
+    {
+     "name": "Fix build errors",
+     "nameJa": "ビルドエラーを修正",
+     "prompt": "Fix compile, type, and bundling errors one at a time. Prefer minimal diffs.",
+     "promptJa": "コンパイル・型・バンドルのエラーを一つずつ修正する。最小限の差分を優先する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Re-run build",
+     "nameJa": "ビルドを再実行",
+     "prompt": "Run the build again and confirm errors are resolved.",
+     "promptJa": "再度ビルドし、エラーが解消したことを確認する。",
+     "shellCheck": "npm run build"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Build Until Green\" loop.\n\nGoal: production build succeeds\nMax iterations: 10\nBetween iterations run: npm run build\nExit when: npm run build exits 0\n\nStep 1: Run the build. If it fails, fix the first error, then repeat until green.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "build",
+    "compile",
+    "ci"
+   ],
+   "copies": 453,
+   "views": 1982
+  },
+  {
+   "number": "17",
+   "slug": "bundle-size-budget",
+   "title": "Bundle Size Budget",
+   "titleJa": "バンドルサイズ予算",
+   "url": "https://loops.elorm.xyz/loops/bundle-size-budget",
+   "category": {
+    "slug": "performance",
+    "label": "Performance",
+    "labelJa": "性能"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Ship features without bloating the client bundle — loop until size checks pass under your budget threshold.",
+   "descriptionJa": "クライアントバンドルを膨らませずに機能を出荷する。予算のしきい値を満たすまでサイズチェックをループする。",
+   "exitCondition": "Bundle size is under the configured budget",
+   "exitConditionJa": "バンドルサイズが設定した予算内に収まる",
+   "checkCommand": "npm run size-limit",
+   "maxIterations": 6,
+   "steps": [
+    {
+     "name": "Measure bundle",
+     "nameJa": "バンドルを計測",
+     "prompt": "Run the production build and bundle size check. Report total KB and the largest new chunks.",
+     "promptJa": "本番ビルドとバンドルサイズチェックを実行し、合計KBと新たに増えた大きなチャンクを報告する。",
+     "shellCheck": "npm run build && npm run size-limit"
+    },
+    {
+     "name": "Trim or lazy-load",
+     "nameJa": "削減または遅延読込",
+     "prompt": "If over budget: dynamic-import heavy modules, remove unused deps, or split routes. No feature cuts unless necessary.",
+     "promptJa": "予算超過なら、重いモジュールを動的importにし、未使用の依存を削除し、ルート分割する。必要でない限り機能は削らない。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Bundle Size Budget\" loop.\n\nGoal: client bundle stays under the size-limit budget\nMax iterations: 6\nBetween iterations run: npm run build && npm run size-limit\nExit when: size-limit exits 0\n\nStep 1: Build and measure bundle size. If over budget, lazy-load or trim deps until size-limit passes.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "performance",
+    "bundle",
+    "frontend"
+   ],
+   "copies": 834,
+   "views": 1771
+  },
+  {
+   "number": "18",
+   "slug": "changelog-sync-after-ship",
+   "title": "Changelog Sync After Ship",
+   "titleJa": "出荷後の変更履歴同期",
+   "url": "https://loops.elorm.xyz/loops/changelog-sync-after-ship",
+   "category": {
+    "slug": "docs",
+    "label": "Docs",
+    "labelJa": "ドキュメント"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "After shipping a feature, loop until CHANGELOG.md has a user-facing entry and conventional commits are reflected.",
+   "descriptionJa": "機能の出荷後、CHANGELOG.md にユーザー向けのエントリが載り、コミット規約が反映されるまでループする。",
+   "exitCondition": "CHANGELOG.md documents all user-visible changes in this ship",
+   "exitConditionJa": "この出荷のユーザー可視な変更が全て CHANGELOG.md に記載されている",
+   "checkCommand": "",
+   "maxIterations": 3,
+   "steps": [
+    {
+     "name": "Diff since last tag",
+     "nameJa": "前回タグからの差分",
+     "prompt": "List commits and user-visible changes since the last release tag or CHANGELOG section.",
+     "promptJa": "前回のリリースタグまたは CHANGELOG のセクション以降のコミットとユーザー可視な変更を列挙する。",
+     "shellCheck": "git log $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~20)..HEAD --oneline"
+    },
+    {
+     "name": "Write changelog entry",
+     "nameJa": "変更履歴を書く",
+     "prompt": "Add a Keep-a-Changelog entry under [Unreleased]: Added, Changed, Fixed. User-facing language only.",
+     "promptJa": "[Unreleased] の下に Keep a Changelog 形式で Added/Changed/Fixed を追記する。ユーザー目線の言葉のみ。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify format",
+     "nameJa": "書式を検証",
+     "prompt": "Confirm CHANGELOG follows project format and links issues/PRs where relevant.",
+     "promptJa": "プロジェクトの書式に沿い、関連するIssueやPRへリンクされていることを確認する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Changelog Sync After Ship\" loop.\n\nGoal: CHANGELOG.md has accurate [Unreleased] entries for this ship\nMax iterations: 3\nBetween iterations run: git log -5 --oneline\nExit when: changelog covers all user-visible changes\n\nStep 1: Review recent commits, write Keep-a-Changelog entries for user-visible changes, and verify completeness.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "docs",
+    "changelog",
+    "release"
+   ],
+   "copies": 700,
+   "views": 1450
+  },
+  {
+   "number": "19",
+   "slug": "coverage-until-threshold",
+   "title": "Coverage Until Threshold",
+   "titleJa": "カバレッジがしきい値に達するまで",
+   "url": "https://loops.elorm.xyz/loops/coverage-until-threshold",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Add focused tests until coverage meets your threshold (e.g. 80%), without changing production behavior unnecessarily.",
+   "descriptionJa": "本番の挙動を不必要に変えずに、カバレッジがしきい値（例：80%）に達するまで的を絞ったテストを追加する。",
+   "exitCondition": "Coverage threshold met and all tests pass",
+   "exitConditionJa": "カバレッジのしきい値を満たし、全テストが通過",
+   "checkCommand": "npm test -- --coverage",
+   "maxIterations": 12,
+   "steps": [
+    {
+     "name": "Measure coverage",
+     "nameJa": "カバレッジを計測",
+     "prompt": "Run tests with coverage reporting enabled.",
+     "promptJa": "カバレッジ計測を有効にしてテストを実行する。",
+     "shellCheck": "npm test -- --coverage"
+    },
+    {
+     "name": "Add tests",
+     "nameJa": "テストを追加",
+     "prompt": "Write the smallest tests needed to cover uncovered branches. No snapshot spam or trivial asserts.",
+     "promptJa": "未カバレッジの分岐を覆う最小限のテストを書く。スナップショットの乱用や自明なアサートは避ける。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Re-measure",
+     "nameJa": "再計測",
+     "prompt": "Re-run coverage and confirm threshold is met.",
+     "promptJa": "カバレッジを再実行し、しきい値の達成を確認する。",
+     "shellCheck": "npm test -- --coverage"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Coverage Until Threshold\" loop.\n\nGoal: coverage meets the target threshold (default 80%) with all tests passing\nMax iterations: 12\nBetween iterations run: npm test -- --coverage\nExit when: coverage threshold is met and tests exit 0\n\nStep 1: Run coverage. Add focused tests for the biggest uncovered gaps, then repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "coverage",
+    "testing",
+    "quality"
+   ],
+   "copies": 882,
+   "views": 1888
+  },
+  {
+   "number": "20",
+   "slug": "de-sloppify-pass",
+   "title": "De-Sloppify Pass",
+   "titleJa": "散らかり掃除パス",
+   "url": "https://loops.elorm.xyz/loops/de-sloppify-pass",
+   "category": {
+    "slug": "review",
+    "label": "Review",
+    "labelJa": "レビュー"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "After implementation, run a cleanup pass: remove debug code, tighten naming, delete dead branches, and align with project conventions.",
+   "descriptionJa": "実装の後に片付けパスを実行する。デバッグコードを削除し、命名を締め、不要な分岐を消し、プロジェクト規約に揃える。",
+   "exitCondition": "No slop remains and lint/tests still pass",
+   "exitConditionJa": "散らかりが残っておらず、lintとテストが依然通過",
+   "checkCommand": "npm run lint && npm test",
+   "maxIterations": 4,
+   "steps": [
+    {
+     "name": "Scan for slop",
+     "nameJa": "散らかりを洗い出す",
+     "prompt": "Review recent changes for debug logs, commented code, TODO hacks, oversized functions, and inconsistent naming.",
+     "promptJa": "直近の変更を見直し、デバッグログ・コメントアウト・TODOの応急処置・肥大化した関数・不統一な命名を洗い出す。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Clean up",
+     "nameJa": "片付ける",
+     "prompt": "Apply minimal fixes: delete dead code, extract helpers, align types, and match surrounding style.",
+     "promptJa": "最小限の修正を適用する。不要コードを削除し、ヘルパーを抽出し、型を揃え、周囲のスタイルに合わせる。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify",
+     "nameJa": "検証",
+     "prompt": "Run lint and tests to ensure cleanup did not break behavior.",
+     "promptJa": "lintとテストを実行し、片付けで挙動が壊れていないことを確認する。",
+     "shellCheck": "npm run lint && npm test"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"De-Sloppify Pass\" loop.\n\nGoal: recent changes are clean, minimal, and convention-aligned\nMax iterations: 4\nBetween iterations run: npm run lint && npm test\nExit when: review finds no slop and checks pass\n\nStep 1: Review the diff for debug code, dead branches, and naming issues. Fix them with minimal diffs.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "review",
+    "quality",
+    "cleanup"
+   ],
+   "copies": 606,
+   "views": 2086
+  },
+  {
+   "number": "21",
+   "slug": "dependency-audit-weekly",
+   "title": "Dependency Audit Weekly",
+   "titleJa": "週次の依存監査",
+   "url": "https://loops.elorm.xyz/loops/dependency-audit-weekly",
+   "category": {
+    "slug": "maintenance",
+    "label": "Maintenance",
+    "labelJa": "保守"
+   },
+   "author": "loops!",
+   "trigger": "interval",
+   "triggerType": "interval",
+   "description": "Weekly loop to check outdated dependencies, propose safe upgrades, and open a summary.",
+   "descriptionJa": "毎週、古い依存関係を確認し、安全なアップグレードを提案し、サマリを提出するループ。",
+   "exitCondition": "Weekly audit summary delivered",
+   "exitConditionJa": "週次の監査サマリが提出される",
+   "checkCommand": "",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "List outdated packages",
+     "nameJa": "古いパッケージを列挙",
+     "prompt": "Run npm outdated and summarize major vs patch updates.",
+     "promptJa": "npm outdated を実行し、メジャー更新とパッチ更新を分けて要約する。",
+     "shellCheck": "npm outdated || true"
+    },
+    {
+     "name": "Propose upgrades",
+     "nameJa": "アップグレードを提案",
+     "prompt": "Recommend safe upgrades. Flag breaking changes and required code changes.",
+     "promptJa": "安全なアップグレードを推奨する。破壊的変更と必要なコード修正にフラグを立てる。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "/loop 7d Start the \"Dependency Audit Weekly\" loop.\n\nGoal: deliver a weekly dependency audit summary.\nBetween iterations run: npm outdated || true\nExit when: summary is posted with recommended upgrades.\n\nStep 1: Run npm outdated, categorize updates, and propose a safe upgrade plan.",
+   "keywords": [
+    "dependencies",
+    "maintenance",
+    "security"
+   ],
+   "copies": 936,
+   "views": 1778
+  },
+  {
+   "number": "22",
+   "slug": "dependency-upgrade-one-by-one",
+   "title": "Dependency Upgrade One-by-One",
+   "titleJa": "依存を1つずつアップグレード",
+   "url": "https://loops.elorm.xyz/loops/dependency-upgrade-one-by-one",
+   "category": {
+    "slug": "maintenance",
+    "label": "Maintenance",
+    "labelJa": "保守"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Upgrade a single outdated package per iteration, fix breakages, and commit — safer than bulk npm update.",
+   "descriptionJa": "1回の反復で古いパッケージを1つだけアップグレードし、破損を直してコミットする。一括の npm update より安全。",
+   "exitCondition": "No outdated production dependencies remain (or user stops)",
+   "exitConditionJa": "本番の古い依存が残っていない（またはユーザーが停止）",
+   "checkCommand": "",
+   "maxIterations": 15,
+   "steps": [
+    {
+     "name": "Pick one package",
+     "nameJa": "パッケージを1つ選ぶ",
+     "prompt": "Run npm outdated. Pick the highest-impact outdated package (one only). Note its current and target version.",
+     "promptJa": "npm outdated を実行し、影響の大きい古いパッケージを1つだけ選ぶ。現在と目標のバージョンを記録する。",
+     "shellCheck": "npm outdated"
+    },
+    {
+     "name": "Upgrade and fix",
+     "nameJa": "アップグレードして修正",
+     "prompt": "Upgrade that single package. Fix type errors, API changes, and test failures caused by the bump.",
+     "promptJa": "そのパッケージだけを更新する。バージョン差分による型エラー・API変更・テスト失敗を修正する。",
+     "shellCheck": "npm test && npm run build"
+    },
+    {
+     "name": "Commit bump",
+     "nameJa": "コミット",
+     "prompt": "Commit with message like chore(deps): bump <package> to <version>.",
+     "promptJa": "chore(deps): bump <package> to <version> のような形式でコミットする。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Dependency Upgrade One-by-One\" loop.\n\nGoal: critical outdated deps are upgraded with green tests\nMax iterations: 15\nBetween iterations run: npm outdated && npm test && npm run build\nExit when: npm outdated shows no critical packages left or user stops\n\nStep 1: Pick one outdated package, upgrade it, fix breakages, commit, and stop. One package per iteration.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "dependencies",
+    "maintenance",
+    "upgrades"
+   ],
+   "copies": 717,
+   "views": 1224
+  },
+  {
+   "number": "23",
+   "slug": "deploy-verification-loop",
+   "title": "Deploy Verification Loop",
+   "titleJa": "デプロイ検証ループ",
+   "url": "https://loops.elorm.xyz/loops/deploy-verification-loop",
+   "category": {
+    "slug": "devops",
+    "label": "DevOps",
+    "labelJa": "DevOps"
+   },
+   "author": "loops!",
+   "trigger": "interval",
+   "triggerType": "interval",
+   "description": "On an interval, hit health and smoke endpoints after a deploy until all checks return healthy responses.",
+   "descriptionJa": "デプロイ後、一定間隔でヘルスチェックとスモークのエンドポイントを叩き、全チェックが正常応答を返すまで続ける。",
+   "exitCondition": "All configured health endpoints return success",
+   "exitConditionJa": "設定した全ヘルスエンドポイントが成功を返す",
+   "checkCommand": "curl -fsS https://your-app.example/health",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Check health endpoints",
+     "nameJa": "ヘルスチェック",
+     "prompt": "Curl configured health/smoke URLs. Record status codes and response bodies.",
+     "promptJa": "設定済みのヘルス/スモークURLをcurlし、ステータスコードとレスポンスを記録する。",
+     "shellCheck": "curl -fsS https://your-app.example/health"
+    },
+    {
+     "name": "Investigate failures",
+     "nameJa": "失敗を調査",
+     "prompt": "If any endpoint fails, check recent deploy logs, env vars, and migrations. Apply the smallest fix.",
+     "promptJa": "失敗があれば、直近のデプロイログ・環境変数・マイグレーションを確認し、最小の修正を適用する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Re-verify",
+     "nameJa": "再検証",
+     "prompt": "Re-run health checks after fixes or rollback decision.",
+     "promptJa": "修正またはロールバック判断の後、ヘルスチェックを再実行する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "/loop 15m Start the \"Deploy Verification Loop\".\n\nGoal: all post-deploy health and smoke endpoints return success.\nMax iterations: 8.\nBetween iterations run: curl -fsS <your-health-url>\nExit when: every configured endpoint succeeds.\n\nStep 1: Hit health/smoke URLs. If any fail, inspect deploy logs and fix or escalate.",
+   "keywords": [
+    "deploy",
+    "devops",
+    "smoke-test"
+   ],
+   "copies": 963,
+   "views": 1383
+  },
+  {
+   "number": "24",
+   "slug": "e2e-until-green",
+   "title": "E2E Until Green",
+   "titleJa": "E2Eがグリーンになるまで",
+   "url": "https://loops.elorm.xyz/loops/e2e-until-green",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run end-to-end tests, fix UI and integration failures, and loop until the E2E suite passes.",
+   "descriptionJa": "エンドツーエンドのテストを実行し、UIと結合の失敗を修正し、E2Eスイートが通過するまでループする。",
+   "exitCondition": "E2E suite exits 0",
+   "exitConditionJa": "E2Eスイートが終了コード0で完了",
+   "checkCommand": "npm run test:e2e",
+   "maxIterations": 10,
+   "steps": [
+    {
+     "name": "Run E2E",
+     "nameJa": "E2Eを実行",
+     "prompt": "Run the project's E2E test command and capture failures.",
+     "promptJa": "プロジェクトのE2Eテストコマンドを実行し、失敗を収集する。",
+     "shellCheck": "npm run test:e2e"
+    },
+    {
+     "name": "Fix failures",
+     "nameJa": "失敗を修正",
+     "prompt": "Fix the smallest root cause for failing E2E specs. Prefer stable selectors and realistic waits.",
+     "promptJa": "失敗するE2E仕様の最小の根本原因を修正する。安定したセレクタと現実的な待機を優先する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Re-run E2E",
+     "nameJa": "E2Eを再実行",
+     "prompt": "Re-run E2E until all specs pass.",
+     "promptJa": "全仕様が通過するまでE2Eを再実行する。",
+     "shellCheck": "npm run test:e2e"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"E2E Until Green\" loop.\n\nGoal: E2E suite passes\nMax iterations: 10\nBetween iterations run: npm run test:e2e\nExit when: E2E command exits 0\n\nStep 1: Run E2E tests. Fix the first failing spec, then repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "e2e",
+    "playwright",
+    "testing"
+   ],
+   "copies": 451,
+   "views": 1621
+  },
+  {
+   "number": "25",
+   "slug": "fix-ci-until-green",
+   "title": "Fix CI Until Green",
+   "titleJa": "CIがグリーンになるまで直す",
+   "url": "https://loops.elorm.xyz/loops/fix-ci-until-green",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Fetch the latest failed CI run, reproduce the failure locally, fix it, and repeat until checks pass.",
+   "descriptionJa": "直近の失敗したCI実行を取得し、ローカルで再現し、修正し、チェックが通るまで繰り返す。",
+   "exitCondition": "Latest CI run conclusion is success",
+   "exitConditionJa": "直近のCI実行の結論が成功",
+   "checkCommand": "gh run list --branch $(git branch --show-current) --limit 1 --json conclusion -q '.[0].conclusion'",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Fetch failed run",
+     "nameJa": "失敗した実行を取得",
+     "prompt": "Use gh to find the latest failed CI run on this branch. Pull logs for the failing job.",
+     "promptJa": "gh でこのブランチの直近の失敗CI実行を探し、失敗ジョブのログを取得する。",
+     "shellCheck": "gh run list --branch $(git branch --show-current) --status failure --limit 1"
+    },
+    {
+     "name": "Reproduce locally",
+     "nameJa": "ローカルで再現",
+     "prompt": "Run the failing CI step locally (test, lint, build). Confirm you can reproduce the error.",
+     "promptJa": "失敗したCIステップ（テスト・lint・ビルド）をローカルで実行し、エラーを再現できることを確認する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Apply fix",
+     "nameJa": "修正を適用",
+     "prompt": "Fix the root cause with a minimal diff. Avoid unrelated refactors.",
+     "promptJa": "最小の差分で根本原因を修正する。無関係なリファクタは避ける。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Push and verify",
+     "nameJa": "pushして検証",
+     "prompt": "Push the fix and wait for CI. Re-check status before the next iteration.",
+     "promptJa": "修正をpushしてCIを待つ。次の反復の前に状態を再確認する。",
+     "shellCheck": "gh run list --branch $(git branch --show-current) --limit 1 --json conclusion -q '.[0].conclusion'"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Fix CI Until Green\" loop.\n\nGoal: latest CI run on this branch passes\nMax iterations: 8\nBetween iterations run: gh run list --branch $(git branch --show-current) --limit 1 --json conclusion -q '.[0].conclusion'\nExit when: latest run conclusion is success\n\nStep 1: Find the latest failed CI run, read logs, reproduce locally, fix root cause, push, and verify.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "ci",
+    "github",
+    "fix"
+   ],
+   "copies": 518,
+   "views": 2080
+  },
+  {
+   "number": "26",
+   "slug": "format-until-clean",
+   "title": "Format Until Clean",
+   "titleJa": "差分が消えるまで整形",
+   "url": "https://loops.elorm.xyz/loops/format-until-clean",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run the formatter, fix any remaining style issues, and loop until the codebase formats cleanly with no diffs.",
+   "descriptionJa": "フォーマッタを実行し、残るスタイル問題を直し、差分なしで整形が完了するまでループする。",
+   "exitCondition": "Formatter produces no remaining diff",
+   "exitConditionJa": "フォーマッタが差分を生成しなくなる",
+   "checkCommand": "npm run format && git diff --quiet",
+   "maxIterations": 5,
+   "steps": [
+    {
+     "name": "Run formatter",
+     "nameJa": "フォーマッタを実行",
+     "prompt": "Run the project formatter (prettier, biome, etc.).",
+     "promptJa": "プロジェクトのフォーマッタ（prettier・biome等）を実行する。",
+     "shellCheck": "npm run format"
+    },
+    {
+     "name": "Check diff",
+     "nameJa": "差分を確認",
+     "prompt": "If formatting changed files, review diff for unintended edits. Fix manual style issues formatter missed.",
+     "promptJa": "整形でファイルが変わったら、意図しない編集がないか差分を確認する。フォーマッタが直せないスタイルは手で直す。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Confirm clean",
+     "nameJa": "クリーンを確認",
+     "prompt": "Re-run formatter and confirm working tree is stable.",
+     "promptJa": "フォーマッタを再実行し、作業ツリーが安定していることを確認する。",
+     "shellCheck": "npm run format && git diff --quiet"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Format Until Clean\" loop.\n\nGoal: formatter runs cleanly with no remaining diff\nMax iterations: 5\nBetween iterations run: npm run format\nExit when: format command succeeds and git diff is empty\n\nStep 1: Run the formatter. Fix any issues it cannot auto-fix, then repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "format",
+    "prettier",
+    "quality"
+   ],
+   "copies": 472,
+   "views": 1730
+  },
+  {
+   "number": "27",
+   "slug": "investigation-script-loop",
+   "title": "Investigation Script Loop",
+   "titleJa": "調査スクリプト・ループ",
+   "url": "https://loops.elorm.xyz/loops/investigation-script-loop",
+   "category": {
+    "slug": "debugging",
+    "label": "Debugging",
+    "labelJa": "デバッグ"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Write a small throwaway script to reproduce a bug, run it, read output, and iterate until the root cause is proven.",
+   "descriptionJa": "バグを再現する小さな使い捨てスクリプトを書き、実行し、出力を読み、根本原因が証明されるまで反復する。",
+   "exitCondition": "Root cause demonstrated by script output with a written summary",
+   "exitConditionJa": "スクリプトの出力で根本原因が示され、要約が書かれている",
+   "checkCommand": "",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Write probe script",
+     "nameJa": "調査スクリプトを書く",
+     "prompt": "Create a ~20-line script that reproduces the bug or queries the failing state. One file only.",
+     "promptJa": "バグを再現するか失敗状態を問い合わせる、20行程度のスクリプトを1ファイルで作る。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Run and read",
+     "nameJa": "実行して読む",
+     "prompt": "Execute the script and capture stdout/stderr. No guessing — read actual output.",
+     "promptJa": "スクリプトを実行し、標準出力・標準エラーを取得する。推測せず、実際の出力を読む。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Adjust hypothesis",
+     "nameJa": "仮説を更新",
+     "prompt": "Update the script or notes based on output. Stop when root cause is demonstrated.",
+     "promptJa": "出力に基づきスクリプトやメモを更新する。根本原因が示されたら停止する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Investigation Script Loop\" loop.\n\nGoal: prove the root cause with a minimal repro script\nMax iterations: 8\nBetween iterations run: node scripts/investigate.mjs\nExit when: script output demonstrates root cause\n\nStep 1: Write a tiny throwaway script that reproduces the issue. Run it and iterate on what the output shows.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "debugging",
+    "repro",
+    "scripts"
+   ],
+   "copies": 715,
+   "views": 1601
+  },
+  {
+   "number": "28",
+   "slug": "knip-until-clean",
+   "title": "Knip Until Clean",
+   "titleJa": "Knipがクリーンになるまで",
+   "url": "https://loops.elorm.xyz/loops/knip-until-clean",
+   "category": {
+    "slug": "maintenance",
+    "label": "Maintenance",
+    "labelJa": "保守"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Find and remove dead exports, unused files, and orphan dependencies — loop until knip reports clean.",
+   "descriptionJa": "使われていないexport・ファイル・孤立した依存を見つけて削除し、knip がクリーンを報告するまでループする。",
+   "exitCondition": "Knip reports no unused files, exports, or dependencies",
+   "exitConditionJa": "knip が未使用のファイル・export・依存を報告しない",
+   "checkCommand": "npx knip",
+   "maxIterations": 5,
+   "steps": [
+    {
+     "name": "Run knip",
+     "nameJa": "knipを実行",
+     "prompt": "Run knip (or depcheck) and categorize unused files, exports, and dependencies.",
+     "promptJa": "knip（または depcheck）を実行し、未使用のファイル・export・依存を分類する。",
+     "shellCheck": "npx knip"
+    },
+    {
+     "name": "Remove or justify",
+     "nameJa": "削除または正当化",
+     "prompt": "Delete confirmed dead code. For false positives, add knip ignore entries with a one-line reason.",
+     "promptJa": "確認済みの不要コードを削除する。誤検知には理由を1行添えて knip の無視設定を追加する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Knip Until Clean\" loop.\n\nGoal: knip reports no unused code or dependencies\nMax iterations: 5\nBetween iterations run: npx knip\nExit when: knip exits 0\n\nStep 1: Run knip. Remove dead exports and unused deps with minimal diffs; verify tests still pass.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "maintenance",
+    "dead-code",
+    "deps"
+   ],
+   "copies": 873,
+   "views": 1497
+  },
+  {
+   "number": "29",
+   "slug": "lint-typecheck-fix",
+   "title": "Lint and Typecheck Fix",
+   "titleJa": "lintと型チェックの修正",
+   "url": "https://loops.elorm.xyz/loops/lint-typecheck-fix",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run lint and typecheck, fix reported issues, and loop until the codebase is clean.",
+   "descriptionJa": "lintと型チェックを実行し、報告された問題を修正し、コードベースがクリーンになるまでループする。",
+   "exitCondition": "Lint and typecheck pass with no errors",
+   "exitConditionJa": "lintと型チェックがエラーなしで通過",
+   "checkCommand": "npm run lint && npx tsc --noEmit",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Run lint and typecheck",
+     "nameJa": "lintと型チェックを実行",
+     "prompt": "Run lint and TypeScript checks.",
+     "promptJa": "lintとTypeScriptのチェックを実行する。",
+     "shellCheck": "npm run lint && npx tsc --noEmit"
+    },
+    {
+     "name": "Fix issues",
+     "nameJa": "問題を修正",
+     "prompt": "Fix lint and type errors with minimal changes. Do not disable rules unless necessary.",
+     "promptJa": "lintと型のエラーを最小限の変更で修正する。必要でない限りルールを無効化しない。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [
+    "Do not modify the check command or exit criteria to force success",
+    "Do not skip, disable, or bypass checks to pass the exit condition",
+    "If stuck after several iterations, stop and report blockers instead of gaming metrics"
+   ],
+   "guardrailsJa": [
+    "成功を強いるためにチェックコマンドや終了基準を変更しない",
+    "終了条件を通すためにチェックをスキップ・無効化・回避しない",
+    "数回反復して行き詰まったら、指標をごまかさず停止してブロッカーを報告する"
+   ],
+   "kickoffPrompt": "Start the \"Lint and Typecheck Fix\" loop.\n\nGoal: lint and typecheck are clean\nMax iterations: 8\nBetween iterations run: npm run lint && npx tsc --noEmit\nExit when: both commands exit 0\n\nStep 1: Run lint and typecheck. Fix reported issues with minimal diffs, then repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "lint",
+    "typescript",
+    "quality"
+   ],
+   "copies": 552,
+   "views": 1760
+  },
+  {
+   "number": "30",
+   "slug": "merge-conflict-resolver",
+   "title": "Merge Conflict Resolver",
+   "titleJa": "マージ競合の解消",
+   "url": "https://loops.elorm.xyz/loops/merge-conflict-resolver",
+   "category": {
+    "slug": "git",
+    "label": "Git",
+    "labelJa": "Git"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Rebase or merge target branch, resolve conflicts file by file, and loop until the branch is current and tests pass.",
+   "descriptionJa": "対象ブランチをリベースまたはマージし、ファイル単位で競合を解消し、ブランチが最新でテストが通るまでループする。",
+   "exitCondition": "Rebase complete with no conflicts and tests passing",
+   "exitConditionJa": "リベースが競合なく完了し、テストが通過",
+   "checkCommand": "git rebase --continue 2>/dev/null; npm test",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Update branch",
+     "nameJa": "ブランチを更新",
+     "prompt": "Fetch latest main and attempt rebase or merge.",
+     "promptJa": "最新のmainをfetchし、リベースまたはマージを試みる。",
+     "shellCheck": "git fetch origin && git rebase origin/main"
+    },
+    {
+     "name": "Resolve conflicts",
+     "nameJa": "競合を解消",
+     "prompt": "For each conflict, read both sides, preserve intent, and resolve with minimal changes.",
+     "promptJa": "競合ごとに双方を読み、意図を保ちながら最小限の変更で解消する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify",
+     "nameJa": "検証",
+     "prompt": "Run tests after each resolution batch.",
+     "promptJa": "解消のバッチごとにテストを実行する。",
+     "shellCheck": "npm test"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Merge Conflict Resolver\" loop.\n\nGoal: branch is rebased on main with no conflicts and tests pass\nMax iterations: 8\nBetween iterations run: npm test\nExit when: rebase completes and tests exit 0\n\nStep 1: Rebase on main. Resolve conflicts one file at a time, run tests, continue.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "git",
+    "rebase",
+    "merge"
+   ],
+   "copies": 403,
+   "views": 1597
+  },
+  {
+   "number": "31",
+   "slug": "migration-until-applied",
+   "title": "Migration Until Applied",
+   "titleJa": "マイグレーションが適用されるまで",
+   "url": "https://loops.elorm.xyz/loops/migration-until-applied",
+   "category": {
+    "slug": "database",
+    "label": "Database",
+    "labelJa": "DB"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run database migrations, fix schema issues, and loop until migrations apply cleanly in dev.",
+   "descriptionJa": "DBマイグレーションを実行し、スキーマの問題を修正し、開発環境でクリーンに適用されるまでループする。",
+   "exitCondition": "All migrations applied with clean status",
+   "exitConditionJa": "全マイグレーションが適用され、状態がクリーン",
+   "checkCommand": "npx prisma migrate status",
+   "maxIterations": 6,
+   "steps": [
+    {
+     "name": "Run migrations",
+     "nameJa": "マイグレーションを実行",
+     "prompt": "Apply pending migrations with the project's migration command.",
+     "promptJa": "プロジェクトのマイグレーションコマンドで保留分を適用する。",
+     "shellCheck": "npx prisma migrate dev"
+    },
+    {
+     "name": "Fix schema errors",
+     "nameJa": "スキーマエラーを修正",
+     "prompt": "If migration fails, fix schema or SQL, regenerate client if needed, and retry.",
+     "promptJa": "失敗したらスキーマかSQLを修正し、必要ならクライアントを再生成して再試行する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify",
+     "nameJa": "検証",
+     "prompt": "Confirm migration history is consistent and app still starts.",
+     "promptJa": "マイグレーション履歴に矛盾がなく、アプリが起動することを確認する。",
+     "shellCheck": "npx prisma migrate status"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Migration Until Applied\" loop.\n\nGoal: all database migrations apply cleanly\nMax iterations: 6\nBetween iterations run: npx prisma migrate status\nExit when: migrate status shows no pending failures\n\nStep 1: Run migrations. Fix schema or SQL errors, then repeat until status is clean.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "database",
+    "prisma",
+    "migrations"
+   ],
+   "copies": 516,
+   "views": 1692
+  },
+  {
+   "number": "32",
+   "slug": "openapi-sync-until-valid",
+   "title": "OpenAPI Sync Until Valid",
+   "titleJa": "OpenAPIが妥当になるまで同期",
+   "url": "https://loops.elorm.xyz/loops/openapi-sync-until-valid",
+   "category": {
+    "slug": "api",
+    "label": "API",
+    "labelJa": "API"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Keep openapi.yaml valid and in sync with route handlers — lint the spec and fix drift each pass.",
+   "descriptionJa": "openapi.yaml を妥当かつルートハンドラと同期した状態に保つ。パスごとに仕様をlintして乖離を直す。",
+   "exitCondition": "OpenAPI spec lints with zero errors",
+   "exitConditionJa": "OpenAPI仕様のlintがエラーゼロ",
+   "checkCommand": "npx @redocly/cli lint openapi.yaml",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Lint OpenAPI",
+     "nameJa": "OpenAPIをlint",
+     "prompt": "Validate openapi.yaml with spectral or swagger-cli. List every error with line numbers.",
+     "promptJa": "spectral や swagger-cli で openapi.yaml を検証し、全エラーを行番号付きで列挙する。",
+     "shellCheck": "npx @redocly/cli lint openapi.yaml"
+    },
+    {
+     "name": "Sync handlers",
+     "nameJa": "ハンドラと同期",
+     "prompt": "Update route handlers or the spec so documented paths, schemas, and status codes match reality.",
+     "promptJa": "文書化されたパス・スキーマ・ステータスコードが実態と一致するよう、ハンドラか仕様を更新する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"OpenAPI Sync Until Valid\" loop.\n\nGoal: openapi.yaml lints clean and matches implemented routes\nMax iterations: 8\nBetween iterations run: npx @redocly/cli lint openapi.yaml\nExit when: OpenAPI lint exits 0\n\nStep 1: Lint openapi.yaml. Fix spec errors and handler drift until lint passes.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "api",
+    "openapi",
+    "docs"
+   ],
+   "copies": 644,
+   "views": 1724
+  },
+  {
+   "number": "33",
+   "slug": "pr-babysitter",
+   "title": "PR Babysitter",
+   "titleJa": "PRお守り係",
+   "url": "https://loops.elorm.xyz/loops/pr-babysitter",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "loops!",
+   "trigger": "interval",
+   "triggerType": "interval",
+   "description": "Every 15 minutes, inspect open PRs with a watch label: nudge reviewers, fix CI, rebase if behind main.",
+   "descriptionJa": "15分ごとに watch ラベルの付いたオープンPRを点検し、レビュアーを促し、CIを直し、mainより遅れていればリベースする。",
+   "exitCondition": "All watched PRs are green, rebased, or escalated with a clear blocker note",
+   "exitConditionJa": "監視対象の全PRがグリーン・リベース済み・明確なブロッカー付きでエスカレーション、のいずれか",
+   "checkCommand": "",
+   "maxIterations": 20,
+   "steps": [
+    {
+     "name": "List watched PRs",
+     "nameJa": "監視対象PRを列挙",
+     "prompt": "List open PRs with the watch label. Skip merged, draft, or conflict-only PRs that need human product input.",
+     "promptJa": "watch ラベルの付いたオープンPRを列挙する。マージ済み・ドラフト・製品判断が必要な競合のみのPRは除外する。",
+     "shellCheck": "gh pr list --label \"codex-watch\" --json number,title,mergeable,statusCheckRollup"
+    },
+    {
+     "name": "Triage each PR",
+     "nameJa": "各PRをトリアージ",
+     "prompt": "For each PR: if CI failed, fix once; if behind main, rebase; if stale review, leave a short status comment.",
+     "promptJa": "PRごとに、CI失敗なら一度修正し、mainより遅れていればリベースし、レビューが滞っていれば短い状況コメントを残す。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Escalate blockers",
+     "nameJa": "ブロッカーをエスカレーション",
+     "prompt": "Stop on merge conflicts needing product decisions or the same failure twice. Report blockers clearly.",
+     "promptJa": "製品判断が必要なマージ競合や、同じ失敗が2回続いたら停止する。ブロッカーを明確に報告する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "/loop 15m Start the \"PR Babysitter\" loop.\n\nGoal: open PRs labeled codex-watch are healthy (CI green, rebased, not stale).\nMax iterations: 20.\nBetween iterations run: gh pr list --label \"codex-watch\"\nExit when: each watched PR is green and current, or escalated.\n\nStep 1: List watched PRs. Fix CI once, rebase if behind, comment if stale. Escalate repeated failures.",
+   "keywords": [
+    "pr",
+    "github",
+    "ci",
+    "boris-cherny"
+   ],
+   "copies": 575,
+   "views": 1266
+  },
+  {
+   "number": "34",
+   "slug": "pr-self-review",
+   "title": "PR Self-Review",
+   "titleJa": "PRセルフレビュー",
+   "url": "https://loops.elorm.xyz/loops/pr-self-review",
+   "category": {
+    "slug": "review",
+    "label": "Review",
+    "labelJa": "レビュー"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Review your own diff like a senior reviewer, fix issues, and repeat for three passes before opening the PR.",
+   "descriptionJa": "自分の差分をシニアレビュアーのように読み、問題を修正し、PRを開く前に3周繰り返す。",
+   "exitCondition": "Three review passes completed with no critical findings",
+   "exitConditionJa": "重大な指摘なしでレビューを3周完了",
+   "checkCommand": "",
+   "maxIterations": 3,
+   "steps": [
+    {
+     "name": "Review diff",
+     "nameJa": "差分をレビュー",
+     "prompt": "Review the current branch diff. List bugs, edge cases, naming issues, and missing tests.",
+     "promptJa": "現在のブランチの差分をレビューし、バグ・エッジケース・命名の問題・不足するテストを列挙する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Address findings",
+     "nameJa": "指摘に対応",
+     "prompt": "Fix the highest-severity findings from the review with minimal scope.",
+     "promptJa": "レビューで最も重大度の高い指摘を、最小のスコープで修正する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Re-review",
+     "nameJa": "再レビュー",
+     "prompt": "Review the updated diff and confirm prior findings are resolved.",
+     "promptJa": "更新後の差分をレビューし、以前の指摘が解消したことを確認する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [
+    "Do not modify the check command or exit criteria to force success",
+    "Do not skip, disable, or bypass checks to pass the exit condition",
+    "If stuck after several iterations, stop and report blockers instead of gaming metrics"
+   ],
+   "guardrailsJa": [
+    "成功を強いるためにチェックコマンドや終了基準を変更しない",
+    "終了条件を通すためにチェックをスキップ・無効化・回避しない",
+    "数回反復して行き詰まったら、指標をごまかさず停止してブロッカーを報告する"
+   ],
+   "kickoffPrompt": "Start the \"PR Self-Review\" loop.\n\nGoal: three clean self-review passes on the current diff\nMax iterations: 3\nBetween iterations run: git diff main...HEAD\nExit when: three passes complete with no critical findings\n\nStep 1: Review the diff like a senior reviewer. Fix findings, then re-review.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "review",
+    "pr",
+    "quality"
+   ],
+   "copies": 982,
+   "views": 2197
+  },
+  {
+   "number": "35",
+   "slug": "pr-watch-loop",
+   "title": "PR Watch Loop",
+   "titleJa": "PR監視ループ",
+   "url": "https://loops.elorm.xyz/loops/pr-watch-loop",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "loops!",
+   "trigger": "interval",
+   "triggerType": "interval",
+   "description": "Poll open PRs labeled codex-watch every 15 minutes, review activity, and flag regressions or stale threads.",
+   "descriptionJa": "codex-watch ラベルの付いたオープンPRを15分ごとにポーリングし、活動を確認し、リグレッションや滞ったスレッドにフラグを立てる。",
+   "exitCondition": "Watch report delivered for all codex-watch PRs",
+   "exitConditionJa": "codex-watch の全PRについて監視レポートが提出される",
+   "checkCommand": "",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "List watched PRs",
+     "nameJa": "監視対象PRを列挙",
+     "prompt": "List open PRs with the codex-watch label. Summarize CI status, review state, and last activity.",
+     "promptJa": "codex-watch ラベルの付いたオープンPRを列挙し、CI状態・レビュー状況・最終活動を要約する。",
+     "shellCheck": "gh pr list --label codex-watch --json number,title,state,statusCheckRollup"
+    },
+    {
+     "name": "Check CI and reviews",
+     "nameJa": "CIとレビューを確認",
+     "prompt": "For each watched PR, check failing checks, unresolved review comments, and merge conflicts.",
+     "promptJa": "各PRについて、失敗チェック・未解決のレビューコメント・マージ競合を確認する。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Report or act",
+     "nameJa": "報告または対応",
+     "prompt": "Post a brief status update. Fix trivial CI failures or ping the author for blockers.",
+     "promptJa": "簡潔な状況を投稿する。些細なCI失敗は修正し、ブロッカーは作者に連絡する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "/loop 15m Start the \"PR Watch Loop\".\n\nGoal: keep codex-watch PRs healthy and unblocked.\nBetween iterations run: gh pr list --label codex-watch --json number,title,state,statusCheckRollup\nExit when: status report is delivered for every watched PR.\n\nStep 1: List codex-watch PRs, check CI and reviews, and report or fix trivial blockers.",
+   "keywords": [
+    "ci",
+    "pr",
+    "watch",
+    "codex"
+   ],
+   "copies": 724,
+   "views": 1682
+  },
+  {
+   "number": "36",
+   "slug": "reflexion-debug-loop",
+   "title": "Reflexion Debug Loop",
+   "titleJa": "リフレクション・デバッグループ",
+   "url": "https://loops.elorm.xyz/loops/reflexion-debug-loop",
+   "category": {
+    "slug": "debugging",
+    "label": "Debugging",
+    "labelJa": "デバッグ"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "On each failed repro attempt, write a short reflection to disk, then retry with that memory — avoids repeating the same wrong fix.",
+   "descriptionJa": "再現の試行が失敗するたびに短い振り返りをディスクに書き、その記憶を持って再挑戦する。同じ誤った修正の繰り返しを防ぐ。",
+   "exitCondition": "Previously failing test passes",
+   "exitConditionJa": "以前失敗していたテストが通過",
+   "checkCommand": "npm test -- --testNamePattern=<failing-test>",
+   "maxIterations": 8,
+   "steps": [
+    {
+     "name": "Reproduce bug",
+     "nameJa": "バグを再現",
+     "prompt": "Run the minimal repro steps or failing test. Capture exact error output.",
+     "promptJa": "最小の再現手順か失敗テストを実行し、正確なエラー出力を取得する。",
+     "shellCheck": "npm test -- --testNamePattern=<failing-test>"
+    },
+    {
+     "name": "Reflect on failure",
+     "nameJa": "失敗を振り返る",
+     "prompt": "Append to .loops/reflexion.md: what you tried, what failed, and one hypothesis to avoid next pass.",
+     "promptJa": ".loops/reflexion.md に追記する：何を試し、何が失敗し、次に避けるべき仮説は何か。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Apply targeted fix",
+     "nameJa": "狙いを定めた修正",
+     "prompt": "Read reflexion.md. Apply a different fix than prior attempts. Prefer root cause over symptoms.",
+     "promptJa": "reflexion.md を読み、過去の試行とは異なる修正を適用する。対症療法より根本原因を優先する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Reflexion Debug Loop\" loop.\n\nGoal: the failing test or repro passes\nMax iterations: 8\nBetween iterations run: npm test -- --testNamePattern=<failing-test>\nExit when: the repro test exits 0\n\nStep 1: Reproduce the bug. If it fails, append a reflection to .loops/reflexion.md before trying a new fix.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "debugging",
+    "reflexion",
+    "memory"
+   ],
+   "copies": 814,
+   "views": 1423
+  },
+  {
+   "number": "37",
+   "slug": "security-audit-weekly",
+   "title": "Security Audit Weekly",
+   "titleJa": "週次セキュリティ監査",
+   "url": "https://loops.elorm.xyz/loops/security-audit-weekly",
+   "category": {
+    "slug": "maintenance",
+    "label": "Maintenance",
+    "labelJa": "保守"
+   },
+   "author": "loops!",
+   "trigger": "interval",
+   "triggerType": "interval",
+   "description": "Weekly npm audit scan, triage vulnerabilities by severity, and propose or apply safe patches.",
+   "descriptionJa": "毎週 npm audit をスキャンし、重大度で脆弱性をトリアージし、安全なパッチを提案または適用する。",
+   "exitCondition": "Weekly security audit summary delivered with remediation plan",
+   "exitConditionJa": "週次のセキュリティ監査サマリが是正計画とともに提出される",
+   "checkCommand": "",
+   "maxIterations": null,
+   "steps": [
+    {
+     "name": "Run npm audit",
+     "nameJa": "npm auditを実行",
+     "prompt": "Run npm audit and capture critical, high, and moderate findings.",
+     "promptJa": "npm audit を実行し、critical・high・moderate の指摘を取得する。",
+     "shellCheck": "npm audit --json"
+    },
+    {
+     "name": "Triage findings",
+     "nameJa": "指摘をトリアージ",
+     "prompt": "Group vulnerabilities by severity and exploitability. Flag dev-only vs production exposure.",
+     "promptJa": "重大度と悪用可能性で脆弱性をグループ化する。開発専用か本番露出かにフラグを立てる。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Propose fixes",
+     "nameJa": "修正を提案",
+     "prompt": "Recommend npm audit fix, targeted overrides, or dependency bumps. Note breaking changes.",
+     "promptJa": "npm audit fix・的を絞った overrides・依存の更新を推奨する。破壊的変更を注記する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "/loop 7d Start the \"Security Audit Weekly\" loop.\n\nGoal: deliver a weekly npm audit summary with a remediation plan.\nBetween iterations run: npm audit --json\nExit when: summary is posted with prioritized fixes.\n\nStep 1: Run npm audit, triage by severity, and propose safe remediation steps.",
+   "keywords": [
+    "security",
+    "npm",
+    "audit",
+    "maintenance"
+   ],
+   "copies": 468,
+   "views": 1138
+  },
+  {
+   "number": "38",
+   "slug": "spec-first-ship",
+   "title": "Spec-First Ship",
+   "titleJa": "仕様ファースト出荷",
+   "url": "https://loops.elorm.xyz/loops/spec-first-ship",
+   "category": {
+    "slug": "planning",
+    "label": "Planning",
+    "labelJa": "計画"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Implement from a written spec.md checklist — each iteration completes one unchecked requirement with verification.",
+   "descriptionJa": "spec.md のチェックリストから実装する。各反復で未チェックの要件を1つ、検証付きで完了させる。",
+   "exitCondition": "Every requirement in spec.md is checked off",
+   "exitConditionJa": "spec.md の全要件がチェック済みになる",
+   "checkCommand": "",
+   "maxIterations": 15,
+   "steps": [
+    {
+     "name": "Read spec",
+     "nameJa": "仕様を読む",
+     "prompt": "Read spec.md. Pick the first unchecked requirement. Do not start multiple requirements in one pass.",
+     "promptJa": "spec.md を読み、最初の未チェック要件を選ぶ。1パスで複数の要件に着手しない。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Implement requirement",
+     "nameJa": "要件を実装",
+     "prompt": "Implement that single requirement with tests. Mark it [x] in spec.md only after verification.",
+     "promptJa": "その1要件をテスト付きで実装する。検証が済んでから spec.md で [x] にする。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Verify",
+     "nameJa": "検証",
+     "prompt": "Run tests and manual checks listed in the spec for this requirement.",
+     "promptJa": "その要件について仕様に記載されたテストと手動チェックを実行する。",
+     "shellCheck": "npm test"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Spec-First Ship\" loop.\n\nGoal: every requirement in spec.md is implemented and checked off\nMax iterations: 15\nBetween iterations run: npm test\nExit when: spec.md has no unchecked requirements\n\nStep 1: Read spec.md, implement the first unchecked item, verify it, mark [x], and stop this iteration.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "planning",
+    "spec",
+    "requirements"
+   ],
+   "copies": 520,
+   "views": 2313
+  },
+  {
+   "number": "39",
+   "slug": "staging-smoke-test",
+   "title": "Staging Smoke Test",
+   "titleJa": "ステージング・スモークテスト",
+   "url": "https://loops.elorm.xyz/loops/staging-smoke-test",
+   "category": {
+    "slug": "devops",
+    "label": "DevOps",
+    "labelJa": "DevOps"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run a fixed smoke checklist against staging after deploy: auth, core flows, and error budgets.",
+   "descriptionJa": "デプロイ後、ステージングに対して固定のスモークチェックリスト（認証・主要フロー・エラー予算）を実行する。",
+   "exitCondition": "Staging smoke checklist passes",
+   "exitConditionJa": "ステージングのスモークチェックリストが通過",
+   "checkCommand": "npm run smoke:staging",
+   "maxIterations": 6,
+   "steps": [
+    {
+     "name": "Run smoke checklist",
+     "nameJa": "スモークを実行",
+     "prompt": "Execute the staging smoke script or manual checklist (login, critical path, webhooks).",
+     "promptJa": "ステージングのスモークスクリプトまたは手動チェックリスト（ログイン・重要経路・Webhook）を実行する。",
+     "shellCheck": "npm run smoke:staging"
+    },
+    {
+     "name": "Fix failures",
+     "nameJa": "失敗を修正",
+     "prompt": "If smoke fails, trace logs, fix the smallest issue, and redeploy or hotfix as appropriate.",
+     "promptJa": "スモークが失敗したらログを追い、最小の問題を修正し、適宜再デプロイまたはホットフィックスする。",
+     "shellCheck": ""
+    },
+    {
+     "name": "Confirm green",
+     "nameJa": "グリーンを確認",
+     "prompt": "Re-run smoke until all checklist items pass.",
+     "promptJa": "全項目が通過するまでスモークを再実行する。",
+     "shellCheck": "npm run smoke:staging"
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Staging Smoke Test\" loop.\n\nGoal: staging smoke checklist passes\nMax iterations: 6\nBetween iterations run: npm run smoke:staging\nExit when: smoke command exits 0\n\nStep 1: Run the staging smoke checklist. Fix the first failing item, then repeat.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "staging",
+    "smoke-test",
+    "deploy"
+   ],
+   "copies": 637,
+   "views": 1448
+  },
+  {
+   "number": "40",
+   "slug": "visual-regression-until-match",
+   "title": "Visual Regression Until Match",
+   "titleJa": "ビジュアル差分が一致するまで",
+   "url": "https://loops.elorm.xyz/loops/visual-regression-until-match",
+   "category": {
+    "slug": "testing",
+    "label": "Testing",
+    "labelJa": "テスト"
+   },
+   "author": "loops!",
+   "trigger": "manual",
+   "triggerType": "manual",
+   "description": "Run Playwright or Percy visual snapshots on UI changes; fix unintended diffs until baselines match intentionally.",
+   "descriptionJa": "UI変更に対して Playwright や Percy のビジュアルスナップショットを実行し、意図しない差分を修正してベースラインに一致させる。",
+   "exitCondition": "Visual regression tests pass with approved baselines",
+   "exitConditionJa": "ビジュアルリグレッションテストが承認済みベースラインで通過",
+   "checkCommand": "npx playwright test --grep @visual",
+   "maxIterations": 6,
+   "steps": [
+    {
+     "name": "Run visual tests",
+     "nameJa": "ビジュアルテストを実行",
+     "prompt": "Run visual regression tests. List screenshots that differ from baseline with component names.",
+     "promptJa": "ビジュアルリグレッションテストを実行し、ベースラインと異なるスクリーンショットをコンポーネント名付きで列挙する。",
+     "shellCheck": "npx playwright test --grep @visual"
+    },
+    {
+     "name": "Fix or approve",
+     "nameJa": "修正または承認",
+     "prompt": "If diffs are bugs, fix CSS/markup. If intentional, update snapshots only after verifying in report.",
+     "promptJa": "差分がバグならCSS/マークアップを修正する。意図的な変更ならレポートで確認してからスナップショットを更新する。",
+     "shellCheck": ""
+    }
+   ],
+   "guardrails": [],
+   "guardrailsJa": [],
+   "kickoffPrompt": "Start the \"Visual Regression Until Match\" loop.\n\nGoal: visual regression suite passes with intentional UI only\nMax iterations: 6\nBetween iterations run: npx playwright test --grep @visual\nExit when: visual tests exit 0\n\nStep 1: Run visual tests. Fix unintended UI diffs; update baselines only for deliberate design changes.\n\nSelf-pace this loop. After each iteration, run the check command, read the output, and only continue if the exit condition is not met. Stop when the exit condition passes or max iterations is reached. Give a short status update each pass.",
+   "keywords": [
+    "testing",
+    "visual",
+    "playwright",
+    "ui"
+   ],
+   "copies": 381,
+   "views": 1359
   }
  ]
 }
