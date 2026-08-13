@@ -4,7 +4,7 @@ THIRD PARTY LICENSES - DI Loop Library
 This product includes the following third-party components:
 
 ----------------------------------------
-1. Loop Library (FF Loops, 70 loops + Japanese translations as derivative work)
+1. Loop Library (FF Loops, 85 loops + Japanese translations as derivative work)
    Source: https://github.com/Forward-Future/loop-library
    License: MIT
 ----------------------------------------
@@ -44,4 +44,23 @@ SOFTWARE.
 3. IBM Plex Sans JP / IBM Plex Mono (Google Fonts)
    License: SIL Open Font License 1.1
    Copyright IBM Corp.
+----------------------------------------
+
+----------------------------------------
+4. loops! (EL Loops, 13 loops + Japanese translations as derivative work)
+   Source: https://loops.elorm.xyz/
+----------------------------------------
+
+----------------------------------------
+5. Awesome Agent Loops (AW Loops, 18 loops + Japanese translations as derivative work)
+   Source: https://github.com/serenakeyitan/awesome-agent-loops
+   License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+   Attribution: serenakeyitan/awesome-agent-loops contributors
+   Note: Japanese translations by DI are a derivative work under CC BY 4.0.
+----------------------------------------
+
+----------------------------------------
+6. Agent Loop Hub (ALH Loops, 27 loops + Japanese translations as derivative work)
+   Source: https://agentloophub.com/
+   License: MIT
 ----------------------------------------

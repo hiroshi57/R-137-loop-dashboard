@@ -1,0 +1,1435 @@
+{
+ "schemaVersion": 1,
+ "name": "Agent Loop Hub",
+ "publisher": "agentloophub.com",
+ "license": "MIT",
+ "description": "agentloophub.com のループテンプレート集（7フィールド仕様・日本語訳付き）",
+ "url": "https://agentloophub.com/",
+ "loopCount": 27,
+ "categories": [
+  {
+   "slug": "design",
+   "label": "設計",
+   "labelJa": "設計"
+  },
+  {
+   "slug": "maintenance",
+   "label": "保守",
+   "labelJa": "保守"
+  },
+  {
+   "slug": "docs",
+   "label": "ドキュメント",
+   "labelJa": "ドキュメント"
+  },
+  {
+   "slug": "ci",
+   "label": "CI",
+   "labelJa": "CI"
+  },
+  {
+   "slug": "marketing",
+   "label": "マーケ",
+   "labelJa": "マーケ"
+  },
+  {
+   "slug": "ops",
+   "label": "運用",
+   "labelJa": "運用"
+  },
+  {
+   "slug": "testing",
+   "label": "テスト",
+   "labelJa": "テスト"
+  },
+  {
+   "slug": "data",
+   "label": "データ",
+   "labelJa": "データ"
+  },
+  {
+   "slug": "security",
+   "label": "セキュリティ",
+   "labelJa": "セキュリティ"
+  }
+ ],
+ "loops": [
+  {
+   "number": "01",
+   "slug": "agent-state-machine-loop",
+   "title": "Agent state-machine loop template",
+   "titleJa": "エージェント状態機械ループ",
+   "url": "https://agentloophub.com/loops/agent-state-machine-loop",
+   "category": {
+    "slug": "design",
+    "label": "設計",
+    "labelJa": "設計"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "event or cron",
+   "triggerJa": "イベント または cron",
+   "triggerType": "time",
+   "description": "An agent workflow runs through explicit states instead of an unbounded while loop.",
+   "descriptionJa": "エージェントのワークフローが、無制限の while ループではなく明示的な状態を通って進む。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Load persisted state and observe the current system condition.",
+     "ja": "永続化された状態を読み込み、現在のシステム状況を観測する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Transition through observe, plan, act, verify, persist, and terminal states using explicit guards.",
+     "ja": "観測→計画→実行→検証→永続化→終端状態を、明示的なガード条件で遷移する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Every transition has a guard, every terminal state is reachable, and invalid state fails closed.",
+     "ja": "全ての遷移にガードがあり、全ての終端状態が到達可能で、不正な状態は安全側に倒れて失敗する。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/state.json stores state, transition history, last verifier result, and retry count.",
+     "ja": ".loop/state.json に状態・遷移履歴・最後の検証結果・リトライ回数を保存する。"
+    }
+   ],
+   "exitCondition": "Terminal success, terminal failure, max retries, or human approval state.",
+   "exitConditionJa": "終端の成功、終端の失敗、最大リトライ到達、または人間の承認待ち状態。",
+   "keywords": []
+  },
+  {
+   "number": "02",
+   "slug": "broken-link-repair-loop",
+   "title": "Broken-link repair loop template",
+   "titleJa": "リンク切れ修復ループ",
+   "url": "https://agentloophub.com/loops/broken-link-repair-loop",
+   "category": {
+    "slug": "maintenance",
+    "label": "保守",
+    "labelJa": "保守"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 2 * * 0",
+   "triggerJa": "0 2 * * 0（毎週日曜2時）",
+   "triggerType": "time",
+   "description": "Internal and important external links return valid destinations.",
+   "descriptionJa": "内部リンクと重要な外部リンクが有効な遷移先を返す。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Crawl sitemap URLs and collect 4xx, 5xx, redirect chains, and missing anchors.",
+     "ja": "サイトマップのURLをクロールし、4xx・5xx・リダイレクト連鎖・欠落アンカーを収集する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Repair internal links, replace dead external citations, or add redirects when policy allows.",
+     "ja": "内部リンクを修復し、死んだ外部引用を差し替え、ポリシーが許せばリダイレクトを追加する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "The link checker returns zero internal broken links and no priority external dead links.",
+     "ja": "リンクチェッカーが内部リンク切れゼロ、優先度の高い外部リンク切れゼロを返す。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/link-check.jsonl stores source URL, broken target, fix, and verifier output.",
+     "ja": ".loop/link-check.jsonl に、参照元URL・切れた遷移先・修正内容・検証結果を保存する。"
+    }
+   ],
+   "exitCondition": "All priority broken links fixed, redirect decision needed, or external replacement is ambiguous.",
+   "exitConditionJa": "優先リンクをすべて修復、リダイレクト方針の判断が必要、または外部の差し替え先が曖昧。",
+   "keywords": []
+  },
+  {
+   "number": "03",
+   "slug": "changelog-drafting-loop",
+   "title": "Changelog drafting loop template",
+   "titleJa": "変更履歴ドラフトループ",
+   "url": "https://agentloophub.com/loops/changelog-drafting-loop",
+   "category": {
+    "slug": "docs",
+    "label": "ドキュメント",
+    "labelJa": "ドキュメント"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 16 * * 5",
+   "triggerJa": "0 16 * * 5（毎週金曜16時）",
+   "triggerType": "time",
+   "description": "CHANGELOG.md stays current with merged user-visible changes.",
+   "descriptionJa": "CHANGELOG.md が、マージ済みのユーザー可視な変更に追従している。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read merged PRs from the week that are not represented in CHANGELOG.md.",
+     "ja": "その週にマージされ、CHANGELOG.md に未反映のPRを読む。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Append concise bullets under Unreleased using existing changelog style.",
+     "ja": "既存の記法に合わせ、Unreleased の下に簡潔な箇条書きを追記する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "No duplicate bullets, links resolve, and all bullets map to merged PRs.",
+     "ja": "重複した項目がなく、リンクが解決し、全項目がマージ済みPRに対応している。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/changelog.jsonl records PRs already considered.",
+     "ja": ".loop/changelog.jsonl に、検討済みのPRを記録する。"
+    }
+   ],
+   "exitCondition": "No eligible PRs remain, or changelog format is ambiguous.",
+   "exitConditionJa": "対象PRが残っていない、または変更履歴の書式が曖昧。",
+   "keywords": []
+  },
+  {
+   "number": "04",
+   "slug": "ci-failure-fixer-loop",
+   "title": "CI failure fixer loop template",
+   "titleJa": "CI失敗フィクサーループ",
+   "url": "https://agentloophub.com/loops/ci-failure-fixer-loop",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "on workflow_run failure",
+   "triggerJa": "workflow_run の失敗時",
+   "triggerType": "proactive",
+   "description": "The default branch returns to green CI after a failed run.",
+   "descriptionJa": "失敗した実行の後、デフォルトブランチがグリーンなCIに戻る。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read the latest failed GitHub Actions run, jobs, logs, and touched files.",
+     "ja": "直近の失敗した GitHub Actions の実行・ジョブ・ログ・変更ファイルを読む。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Reproduce the failing command locally, fix the smallest scoped cause, and open a PR.",
+     "ja": "失敗したコマンドをローカルで再現し、最小スコープの原因を修正し、PRを開く。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "The failed command passes locally and the same workflow passes on the PR.",
+     "ja": "失敗したコマンドがローカルで通り、同じワークフローがPR上で通過する。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/ci-fixes.jsonl records workflow, failing job, root cause, PR, and result.",
+     "ja": ".loop/ci-fixes.jsonl に、ワークフロー・失敗ジョブ・根本原因・PR・結果を記録する。"
+    }
+   ],
+   "exitCondition": "CI is green, failure is infra-only, or two attempted fixes fail and escalate.",
+   "exitConditionJa": "CIがグリーン、失敗がインフラ起因のみ、または2回修正を試みて失敗しエスカレーション。",
+   "keywords": []
+  },
+  {
+   "number": "05",
+   "slug": "codex-loop-plugin-audit-loop",
+   "title": "Codex loop plugin audit loop template",
+   "titleJa": "Codexループ導入監査",
+   "url": "https://agentloophub.com/loops/codex-loop-plugin-audit-loop",
+   "category": {
+    "slug": "design",
+    "label": "設計",
+    "labelJa": "設計"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "manual before enabling automation",
+   "triggerJa": "自動化を有効にする前に手動実行",
+   "triggerType": "goal",
+   "description": "A repository has a reviewed loop automation proposal before recurring Codex work runs.",
+   "descriptionJa": "定常的なCodex作業を走らせる前に、レビュー済みのループ自動化案がリポジトリに存在する。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Inspect repo scripts, tests, CI, docs, and existing automation files such as .loop/loop.yaml.",
+     "ja": "リポジトリのスクリプト・テスト・CI・ドキュメント・既存の .loop/loop.yaml 等を点検する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Draft or update a loop spec that defines trigger, tool permissions, verifier, state, and exit policy.",
+     "ja": "トリガー・ツール権限・検証者・状態・終了ポリシーを定義したループ仕様を起草／更新する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "The proposed loop references real commands and includes a non-human verifier plus stop condition.",
+     "ja": "提案ループが実在のコマンドを参照し、人間以外の検証者と停止条件を含んでいる。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/audit.md stores the proposed loop, risks, required approvals, and owner.",
+     "ja": ".loop/audit.md に、提案ループ・リスク・必要な承認・オーナーを保存する。"
+    }
+   ],
+   "exitCondition": "Audit file is complete, no safe verifier exists, or repository owner rejects automation.",
+   "exitConditionJa": "監査ファイルが完成、安全な検証者が存在しない、またはリポジトリ所有者が自動化を却下。",
+   "keywords": []
+  },
+  {
+   "number": "06",
+   "slug": "content-performance-feedback-loop",
+   "title": "Content performance feedback loop template",
+   "titleJa": "コンテンツ成果フィードバックループ",
+   "url": "https://agentloophub.com/loops/content-performance-feedback-loop",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 6 * * 1",
+   "triggerJa": "0 6 * * 1（毎週月曜6時）",
+   "triggerType": "time",
+   "description": "Published content gets a measured next action based on performance data.",
+   "descriptionJa": "公開済みコンテンツが、実績データに基づいた次アクションを得る。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Pull page analytics, GSC queries, conversions, and last update date.",
+     "ja": "ページ解析・Search Consoleのクエリ・コンバージョン・最終更新日を取得する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Classify each page as keep, refresh, consolidate, add internal links, or escalate.",
+     "ja": "各ページを、維持・リライト・統合・内部リンク追加・エスカレーションのいずれかに分類する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Every action has metric evidence and does not conflict with protected ranking keywords.",
+     "ja": "全アクションに指標の裏付けがあり、保護対象の上位キーワードと矛盾しない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/content-feedback.jsonl records URL, metrics, classification, action, and follow-up date.",
+     "ja": ".loop/content-feedback.jsonl に、URL・指標・分類・アクション・再確認日を記録する。"
+    }
+   ],
+   "exitCondition": "Top actions queued, data is insufficient, or a title/meta/backlink decision is needed.",
+   "exitConditionJa": "上位アクションをキュー投入、データ不足、またはタイトル/メタ/被リンクの判断が必要。",
+   "keywords": []
+  },
+  {
+   "number": "07",
+   "slug": "content-refresh-loop",
+   "title": "Content refresh loop template",
+   "titleJa": "コンテンツ更新ループ",
+   "url": "https://agentloophub.com/loops/content-refresh-loop",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 3 * * *",
+   "triggerJa": "0 3 * * *（毎日3時）",
+   "triggerType": "time",
+   "description": "Pages that lost rank in Search Console are rewritten and re-indexed.",
+   "descriptionJa": "Search Console で順位を落としたページが書き直され、再インデックスされる。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Pull GSC pages whose average position dropped more than 3 in 14 days.",
+     "ja": "14日で平均掲載順位が3以上下落したページをGSCから取得する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Rewrite the page: refresh facts, tighten intro, add missing entities; open a PR.",
+     "ja": "ページを書き直す：事実を更新し、導入を引き締め、欠けている要素を追加してPRを開く。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Meta intact, internal links intact, diff over 25%, build passes.",
+     "ja": "メタ情報と内部リンクが維持され、差分25%超、ビルドが通過する。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "state.md tracks page, last refresh date, position history.",
+     "ja": "state.md に、ページ・最終更新日・順位推移を記録する。"
+    }
+   ],
+   "exitCondition": "Queue empty, or a page refreshed twice without rank recovery (escalate to human).",
+   "exitConditionJa": "キューが空、または2回更新しても順位が回復しない（人間へエスカレーション）。",
+   "keywords": []
+  },
+  {
+   "number": "08",
+   "slug": "dependency-upgrade-loop",
+   "title": "Dependency upgrade loop template",
+   "titleJa": "依存関係アップグレードループ",
+   "url": "https://agentloophub.com/loops/dependency-upgrade-loop",
+   "category": {
+    "slug": "maintenance",
+    "label": "保守",
+    "labelJa": "保守"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 4 * * 6",
+   "triggerJa": "0 4 * * 6（毎週土曜4時）",
+   "triggerType": "time",
+   "description": "All dependencies are within one minor version of latest, with green CI.",
+   "descriptionJa": "全依存が最新から1マイナーバージョン以内に収まり、CIがグリーンである。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "npm outdated / pip list --outdated; pick the single oldest package.",
+     "ja": "npm outdated / pip list --outdated を実行し、最も古いパッケージを1つ選ぶ。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Bump it, run tests, fix breakage within the diff budget.",
+     "ja": "それを更新し、テストを実行し、差分予算の範囲で破損を修正する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "CI passes and lockfile diff touches only the bumped package tree.",
+     "ja": "CIが通り、ロックファイルの差分が更新したパッケージ系統のみに触れている。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "upgrade-log.md records package, from-to, breakage notes.",
+     "ja": "upgrade-log.md に、パッケージ・変更前後・破損メモを記録する。"
+    }
+   ],
+   "exitCondition": "One package per cycle; loop exits when nothing is outdated.",
+   "exitConditionJa": "1サイクル1パッケージ。古い依存が無くなればループ終了。",
+   "keywords": []
+  },
+  {
+   "number": "09",
+   "slug": "desired-state-controller-loop",
+   "title": "Desired-state controller loop template",
+   "titleJa": "宣言的状態コントローラループ",
+   "url": "https://agentloophub.com/loops/desired-state-controller-loop",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "*/15 * * * *",
+   "triggerJa": "*/15 * * * *（15分毎）",
+   "triggerType": "time",
+   "description": "Observed system state converges toward a declared desired state without manual babysitting.",
+   "descriptionJa": "観測されたシステム状態が、手動の世話なしに宣言された望ましい状態へ収束する。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read desired spec and observed status from APIs, files, or dashboards.",
+     "ja": "望ましい仕様と、API・ファイル・ダッシュボードからの観測状態を読む。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Compute drift, apply the smallest allowed actuator action, and record the reconciliation.",
+     "ja": "差分を計算し、許可された最小のアクチュエータ操作を適用し、調整内容を記録する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Observed status moves closer to desired state and no forbidden field changed.",
+     "ja": "観測状態が望ましい状態に近づき、禁止フィールドが変更されていない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/controller.jsonl records spec hash, observed status, action, and verifier result.",
+     "ja": ".loop/controller.jsonl に、仕様ハッシュ・観測状態・操作・検証結果を記録する。"
+    }
+   ],
+   "exitCondition": "Observed matches desired, drift is forbidden, actuator fails twice, or human approval is needed.",
+   "exitConditionJa": "観測が望ましい状態に一致、差分が禁止対象、アクチュエータが2回失敗、または人間の承認が必要。",
+   "keywords": []
+  },
+  {
+   "number": "10",
+   "slug": "docs-refresh-loop",
+   "title": "Docs refresh loop template",
+   "titleJa": "ドキュメント更新ループ",
+   "url": "https://agentloophub.com/loops/docs-refresh-loop",
+   "category": {
+    "slug": "docs",
+    "label": "ドキュメント",
+    "labelJa": "ドキュメント"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "on merged PR with docs-impact label",
+   "triggerJa": "docs-impact ラベル付きPRのマージ時",
+   "triggerType": "proactive",
+   "description": "Docs pages touched by product changes are updated before users hit stale instructions.",
+   "descriptionJa": "製品変更の影響を受けたドキュメントが、ユーザーが古い手順に当たる前に更新される。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Find changed code paths, docs-impact labels, and related existing docs pages.",
+     "ja": "変更されたコード経路・docs-impactラベル・関連する既存ドキュメントを探す。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Update affected docs with current commands, screenshots notes, and migration caveats.",
+     "ja": "影響ドキュメントを、現行コマンド・スクリーンショットの注記・移行時の注意付きで更新する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Docs build passes, code snippets compile or lint, and changed pages link to the relevant feature.",
+     "ja": "ドキュメントのビルドが通り、コード片がコンパイル/lintを通り、更新ページが該当機能へリンクしている。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/docs-refresh.jsonl tracks PR, pages checked, updated pages, and verifier result.",
+     "ja": ".loop/docs-refresh.jsonl に、PR・確認したページ・更新ページ・検証結果を記録する。"
+    }
+   ],
+   "exitCondition": "Docs updated, no docs page applies, or product owner context is required.",
+   "exitConditionJa": "ドキュメント更新完了、該当ページ無し、またはプロダクトオーナーの文脈が必要。",
+   "keywords": []
+  },
+  {
+   "number": "11",
+   "slug": "flaky-test-quarantine-loop",
+   "title": "Flaky test quarantine loop template",
+   "titleJa": "フレーキーテスト隔離ループ",
+   "url": "https://agentloophub.com/loops/flaky-test-quarantine-loop",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 */4 * * *",
+   "triggerJa": "0 */4 * * *（4時間毎）",
+   "triggerType": "time",
+   "description": "Recurring flaky tests are identified with evidence and quarantined only under policy.",
+   "descriptionJa": "再発するフレーキーテストが証拠付きで特定され、ポリシーに則ってのみ隔離される。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Aggregate recent CI failures by test name, error signature, branch, and retry outcome.",
+     "ja": "直近のCI失敗を、テスト名・エラー特徴・ブランチ・リトライ結果で集計する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Open an issue with evidence or apply the project's quarantine marker if threshold is met.",
+     "ja": "証拠付きでIssueを作成するか、閾値を満たせばプロジェクトの隔離マーカーを適用する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "The failure recurs across at least three independent runs and passes on retry or alternate run.",
+     "ja": "失敗が3回以上の独立実行で再発し、リトライまたは別実行では成功する。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/flakes.jsonl stores test, signatures, run IDs, confidence, and action.",
+     "ja": ".loop/flakes.jsonl に、テスト・特徴・実行ID・確信度・アクションを保存する。"
+    }
+   ],
+   "exitCondition": "No test crosses threshold, issue opened, quarantine PR opened, or owner approval needed.",
+   "exitConditionJa": "閾値を超えるテストが無い、Issue作成済み、隔離PR作成済み、またはオーナー承認が必要。",
+   "keywords": []
+  },
+  {
+   "number": "12",
+   "slug": "issue-dedupe-loop",
+   "title": "Issue dedupe loop template",
+   "titleJa": "Issue重複排除ループ",
+   "url": "https://agentloophub.com/loops/issue-dedupe-loop",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "*/20 * * * *",
+   "triggerJa": "*/20 * * * *（20分毎）",
+   "triggerType": "time",
+   "description": "Duplicate issues are linked to canonical issues before maintainers spend review time.",
+   "descriptionJa": "重複Issueが、メンテナのレビュー時間を消費する前に正規Issueへ紐づけられる。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "List new issues and search recent open/closed issues by title, stack trace, labels, and keywords.",
+     "ja": "新規Issueを列挙し、タイトル・スタックトレース・ラベル・キーワードで既存Issueを検索する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Comment with likely canonical issue, apply duplicate-candidate label, and link evidence.",
+     "ja": "正規Issue候補をコメントし、duplicate-candidate ラベルを付け、根拠をリンクする。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Similarity score passes threshold and evidence includes at least two matching signals.",
+     "ja": "類似度スコアが閾値を超え、根拠に少なくとも2つの一致シグナルが含まれる。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/issue-dedupe.jsonl records issue, candidate, score, signals, and comment ID.",
+     "ja": ".loop/issue-dedupe.jsonl に、Issue・候補・スコア・シグナル・コメントIDを記録する。"
+    }
+   ],
+   "exitCondition": "Queue empty, duplicate candidate labeled, or confidence below threshold.",
+   "exitConditionJa": "キューが空、重複候補としてラベル付け完了、または確信度が閾値未満。",
+   "keywords": []
+  },
+  {
+   "number": "13",
+   "slug": "issue-triage-loop",
+   "title": "Issue triage loop template",
+   "titleJa": "Issueトリアージループ",
+   "url": "https://agentloophub.com/loops/issue-triage-loop",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "*/15 * * * *",
+   "triggerJa": "*/15 * * * *（15分毎）",
+   "triggerType": "time",
+   "description": "No issue sits unlabeled for more than 15 minutes during work hours.",
+   "descriptionJa": "就業時間中、ラベル未設定のIssueが15分を超えて放置されない。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "gh issue list with empty label filter, state open.",
+     "ja": "gh issue list でラベル空・オープン状態のIssueを取得する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Label by area and priority, dedupe against existing issues, post a one-line summary.",
+     "ja": "領域と優先度でラベル付けし、既存Issueと重複排除し、1行サマリを投稿する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Human spot-checks 1 in 20; mislabel rate must stay under 10%.",
+     "ja": "人間が20件に1件を抜き取り確認。誤ラベル率は10%未満を維持する。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "Triage decisions appended to .loop/triage.jsonl for calibration.",
+     "ja": "トリアージ判断を .loop/triage.jsonl に追記し、精度較正に使う。"
+    }
+   ],
+   "exitCondition": "Queue empty each cycle; loop itself runs indefinitely on cron.",
+   "exitConditionJa": "各サイクルでキューが空になる。ループ自体はcronで継続実行。",
+   "keywords": []
+  },
+  {
+   "number": "14",
+   "slug": "keyword-discovery-loop",
+   "title": "Keyword discovery loop template",
+   "titleJa": "キーワード発見ループ",
+   "url": "https://agentloophub.com/loops/keyword-discovery-loop",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 6 * * 1",
+   "triggerJa": "0 6 * * 1（毎週月曜6時）",
+   "triggerType": "time",
+   "description": "The content queue always holds at least 10 briefed keywords with search demand.",
+   "descriptionJa": "コンテンツのキューに、検索需要のあるブリーフ済みキーワードが常に10件以上ある。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Diff GSC impression queries against existing pages; crawl competitor sitemaps for gaps.",
+     "ja": "GSCの表示回数クエリと既存ページを突き合わせ、競合サイトマップから欠落を洗い出す。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Cluster gaps, score by impressions x absence, draft a one-paragraph brief each.",
+     "ja": "欠落をクラスタ化し、表示回数×不在度でスコア付けし、各々1段落のブリーフを起草する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Each brief has volume evidence and no duplicate against existing slugs.",
+     "ja": "各ブリーフに検索ボリュームの根拠があり、既存スラッグと重複しない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "Briefs appended to queue.md with score and source query.",
+     "ja": "ブリーフをスコアと元クエリ付きで queue.md に追記する。"
+    }
+   ],
+   "exitCondition": "At least 5 new briefs queued, or no gaps above threshold.",
+   "exitConditionJa": "新規ブリーフを5件以上投入、または閾値を超える欠落が無い。",
+   "keywords": []
+  },
+  {
+   "number": "15",
+   "slug": "landing-page-ab-copy-loop",
+   "title": "Landing-page A/B copy loop template",
+   "titleJa": "LP A/Bコピーループ",
+   "url": "https://agentloophub.com/loops/landing-page-ab-copy-loop",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 7 * * 1",
+   "triggerJa": "0 7 * * 1（毎週月曜7時）",
+   "triggerType": "time",
+   "description": "Low-performing landing page copy variants are replaced with measured alternatives.",
+   "descriptionJa": "成果の低いランディングページのコピーが、計測された代替案に置き換わる。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read analytics, conversion events, page queries, and current copy blocks for eligible pages.",
+     "ja": "対象ページの解析・コンバージョンイベント・流入クエリ・現行コピーを読む。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Draft one alternative headline, CTA, FAQ, or proof block while preserving protected metadata.",
+     "ja": "保護対象のメタ情報を保ちつつ、見出し・CTA・FAQ・実績ブロックの代替案を1つ起草する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "No title/meta changes, build passes, copy maps to the same search intent, and experiment event is configured.",
+     "ja": "タイトル/メタ未変更、ビルド通過、コピーが同じ検索意図に対応し、実験イベントが設定済み。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/copy-tests.jsonl stores page, hypothesis, changed block, metric, and start date.",
+     "ja": ".loop/copy-tests.jsonl に、ページ・仮説・変更ブロック・指標・開始日を保存する。"
+    }
+   ],
+   "exitCondition": "One experiment PR opened, no page meets threshold, or product claim needs approval.",
+   "exitConditionJa": "実験PRを1件作成、閾値を満たすページが無い、または製品上の主張に承認が必要。",
+   "keywords": []
+  },
+  {
+   "number": "16",
+   "slug": "loop-yaml-bootstrap-loop",
+   "title": "Loop YAML bootstrap loop template",
+   "titleJa": "loop.yaml 初期化ループ",
+   "url": "https://agentloophub.com/loops/loop-yaml-bootstrap-loop",
+   "category": {
+    "slug": "design",
+    "label": "設計",
+    "labelJa": "設計"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "manual scaffold",
+   "triggerJa": "手動での雛形作成",
+   "triggerType": "goal",
+   "description": "A repository gains a minimal .loop/loop.yaml that describes one safe recurring workflow.",
+   "descriptionJa": "リポジトリが、安全な定常ワークフローを1つ記述した最小の .loop/loop.yaml を得る。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read package scripts, CI workflows, README, and common maintenance pain points.",
+     "ja": "パッケージのスクリプト・CIワークフロー・README・よくある保守の痛点を読む。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Create .loop/loop.yaml with one conservative loop definition and comments for required approvals.",
+     "ja": "保守的なループ定義1つと、必要な承認のコメントを含む .loop/loop.yaml を作成する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "YAML parses, referenced commands exist, and verifier command exits 0 on the current repo.",
+     "ja": "YAMLがパースでき、参照コマンドが実在し、検証コマンドが現リポジトリで終了コード0を返す。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/loop.yaml is committed with the loop definition.",
+     "ja": ".loop/loop.yaml をループ定義とともにコミットする。"
+    }
+   ],
+   "exitCondition": "Valid loop.yaml exists, verifier is missing, or owner must decide the workflow.",
+   "exitConditionJa": "有効な loop.yaml が存在、検証者が不在、またはワークフローをオーナーが決める必要がある。",
+   "keywords": []
+  },
+  {
+   "number": "17",
+   "slug": "pr-review-loop",
+   "title": "PR review loop template",
+   "titleJa": "PRレビューループ",
+   "url": "https://agentloophub.com/loops/pr-review-loop",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "*/30 * * * *",
+   "triggerJa": "*/30 * * * *（30分毎）",
+   "triggerType": "time",
+   "description": "Every open PR receives a focused review with blocking issues separated from suggestions.",
+   "descriptionJa": "全てのオープンPRが、ブロッキング項目と提案を分けた焦点あるレビューを受ける。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "List open PRs without an agent review comment in the last 24 hours.",
+     "ja": "直近24時間にエージェントのレビューコメントが無いオープンPRを列挙する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Inspect diff, tests, and affected files; post review comments grouped by severity.",
+     "ja": "差分・テスト・影響ファイルを点検し、重大度でグループ分けしたレビューコメントを投稿する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Review mentions only changed lines or directly affected behavior, and no duplicate comment exists.",
+     "ja": "レビューが変更行または直接影響する挙動のみに言及し、重複コメントが存在しない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/pr-review.jsonl stores PR number, head SHA, review summary, and comment IDs.",
+     "ja": ".loop/pr-review.jsonl に、PR番号・head SHA・レビュー要約・コメントIDを保存する。"
+    }
+   ],
+   "exitCondition": "Queue empty, PR is draft, or diff exceeds review budget and escalates.",
+   "exitConditionJa": "キューが空、PRがドラフト、または差分がレビュー予算を超えてエスカレーション。",
+   "keywords": []
+  },
+  {
+   "number": "18",
+   "slug": "release-notes-loop",
+   "title": "Release notes loop template",
+   "titleJa": "リリースノートループ",
+   "url": "https://agentloophub.com/loops/release-notes-loop",
+   "category": {
+    "slug": "docs",
+    "label": "ドキュメント",
+    "labelJa": "ドキュメント"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "on release draft",
+   "triggerJa": "リリースドラフト作成時",
+   "triggerType": "proactive",
+   "description": "Every release draft has accurate user-facing notes before tagging.",
+   "descriptionJa": "全てのリリースドラフトが、タグ付け前に正確なユーザー向けノートを持つ。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Diff merged PRs since the last tag and collect labels, commits, and linked issues.",
+     "ja": "前回タグ以降のマージ済みPRを差分抽出し、ラベル・コミット・関連Issueを収集する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Draft grouped release notes: added, changed, fixed, security, migration notes.",
+     "ja": "追加・変更・修正・セキュリティ・移行注意 に分類したリリースノートを起草する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Every listed item maps to a merged PR or commit, and breaking changes are explicitly called out.",
+     "ja": "全項目がマージ済みPRまたはコミットに対応し、破壊的変更が明示されている。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/release-notes.json stores last tag, draft release ID, and included PRs.",
+     "ja": ".loop/release-notes.json に、前回タグ・ドラフトID・含めたPRを保存する。"
+    }
+   ],
+   "exitCondition": "Draft updated, no merged changes exist, or missing product context requires human edit.",
+   "exitConditionJa": "ドラフト更新済み、マージ済み変更が無い、または製品文脈の欠落で人間の編集が必要。",
+   "keywords": []
+  },
+  {
+   "number": "19",
+   "slug": "scheduled-claude-code-maintenance-loop",
+   "title": "Scheduled Claude Code maintenance loop",
+   "titleJa": "定期メンテナンス実行ループ",
+   "url": "https://agentloophub.com/loops/scheduled-claude-code-maintenance-loop",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "cron, /schedule, /loop, or GitHub Actions",
+   "triggerJa": "cron / /schedule / /loop / GitHub Actions",
+   "triggerType": "time",
+   "description": "A recurring maintenance task runs with the right trigger style for its environment.",
+   "descriptionJa": "定常的な保守タスクが、その環境に適したトリガー方式で実行される。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Classify the task by required machine access, session continuity, secrets, and repository event source.",
+     "ja": "必要なマシンアクセス・セッション継続性・シークレット・リポジトリのイベント源でタスクを分類する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Pick the trigger style, write the loop command, and document required permissions.",
+     "ja": "トリガー方式を選び、ループコマンドを書き、必要な権限を文書化する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "The selected trigger can reach required files/secrets and runs the verifier command.",
+     "ja": "選んだトリガーが必要なファイル/シークレットに到達でき、検証コマンドを実行できる。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/schedule.md stores trigger rationale, command, verifier, and rollback step.",
+     "ja": ".loop/schedule.md に、トリガー選択理由・コマンド・検証者・ロールバック手順を保存する。"
+    }
+   ],
+   "exitCondition": "Schedule documented, verifier unavailable, or secrets/permissions need human setup.",
+   "exitConditionJa": "スケジュール文書化済み、検証者が利用不可、またはシークレット/権限の人手設定が必要。",
+   "keywords": []
+  },
+  {
+   "number": "20",
+   "slug": "scrape-validate-loop",
+   "title": "Scrape-and-validate loop template",
+   "titleJa": "スクレイプ＆検証ループ",
+   "url": "https://agentloophub.com/loops/scrape-validate-loop",
+   "category": {
+    "slug": "data",
+    "label": "データ",
+    "labelJa": "データ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "*/30 * * * *",
+   "triggerJa": "*/30 * * * *（30分毎）",
+   "triggerType": "time",
+   "description": "Every source is scraped, validated against schema, and loaded.",
+   "descriptionJa": "全ソースがスクレイプされ、スキーマ検証を通り、ロードされる。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Sources list with last-success timestamps; pick stale ones.",
+     "ja": "最終成功時刻付きのソース一覧から、古いものを選ぶ。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Fetch, parse, normalize; retry failures with exponential backoff.",
+     "ja": "取得・パース・正規化し、失敗は指数バックオフでリトライする。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Schema validation pass rate at least 98%; row counts within expected band.",
+     "ja": "スキーマ検証の通過率98%以上、行数が想定範囲内。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "Source state table: last_run, last_success, consecutive_failures.",
+     "ja": "ソース状態テーブル：last_run・last_success・consecutive_failures。"
+    }
+   ],
+   "exitCondition": "All sources fresh, or a source fails 3x (quarantine and alert).",
+   "exitConditionJa": "全ソースが最新、またはあるソースが3回失敗（隔離してアラート）。",
+   "keywords": []
+  },
+  {
+   "number": "21",
+   "slug": "screenshot-qa-loop",
+   "title": "Screenshot QA loop template",
+   "titleJa": "スクリーンショットQAループ",
+   "url": "https://agentloophub.com/loops/screenshot-qa-loop",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "on UI PR",
+   "triggerJa": "UI変更のPR時",
+   "triggerType": "proactive",
+   "description": "Important pages render without blank states, overlap, or responsive layout regressions.",
+   "descriptionJa": "重要ページが、空白・要素重なり・レスポンシブ崩れなく描画される。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read changed routes/components and select desktop and mobile viewport screenshots.",
+     "ja": "変更されたルート/コンポーネントを読み、デスクトップとモバイルのビューポートを選ぶ。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Run Playwright screenshots, inspect visual diffs, and fix obvious layout regressions.",
+     "ja": "Playwrightでスクリーンショットを撮り、視覚差分を点検し、明らかなレイアウト崩れを修正する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Screenshots are nonblank, core UI is visible, and text does not overlap at target viewports.",
+     "ja": "スクリーンショットが空白でなく、主要UIが見え、対象ビューポートでテキストが重ならない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/screenshot-qa.jsonl records route, viewport, screenshot path, findings, and fixes.",
+     "ja": ".loop/screenshot-qa.jsonl に、ルート・ビューポート・画像パス・所見・修正を記録する。"
+    }
+   ],
+   "exitCondition": "All target screenshots pass, visual diff requires design decision, or viewport is unreachable.",
+   "exitConditionJa": "全対象が通過、視覚差分にデザイン判断が必要、またはビューポートに到達不能。",
+   "keywords": []
+  },
+  {
+   "number": "22",
+   "slug": "search-console-striking-distance-loop",
+   "title": "Search Console striking-distance loop",
+   "titleJa": "あと一歩キーワード攻略ループ",
+   "url": "https://agentloophub.com/loops/search-console-striking-distance-loop",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 6 * * 1",
+   "triggerJa": "0 6 * * 1（毎週月曜6時）",
+   "triggerType": "time",
+   "description": "Queries ranking positions 8-20 are queued with the next concrete page action.",
+   "descriptionJa": "掲載順位8〜20位のクエリが、次の具体的なページ施策とともにキューに入る。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Pull GSC query+page rows for the last 28 days and score opportunities by impressions, position, and CTR gap.",
+     "ja": "直近28日のGSCのクエリ×ページを取得し、表示回数・順位・CTR差で機会をスコア化する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Create or update a task queue with page, query, opportunity score, and recommended content/internal-link action.",
+     "ja": "ページ・クエリ・機会スコア・推奨するコンテンツ/内部リンク施策のタスクキューを作成/更新する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Every queued item has one target URL, one primary query, and no duplicate in-flight PR.",
+     "ja": "各項目が対象URL1つ・主要クエリ1つを持ち、進行中PRと重複しない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "tasks.md and domains/<domain>/todo.md store queued action and follow-up date.",
+     "ja": "tasks.md と domains/<domain>/todo.md に、投入した施策と再確認日を保存する。"
+    }
+   ],
+   "exitCondition": "Top N actionable items are queued, GSC permission fails, or every candidate is @human.",
+   "exitConditionJa": "上位N件を投入、GSC権限エラー、または全候補が人間判断待ち。",
+   "keywords": []
+  },
+  {
+   "number": "23",
+   "slug": "security-dependency-loop",
+   "title": "Security dependency loop template",
+   "titleJa": "セキュリティ依存対応ループ",
+   "url": "https://agentloophub.com/loops/security-dependency-loop",
+   "category": {
+    "slug": "security",
+    "label": "セキュリティ",
+    "labelJa": "セキュリティ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 5 * * *",
+   "triggerJa": "0 5 * * *（毎日5時）",
+   "triggerType": "time",
+   "description": "Known dependency vulnerabilities are patched without broad upgrade churn.",
+   "descriptionJa": "既知の依存脆弱性が、広範なアップグレードの混乱なしに修正される。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Read npm audit, pip-audit, Dependabot alerts, or advisory feed and pick the highest severity fixable item.",
+     "ja": "npm audit・pip-audit・Dependabotアラート・勧告フィードを読み、修正可能な最高重大度を1つ選ぶ。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Upgrade the minimum package range needed, adjust code only for required breaking changes.",
+     "ja": "必要最小限のバージョン範囲を上げ、必須の破壊的変更にのみコードを調整する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Audit no longer reports the advisory and the test suite passes.",
+     "ja": "監査がその勧告を報告しなくなり、テストスイートが通過する。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/security-upgrades.jsonl records advisory, package, old/new versions, tests, and PR.",
+     "ja": ".loop/security-upgrades.jsonl に、勧告・パッケージ・変更前後・テスト・PRを記録する。"
+    }
+   ],
+   "exitCondition": "One advisory fixed, no fix is available, or upgrade requires product decision.",
+   "exitConditionJa": "勧告を1件修正、修正が存在しない、またはアップグレードに製品判断が必要。",
+   "keywords": []
+  },
+  {
+   "number": "24",
+   "slug": "social-content-autopilot-loop",
+   "title": "Social content autopilot loop template",
+   "titleJa": "SNS投稿オートパイロットループ",
+   "url": "https://agentloophub.com/loops/social-content-autopilot-loop",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 8,14,20 * * *",
+   "triggerJa": "0 8,14,20 * * *（毎日8/14/20時）",
+   "triggerType": "time",
+   "description": "Social posts are drafted, scored, deduped, and queued without bypassing safety controls.",
+   "descriptionJa": "SNS投稿が、安全管理を迂回せずに起草・採点・重複排除・キュー投入される。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Collect approved topics, recent posts, performance data, and platform constraints.",
+     "ja": "承認済みトピック・最近の投稿・実績データ・プラットフォーム制約を収集する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Research, draft, score quality, check similarity, and queue posts that pass policy.",
+     "ja": "調査・起草・品質採点・類似度チェックを行い、ポリシーを通過した投稿をキューに入れる。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Quality score meets threshold, similarity is below limit, links resolve, and kill switch is off.",
+     "ja": "品質スコアが閾値以上、類似度が上限未満、リンクが解決し、キルスイッチがオフ。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/social-queue.jsonl stores draft, score, source topic, scheduled time, and approval state.",
+     "ja": ".loop/social-queue.jsonl に、下書き・スコア・元トピック・予定時刻・承認状態を保存する。"
+    }
+   ],
+   "exitCondition": "Daily queue filled, quality threshold fails three times, kill switch is on, or policy approval needed.",
+   "exitConditionJa": "日次キューが充足、品質閾値に3回失敗、キルスイッチがオン、またはポリシー承認が必要。",
+   "keywords": []
+  },
+  {
+   "number": "25",
+   "slug": "stale-pr-cleanup-loop",
+   "title": "Stale PR cleanup loop template",
+   "titleJa": "放置PR整理ループ",
+   "url": "https://agentloophub.com/loops/stale-pr-cleanup-loop",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "0 9 * * 1-5",
+   "triggerJa": "0 9 * * 1-5（平日9時）",
+   "triggerType": "time",
+   "description": "No abandoned PR remains open without a next action.",
+   "descriptionJa": "次アクションの無い放置PRが、オープンのまま残らない。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Find PRs with no commits or comments for 14 days.",
+     "ja": "14日間コミットもコメントも無いPRを探す。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Classify each PR as waiting-author, needs-rebase, superseded, or ready-for-human.",
+     "ja": "各PRを、作者待ち・リベース必要・置換済み・人間判断待ち に分類する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Each PR gets exactly one status comment and label update, with no close action unless policy allows it.",
+     "ja": "各PRにステータスコメントとラベル更新がちょうど1つ付き、ポリシーが許さない限りクローズしない。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/stale-prs.jsonl records PR, classification, action, and next check date.",
+     "ja": ".loop/stale-prs.jsonl に、PR・分類・アクション・次回確認日を記録する。"
+    }
+   ],
+   "exitCondition": "All stale PRs have labels/comments, or a PR needs maintainer decision.",
+   "exitConditionJa": "全放置PRにラベル/コメントが付く、またはメンテナの判断が必要。",
+   "keywords": []
+  },
+  {
+   "number": "26",
+   "slug": "support-ticket-triage-loop",
+   "title": "Support-ticket triage loop template",
+   "titleJa": "サポート問合せトリアージループ",
+   "url": "https://agentloophub.com/loops/support-ticket-triage-loop",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "*/10 * * * *",
+   "triggerJa": "*/10 * * * *（10分毎）",
+   "triggerType": "time",
+   "description": "New support tickets are classified, deduped, and routed within the SLA window.",
+   "descriptionJa": "新規サポートチケットが、SLA時間内に分類・重複排除・振り分けされる。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Fetch untriaged tickets from the support queue and recent related issues.",
+     "ja": "サポートキューから未トリアージのチケットと、関連する最近のIssueを取得する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Classify intent, severity, product area, duplicate status, and draft a concise internal summary.",
+     "ja": "意図・重大度・製品領域・重複状況を分類し、簡潔な社内サマリを起草する。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "Ticket has exactly one severity, one owner group, and either duplicate link or next action.",
+     "ja": "チケットが重大度1つ・担当グループ1つを持ち、重複リンクか次アクションのいずれかがある。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": ".loop/support-triage.jsonl stores ticket ID, classification, confidence, and action.",
+     "ja": ".loop/support-triage.jsonl に、チケットID・分類・確信度・アクションを保存する。"
+    }
+   ],
+   "exitCondition": "Queue empty, confidence below threshold, or customer-impacting escalation needed.",
+   "exitConditionJa": "キューが空、確信度が閾値未満、または顧客影響のエスカレーションが必要。",
+   "keywords": []
+  },
+  {
+   "number": "27",
+   "slug": "test-fix-loop",
+   "title": "Test-fix loop template",
+   "titleJa": "テスト修正ループ",
+   "url": "https://agentloophub.com/loops/test-fix-loop",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "Agent Loop Hub",
+   "trigger": "on push",
+   "triggerJa": "push 時",
+   "triggerType": "proactive",
+   "description": "The full test suite passes twice in a row.",
+   "descriptionJa": "全テストスイートが2回連続で通過する。",
+   "fields": [
+    {
+     "key": "discover",
+     "label": "F3 · Discover",
+     "labelJa": "発見",
+     "en": "Run the suite; collect every failing test with stack traces.",
+     "ja": "スイートを実行し、失敗した全テストをスタックトレース付きで収集する。"
+    },
+    {
+     "key": "act",
+     "label": "F4 · Act",
+     "labelJa": "実行",
+     "en": "Hand each failure to a subagent scoped to the failing module.",
+     "ja": "各失敗を、該当モジュールにスコープを絞ったサブエージェントに渡す。"
+    },
+    {
+     "key": "verify",
+     "label": "F5 · Verify",
+     "labelJa": "検証",
+     "en": "pytest exit 0, twice consecutively (guards against flakes).",
+     "ja": "pytest が終了コード0を2回連続で返す（フレーキー対策）。"
+    },
+    {
+     "key": "persist",
+     "label": "F6 · Persist",
+     "labelJa": "永続化",
+     "en": "Failures log appended to .loop/failures.jsonl for flake analysis.",
+     "ja": "失敗ログを .loop/failures.jsonl に追記し、フレーキー分析に使う。"
+    }
+   ],
+   "exitCondition": "Two consecutive green runs, or 10 cycles (then open an issue).",
+   "exitConditionJa": "2回連続グリーン、または10サイクル到達（Issueを作成）。",
+   "keywords": []
+  }
+ ]
+}

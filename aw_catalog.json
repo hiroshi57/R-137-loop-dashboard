@@ -1,0 +1,457 @@
+{
+ "schemaVersion": 1,
+ "name": "Awesome Agent Loops",
+ "publisher": "serenakeyitan/awesome-agent-loops",
+ "license": "CC BY 4.0",
+ "description": "X の実践者由来の /loop・/goal・/schedule コマンド集（日本語訳付き）",
+ "url": "https://github.com/serenakeyitan/awesome-agent-loops",
+ "loopCount": 18,
+ "categories": [
+  {
+   "slug": "testing",
+   "label": "テスト",
+   "labelJa": "テスト"
+  },
+  {
+   "slug": "ci",
+   "label": "CI",
+   "labelJa": "CI"
+  },
+  {
+   "slug": "impl",
+   "label": "実装",
+   "labelJa": "実装"
+  },
+  {
+   "slug": "quality",
+   "label": "品質",
+   "labelJa": "品質"
+  },
+  {
+   "slug": "ops",
+   "label": "運用",
+   "labelJa": "運用"
+  },
+  {
+   "slug": "docs",
+   "label": "ドキュメント",
+   "labelJa": "ドキュメント"
+  }
+ ],
+ "loops": [
+  {
+   "number": "01",
+   "slug": "kill-flaky-tests",
+   "title": "Kill flaky tests",
+   "titleJa": "フレーキーテストを潰す",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#kill-flaky-tests",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "awesome-agent-loops",
+   "command": "loop",
+   "commandLabel": "/loop（間隔で繰り返す）",
+   "triggerType": "time",
+   "description": "No interval — Claude self-paces and ends the loop itself once 5 green runs in a row is provably met.",
+   "descriptionJa": "テストスイートを20回実行し、断続的な失敗をすべて収集し、フレーキーなものを修正または隔離して、5回連続で完全グリーンになるまで止めない。",
+   "kickoffPrompt": "/loop run my test suite 20 times, collect every\nintermittent failure, fix or quarantine the flaky\nones, and don't stop until you get 5 consecutive\nfully-green runs",
+   "source": "https://x.com/ericzakariasson/status/2064122350866682100",
+   "keywords": [
+    "loop"
+   ]
+  },
+  {
+   "number": "02",
+   "slug": "watch-tests",
+   "title": "Watch tests",
+   "titleJa": "テストを見張る",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#watch-tests",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "awesome-agent-loops",
+   "command": "loop",
+   "commandLabel": "/loop（間隔で繰り返す）",
+   "triggerType": "time",
+   "description": "The shape is `/loop <interval> <prompt>`. Stops when you close the terminal — use `/schedule` for runs that survive.",
+   "descriptionJa": "15分ごとにテストスイートを実行し、失敗があれば失敗テストとエラー出力を表示する。",
+   "kickoffPrompt": "/loop 15m run the test suite, and if anything fails,\nshow me the failing tests and the error output",
+   "source": "https://x.com/cnemalek/status/2062977991328583923",
+   "keywords": [
+    "loop"
+   ]
+  },
+  {
+   "number": "03",
+   "slug": "babysit-a-pr",
+   "title": "Babysit a PR",
+   "titleJa": "PRのお守りをする",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#babysit-a-pr",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "awesome-agent-loops",
+   "command": "loop",
+   "commandLabel": "/loop（間隔で繰り返す）",
+   "triggerType": "time",
+   "description": "The prompt can be another slash command. This is how Boris Cherny works now — he writes loops that prompt Claude, instead of prompting himself.",
+   "descriptionJa": "20分ごとに /review-pr を対象PRに対して再実行する。プロンプトに別のスラッシュコマンドを渡せる点が要点。",
+   "kickoffPrompt": "/loop 20m /review-pr 1234",
+   "source": "https://x.com/0xAndros/status/2064063929517777147",
+   "keywords": [
+    "loop"
+   ]
+  },
+  {
+   "number": "04",
+   "slug": "babysit-many-prs",
+   "title": "Babysit many PRs",
+   "titleJa": "複数PRのお守りをする",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#babysit-many-prs",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "awesome-agent-loops",
+   "command": "loop",
+   "commandLabel": "/loop（間隔で繰り返す）",
+   "triggerType": "time",
+   "description": "A 15-minute watchdog over a labeled set of PRs. Popularized as the \"PR Babysitter\" loop (boris-cherny) in the [loops!](https://loops.elorm.xyz/loops) catalog.",
+   "descriptionJa": "15分ごとに codex-watch ラベルの付いた全オープンPRを確認し、CI失敗の修正・mainからの遅れのリベース・レビュー待ちの催促を行い、各PRを健全に保つ。",
+   "kickoffPrompt": "/loop 15m check every open PR labeled `codex-watch`\nand keep each healthy: fix CI failures, rebase when\nbehind main, and nudge if a review is pending",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "loop"
+   ]
+  },
+  {
+   "number": "05",
+   "slug": "wait-for-ci",
+   "title": "Wait for CI",
+   "titleJa": "CIの完了を待つ",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#wait-for-ci",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "awesome-agent-loops",
+   "command": "loop",
+   "commandLabel": "/loop（間隔で繰り返す）",
+   "triggerType": "time",
+   "description": "Use `/loop` when you want to *watch* something on a clock, not drive an agent to a finish (that's `/goal`). ---",
+   "descriptionJa": "10分ごとに gh pr checks を実行し、全て通れば「マージ可能」と伝え、失敗があればどれがなぜ失敗したかを要約する。",
+   "kickoffPrompt": "/loop 10m run `gh pr checks 1234`; if all pass, tell\nme it's ready to merge; if any fail, summarize which\nand why",
+   "source": "https://x.com/louiswharmby/status/2063962089819869227",
+   "keywords": [
+    "loop"
+   ]
+  },
+  {
+   "number": "06",
+   "slug": "fix-tests-and-lint",
+   "title": "Fix tests + lint",
+   "titleJa": "テストとlintを直す",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#fix-tests-and-lint",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "The most-shared `/goal` on X. One sentence, and the agent fixes bugs, runs checks, and ships clean — \"literally a $200/hr QA engineer.\"",
+   "descriptionJa": "全テストが通り、lintがクリーンになるまで実行する。X上で最も共有された /goal。「時給200ドルのQAエンジニアそのもの」と評される。",
+   "kickoffPrompt": "/goal all tests pass and lint is clean",
+   "source": "https://x.com/RodmanAi/status/2054975035639812170",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "07",
+   "slug": "hit-acceptance-criteria",
+   "title": "Hit acceptance criteria",
+   "titleJa": "受け入れ基準を満たす",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#hit-acceptance-criteria",
+   "category": {
+    "slug": "impl",
+    "label": "実装",
+    "labelJa": "実装"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "> \"write /goals like acceptance criteria… you set a completion condition, the agent works until a fast evaluator confirms it's met.\"",
+   "descriptionJa": "/users エンドポイントがページネーション付きJSONで200を返し、全テストが通り、lintがクリーンになるまで実行（20ターンで停止）。受け入れ基準のように /goal を書くのがコツ。",
+   "kickoffPrompt": "/goal the /users endpoint returns 200 with a\npaginated JSON body, all tests pass, and lint is\nclean — stop after 20 turns",
+   "source": "https://x.com/akshay_pachaar/status/2055208848609460525",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "08",
+   "slug": "migrate-an-api",
+   "title": "Migrate an API",
+   "titleJa": "APIを移行する",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#migrate-an-api",
+   "category": {
+    "slug": "impl",
+    "label": "実装",
+    "labelJa": "実装"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "> \"A SINGLE CODEX `/goal` RUN IS THE CLEAR WINNER. NO ORCHESTRATION… it completely destroyed the Opus orchestration setup.\" Try one `/goal` with a clear finish line before reaching for a multi-agent harness.",
+   "descriptionJa": "./legacy-api を import している全ファイルを ./v2-api に切り替え、全テストが通り、typecheckがクリーンになるまで実行（30ターンで停止）。",
+   "kickoffPrompt": "/goal every file importing from `./legacy-api` now\nimports from `./v2-api`, all tests pass, and\n`npm run typecheck` is clean — stop after 30 turns",
+   "source": "https://x.com/KingBootoshi/status/2060068980728184842",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "09",
+   "slug": "ship-a-pr-until-green",
+   "title": "Ship a PR until green",
+   "titleJa": "PRがグリーンになるまで出荷する",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#ship-a-pr-until-green",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "The most-copied loop in the [loops!](https://loops.elorm.xyz/loops) catalog — drives the whole implement → push → PR → fix-CI cycle.",
+   "descriptionJa": "変更のPRが開かれ、全CIチェックが通るまで実行する。実装→ローカルテスト→push→PR作成→CI修正のサイクル全体を駆動する。",
+   "kickoffPrompt": "/goal a PR is open for this change and every CI check\npasses — implement it, test locally, push, open the\nPR with `gh pr create`, then keep fixing failures\n(re-check with `gh pr checks`) until green; stop\nafter 10 turns",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "10",
+   "slug": "reach-coverage-target",
+   "title": "Reach coverage target",
+   "titleJa": "カバレッジ目標に到達する",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#reach-coverage-target",
+   "category": {
+    "slug": "testing",
+    "label": "テスト",
+    "labelJa": "テスト"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "A bounded `/goal` with a numeric end state. Swap in your own threshold.",
+   "descriptionJa": "テストカバレッジが80%以上かつ全テスト通過になるまで、カバレッジの低いファイルに絞ってテストを追加し、毎ターン再計測する。",
+   "kickoffPrompt": "/goal test coverage is at least 80% with all tests\npassing — add focused tests for the least-covered\nfiles, re-run coverage each turn, stop at the\nthreshold or after 12 turns",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "11",
+   "slug": "get-the-build-green",
+   "title": "Get the build green",
+   "titleJa": "ビルドをグリーンにする",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#get-the-build-green",
+   "category": {
+    "slug": "impl",
+    "label": "実装",
+    "labelJa": "実装"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "Iteratively clears compile and bundling errors until the production build passes.",
+   "descriptionJa": "npm run build が終了コード0になるまで、ビルドを実行して最初のエラーを修正することを繰り返す（10ターンで停止）。",
+   "kickoffPrompt": "/goal `npm run build` exits 0 — run the build, fix\nthe first error, repeat until it succeeds; stop after\n10 turns",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "12",
+   "slug": "clean-up-the-slop",
+   "title": "Clean up the slop",
+   "titleJa": "散らかりを片付ける",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#clean-up-the-slop",
+   "category": {
+    "slug": "quality",
+    "label": "品質",
+    "labelJa": "品質"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "The \"De-Sloppify Pass\" — second most-copied loop in the [loops!](https://loops.elorm.xyz/loops) catalog. Great after an agent leaves a mess.",
+   "descriptionJa": "直近の差分がクリーンで規約に沿った状態になるまで、デバッグコード・不要な分岐・悪い命名をレビューし最小限の修正を加える。エージェントが散らかした後に有効。",
+   "kickoffPrompt": "/goal the recent diff is clean and convention-aligned\n— review it for debug code, dead branches, and bad\nnames, fix with minimal edits until `npm run lint &&\nnpm test` passes; stop after 4 turns",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "13",
+   "slug": "apply-db-migrations",
+   "title": "Apply DB migrations",
+   "titleJa": "DBマイグレーションを適用する",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#apply-db-migrations",
+   "category": {
+    "slug": "impl",
+    "label": "実装",
+    "labelJa": "実装"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "Keeps applying and repairing migrations until the status check comes back clean.",
+   "descriptionJa": "全マイグレーションがクリーンに適用されるまで、実行してスキーマやSQLのエラーを修正することを繰り返す（6ターンで停止）。",
+   "kickoffPrompt": "/goal all database migrations apply cleanly — run\nthem, fix schema or SQL errors, repeat until\n`npx prisma migrate status` is clean; stop after 6\nturns",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "14",
+   "slug": "format-until-clean",
+   "title": "Format until clean",
+   "titleJa": "差分が消えるまで整形する",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#format-until-clean",
+   "category": {
+    "slug": "quality",
+    "label": "品質",
+    "labelJa": "品質"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "Runs the formatter on repeat and fixes whatever it can't auto-resolve.",
+   "descriptionJa": "npm run format が差分を残さなくなるまで、フォーマッタを実行し自動修正できない箇所を手で直す。",
+   "kickoffPrompt": "/goal `npm run format` leaves no diff — run the\nformatter, hand-fix anything it can't auto-fix, repeat\nuntil `git diff` is empty",
+   "source": "https://loops.elorm.xyz/loops",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "15",
+   "slug": "refactor-with-subagents",
+   "title": "Refactor with subagents",
+   "titleJa": "サブエージェントでリファクタする",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#refactor-with-subagents",
+   "category": {
+    "slug": "impl",
+    "label": "実装",
+    "labelJa": "実装"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "> \"Set `/goal`… Claude spawned 3 subagents: one for parser, one for UI, one for tests. All three finished.\" `/goal` fanning out across a module.",
+   "descriptionJa": "対話システムを分岐と感情タグ対応にリファクタする。/goal がモジュールを横断してサブエージェントに分散する例（パーサ・UI・テストの3体）。",
+   "kickoffPrompt": "/goal refactor the dialogue system to support\nbranching + emotion tags",
+   "source": "https://x.com/hui1231123/status/2064147531194642525",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "16",
+   "slug": "flash-firmware",
+   "title": "Flash firmware",
+   "titleJa": "ファームウェアを書き込む",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#flash-firmware",
+   "category": {
+    "slug": "impl",
+    "label": "実装",
+    "labelJa": "実装"
+   },
+   "author": "awesome-agent-loops",
+   "command": "goal",
+   "commandLabel": "/goal（条件を満たすまで）",
+   "triggerType": "goal",
+   "description": "> \"I use `/goal` to define what the firmware should achieve… Claude writes the code and flashes it to the board via a J-Link debugger.\" Not just for web — anything with a verifiable end state works. ---",
+   "descriptionJa": "オンボードLEDが指定パターンで点滅するまで実行する。Webに限らず、検証可能な終了条件があるものなら何にでも使える例。",
+   "kickoffPrompt": "/goal the onboard LED blinks in the specified pattern",
+   "source": "https://x.com/EitanRevach/status/2064135652288217093",
+   "keywords": [
+    "goal"
+   ]
+  },
+  {
+   "number": "17",
+   "slug": "morning-issue-triage",
+   "title": "Morning issue triage",
+   "titleJa": "朝のIssueトリアージ",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#morning-issue-triage",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "awesome-agent-loops",
+   "command": "schedule",
+   "commandLabel": "/schedule（クラウドcron）",
+   "triggerType": "proactive",
+   "description": "> \"Configure once — prompt + repo + connectors — and it runs 7×24 in the cloud, even with your computer off.\"",
+   "descriptionJa": "平日朝9時に、直近24時間の新規Issueを領域と優先度でラベル付けし、各Issueに1行サマリを投稿する。クラウドで24時間365日稼働。",
+   "kickoffPrompt": "/schedule every weekday at 9am, label new issues from\nthe last 24h by area and priority, and post a\none-line summary on each",
+   "source": "https://x.com/chenchengpro/status/2044212236881932637",
+   "keywords": [
+    "schedule"
+   ]
+  },
+  {
+   "number": "18",
+   "slug": "keep-docs-in-sync",
+   "title": "Keep docs in sync",
+   "titleJa": "ドキュメントを同期し続ける",
+   "url": "https://github.com/serenakeyitan/awesome-agent-loops#keep-docs-in-sync",
+   "category": {
+    "slug": "docs",
+    "label": "ドキュメント",
+    "labelJa": "ドキュメント"
+   },
+   "author": "awesome-agent-loops",
+   "command": "schedule",
+   "commandLabel": "/schedule（クラウドcron）",
+   "triggerType": "proactive",
+   "description": "> \"Trigger agents on a schedule, from a GitHub event, or via API. Anthropic uses this internally for docs and backlog maintenance.\" ---",
+   "descriptionJa": "main への push のたびに、変更コードが /docs のドキュメントと乖離していないか確認し、古い箇所を修正するPRを開く。",
+   "kickoffPrompt": "/schedule on every push to main, check whether the\nchanged code drifted from the docs in /docs, and open\na PR fixing anything out of date",
+   "source": "https://x.com/starmexxx/status/2044653921629606204",
+   "keywords": [
+    "schedule"
+   ]
+  }
+ ]
+}

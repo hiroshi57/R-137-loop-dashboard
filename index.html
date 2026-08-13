@@ -444,6 +444,8 @@
   .ff-result-count{font-size:12px;color:var(--sub);margin-left:auto}
   #ffSection{display:none}
   #elSection{display:none}
+  #awSection{display:none}
+  #alhSection{display:none}
   /* ===== ループ＝グラフ可視化（プロンプト→エージェント→ループ→グラフ） ===== */
   .flowchain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 14px;
     padding:12px 14px;background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius-sm)}
@@ -532,6 +534,8 @@
     <button class="src-tab on" data-src="di" id="tabDI">🇯🇵 DI ループ <span id="diTabCount"></span></button>
     <button class="src-tab" data-src="ff" id="tabFF">🌐 FF ループ <span id="ffTabCount">（読込中…）</span></button>
     <button class="src-tab" data-src="el" id="tabEL">⚙️ EL ループ <span id="elTabCount">（読込中…）</span></button>
+    <button class="src-tab" data-src="aw" id="tabAW">⭐ AW ループ <span id="awTabCount">（読込中…）</span></button>
+    <button class="src-tab" data-src="alh" id="tabALH">🧩 ALH ループ <span id="alhTabCount">（読込中…）</span></button>
   </div>
 
   <!-- ① DI サマリー -->
@@ -653,6 +657,56 @@
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="elTypeChips"></div>
     <div class="grid" id="elGrid"></div>
   </div><!-- /elSection -->
+
+  <!-- AW ループセクション（awesome-agent-loops） -->
+  <div id="awSection">
+    <div class="eyebrow">AW LOOP LIBRARY — Awesome Agent Loops</div>
+    <div style="font-size:11px;color:var(--faint);margin:-6px 0 14px">
+      出典 <a href="https://github.com/serenakeyitan/awesome-agent-loops" target="_blank" rel="noopener" style="color:var(--primary)">serenakeyitan/awesome-agent-loops</a>
+      — <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener" style="color:var(--primary)">CC BY 4.0</a>。X の実践者由来の <code class="mono">/loop</code>・<code class="mono">/goal</code>・<code class="mono">/schedule</code> コマンド集（日本語訳はDIによる二次的著作物）。
+    </div>
+    <div class="ff-kpi-strip" id="awKpis">
+      <div class="kpi"><div class="v" id="awKpiCount">—</div><div class="l">ループ総数</div></div>
+      <div class="kpi"><div class="v" id="awKpiCats">—</div><div class="l">カテゴリ</div></div>
+      <div class="kpi"><div class="v" id="awKpiFiltered">—</div><div class="l">絞り込み結果</div></div>
+    </div>
+    <div class="ff-filters-row" id="awFiltersRow">
+      <div class="search-box" style="flex:1;min-width:220px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="awQ" type="search" placeholder="タイトル / 説明 / コマンドで検索" autocomplete="off">
+        <button class="search-clear" id="awQClear" aria-label="検索クリア">✕</button>
+      </div>
+      <span class="ff-result-count">該当 <b id="awCount">—</b> 件</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="awCatChips"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="awTypeChips"></div>
+    <div class="grid" id="awGrid"></div>
+  </div><!-- /awSection -->
+
+  <!-- ALH ループセクション（Agent Loop Hub） -->
+  <div id="alhSection">
+    <div class="eyebrow">ALH LOOP LIBRARY — Agent Loop Hub</div>
+    <div style="font-size:11px;color:var(--faint);margin:-6px 0 14px">
+      出典 <a href="https://agentloophub.com/" target="_blank" rel="noopener" style="color:var(--primary)">agentloophub.com</a>
+      — MIT。1ループ7フィールド仕様（目標・トリガー・発見・実行・検証・永続化・終了）。日本語訳はDIによる二次的著作物。
+    </div>
+    <div class="ff-kpi-strip" id="alhKpis">
+      <div class="kpi"><div class="v" id="alhKpiCount">—</div><div class="l">ループ総数</div></div>
+      <div class="kpi"><div class="v" id="alhKpiCats">—</div><div class="l">カテゴリ</div></div>
+      <div class="kpi"><div class="v" id="alhKpiFiltered">—</div><div class="l">絞り込み結果</div></div>
+    </div>
+    <div class="ff-filters-row" id="alhFiltersRow">
+      <div class="search-box" style="flex:1;min-width:220px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="alhQ" type="search" placeholder="タイトル / 目標 / 各フィールドで検索" autocomplete="off">
+        <button class="search-clear" id="alhQClear" aria-label="検索クリア">✕</button>
+      </div>
+      <span class="ff-result-count">該当 <b id="alhCount">—</b> 件</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="alhCatChips"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="alhTypeChips"></div>
+    <div class="grid" id="alhGrid"></div>
+  </div><!-- /alhSection -->
 
 </main>
 
@@ -1488,12 +1542,16 @@ let source = "di";
 function switchSource(s){
   source=s;
   document.querySelectorAll(".src-tab").forEach(b=>b.classList.toggle("on",b.dataset.src===s));
-  const di=$("#diSection"), ff=$("#ffSection"), el=$("#elSection");
+  const di=$("#diSection"), ff=$("#ffSection"), el=$("#elSection"), aw=$("#awSection"), alh=$("#alhSection");
   if(di) di.style.display=s==="di"?"block":"none";
   if(ff) ff.style.display=s==="ff"?"block":"none";
   if(el) el.style.display=s==="el"?"block":"none";
+  if(aw) aw.style.display=s==="aw"?"block":"none";
+  if(alh) alh.style.display=s==="alh"?"block":"none";
   if(s==="ff" && FF_DATA) renderFFGrid();
   if(s==="el" && EL_DATA) renderELGrid();
+  if(s==="aw" && AW_DATA) renderAWGrid();
+  if(s==="alh" && ALH_DATA) renderALHGrid();
 }
 
 /* ========= EL ループ（loops.elorm.xyz） ========= */
@@ -1695,6 +1753,283 @@ function initEL(){
   if(q){ const d=debounce(()=>{ elSearchQ=q.value; renderELGrid(); },220);
     q.addEventListener("input",d); q.addEventListener("search",d);
     const clr=$("#elQClear"); if(clr) clr.addEventListener("click",()=>{ q.value=""; elSearchQ=""; renderELGrid(); }); }
+}
+
+/* ========= AW ループ（awesome-agent-loops / CC BY 4.0） ========= */
+let AW_DATA=null, awCatFilter="all", awTypeFilter="all", awSearchQ="";
+const AW_CAT_COLORS={"テスト":"#C77A12","CI":"#0E7FA8","実装":"#2B4BD8","品質":"#5A38C9","運用":"#0E8A5F","ドキュメント":"#D8266E"};
+const awTitle=l=>l.titleJa||l.title;
+const awDesc =l=>l.descriptionJa||l.description||"";
+const awColor=c=>AW_CAT_COLORS[c.labelJa||c.label]||"#666";
+
+function loadAW(){
+  fetch("aw_catalog.json").then(r=>r.json()).then(d=>{
+    AW_DATA=d; AW_DATA._bySlug={};
+    d.loops.forEach(l=>{ l._type=l.triggerType; AW_DATA._bySlug[l.slug]=l; });
+    AW_DATA.catList=d.categories.map(c=>({slug:c.slug,label:c.labelJa||c.label}));
+    const t=$("#awTabCount"); if(t) t.textContent="("+d.loops.length+")";
+    const kc=$("#awKpiCount"); if(kc) kc.textContent=d.loops.length;
+    const kcat=$("#awKpiCats"); if(kcat) kcat.textContent=AW_DATA.catList.length;
+    if(source==="aw") renderAWGrid();
+  }).catch(()=>{ const t=$("#awTabCount"); if(t) t.textContent="(読込失敗)"; });
+}
+
+function renderAWGrid(){
+  if(!AW_DATA) return;
+  const q=awSearchQ.toLowerCase().trim();
+  let loops=AW_DATA.loops;
+  if(awCatFilter!=="all") loops=loops.filter(l=>l.category.slug===awCatFilter);
+  if(awTypeFilter!=="all") loops=loops.filter(l=>l._type===awTypeFilter);
+  if(q) loops=loops.filter(l=>awTitle(l).toLowerCase().includes(q)||awDesc(l).toLowerCase().includes(q)||
+    l.title.toLowerCase().includes(q)||(l.kickoffPrompt||"").toLowerCase().includes(q));
+  const catEl=$("#awCatChips");
+  if(catEl){
+    const all=`<button class="ff-chip${awCatFilter==="all"?" on":""}" data-awcat="all">すべて (${AW_DATA.loops.length})</button>`;
+    catEl.innerHTML=all+AW_DATA.catList.map(c=>{
+      const n=AW_DATA.loops.filter(l=>l.category.slug===c.slug).length;
+      return `<button class="ff-chip${awCatFilter===c.slug?" on":""}" data-awcat="${esc(c.slug)}">${esc(c.label)} (${n})</button>`;
+    }).join("");
+  }
+  const typeEl=$("#awTypeChips");
+  if(typeEl){
+    const all=`<button class="ff-chip${awTypeFilter==="all"?" on":""}" data-awtype="all">全タイプ</button>`;
+    typeEl.innerHTML=all+LOOP_TYPE_ORDER.map(t=>{
+      const n=AW_DATA.loops.filter(l=>l._type===t).length; if(!n) return "";
+      return `<button class="ff-chip${awTypeFilter===t?" on":""}" data-awtype="${t}" title="${esc(typeInfo(t).note)}">${typeInfo(t).icon} ${esc(typeInfo(t).label)} (${n})</button>`;
+    }).join("");
+  }
+  const cnt=$("#awCount"); if(cnt) cnt.textContent=loops.length;
+  const kf=$("#awKpiFiltered"); if(kf) kf.textContent=loops.length;
+  const grid=$("#awGrid"); if(!grid) return;
+  grid.innerHTML=loops.length?loops.map(awCardHTML).join(""):'<div class="empty"><b>該当するAWループがありません</b></div>';
+}
+
+function awCardHTML(l){
+  const color=awColor(l.category), d0=awDesc(l);
+  const isFav=favorites.has("aw:"+l.slug);
+  return `<article class="card">
+    <div class="badges">
+      <span class="badge cat" style="border-left:3px solid ${color}">${esc(l.category.labelJa||l.category.label)}</span>
+      <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
+      <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">/${esc(l.command)}</span>
+    </div>
+    <h4>${esc(awTitle(l))}</h4>
+    <div class="goal">${esc(d0.substring(0,130))}${d0.length>130?"...":""}</div>
+    <div class="strat" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">${esc((l.kickoffPrompt||"").substring(0,120))}${(l.kickoffPrompt||"").length>120?"...":""}</div>
+    <div class="card-foot">
+      <span class="agents">${esc(l.commandLabel||"")}</span>
+      <button class="btn fav-btn${isFav?" on":""}" data-fav="aw:${esc(l.slug)}" title="お気に入り">★</button>
+      <button class="btn" data-awview="${esc(l.slug)}">詳細</button>
+      <button class="btn primary" data-awcopy="${esc(l.slug)}">Copy</button>
+    </div>
+  </article>`;
+}
+
+function openAWModal(loop){
+  currentLoop={_aw:true,...loop};
+  const color=awColor(loop.category);
+  $("#mBadges").innerHTML=`
+    <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
+    <span class="badge type" title="${esc(typeInfo(loop._type).note)}">${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span>
+    <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">AW #${loop.number}</span>
+    <span style="font-size:11px;color:var(--faint)">${esc(loop.commandLabel||"")}</span>`;
+  $("#mTitle").textContent=awTitle(loop);
+  const srcLink=loop.source?`<div class="m-sec"><b class="lbl">出典（実践者のポスト）</b><a href="${esc(loop.source)}" target="_blank" rel="noopener" style="color:var(--primary);font-size:12px">${esc(loop.source)}</a></div>`:"";
+  $("#mBody").innerHTML=`
+    <div class="m-sec tldr">
+      <div class="tldr-lead"><b class="lbl">このループがすること</b><p>${esc(awDesc(loop))}</p></div>
+      <div class="tldr-meta">
+        <div class="tm"><b>コマンド種別</b><span>${esc(loop.commandLabel||"")}</span></div>
+        <div class="tm"><b>ループタイプ</b><span>${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span></div>
+        <div class="tm"><b>ライセンス</b><span>CC BY 4.0（要帰属表示）</span></div>
+      </div>
+    </div>
+    ${loopGraphBlock([{label:"コマンド投入",sub:"/"+loop.command},{label:"エージェントが実行",sub:""},{label:"結果を検証",sub:""},{label:"終了条件を判定",sub:""}])}
+    <div class="m-sec">
+      <div class="prompt-head"><b>コマンド（そのままコピーして使う）</b><button class="btn primary" id="mCopy">Copy</button></div>
+      <pre class="prompt" id="mPrompt"></pre>
+    </div>
+    <div class="m-sec"><b class="lbl">補足（原文）</b><p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(loop.description||"")}</p></div>
+    ${srcLink}`;
+  $("#mPrompt").textContent=loop.kickoffPrompt||"";
+  $("#mCopy").addEventListener("click", e=>copyText(loop.kickoffPrompt||"", e.currentTarget));
+  $("#mCust").innerHTML=buildCustPanel();
+  initCustPanel(awTitle(loop), loop.kickoffPrompt||"", awDesc(loop), loop.url||"");
+  $("#overlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+
+function initAW(){
+  const grid=$("#awGrid");
+  if(grid) grid.addEventListener("click", e=>{
+    const fv=e.target.closest("[data-fav]");
+    if(fv){ const id=fv.dataset.fav;
+      if(favorites.has(id)){favorites.delete(id);fv.classList.remove("on");}else{favorites.add(id);fv.classList.add("on");}
+      updateFavBar(); return; }
+    const vw=e.target.closest("[data-awview]");
+    if(vw&&AW_DATA){ const l=AW_DATA._bySlug[vw.dataset.awview]; if(l) openAWModal(l); return; }
+    const cp=e.target.closest("[data-awcopy]");
+    if(cp&&AW_DATA){ const l=AW_DATA._bySlug[cp.dataset.awcopy]; if(l) copyText(l.kickoffPrompt||awDesc(l), cp); }
+  });
+  const catEl=$("#awCatChips");
+  if(catEl) catEl.addEventListener("click",e=>{const c=e.target.closest("[data-awcat]"); if(c){awCatFilter=c.dataset.awcat;renderAWGrid();}});
+  const typeEl=$("#awTypeChips");
+  if(typeEl) typeEl.addEventListener("click",e=>{const c=e.target.closest("[data-awtype]"); if(c){awTypeFilter=c.dataset.awtype;renderAWGrid();}});
+  const q=$("#awQ");
+  if(q){ const d=debounce(()=>{awSearchQ=q.value;renderAWGrid();},220);
+    q.addEventListener("input",d); q.addEventListener("search",d);
+    const clr=$("#awQClear"); if(clr) clr.addEventListener("click",()=>{q.value="";awSearchQ="";renderAWGrid();}); }
+}
+
+/* ========= ALH ループ（Agent Loop Hub / MIT） ========= */
+let ALH_DATA=null, alhCatFilter="all", alhTypeFilter="all", alhSearchQ="";
+const ALH_CAT_COLORS={"設計":"#5A38C9","保守":"#0E8A5F","ドキュメント":"#D8266E","CI":"#0E7FA8","マーケ":"#C77A12","運用":"#2B4BD8","テスト":"#B0379B","データ":"#3A6FB0","セキュリティ":"#DC2F55"};
+const alhTitle=l=>l.titleJa||l.title;
+const alhDesc =l=>l.descriptionJa||l.description||"";
+const alhExit =l=>l.exitConditionJa||l.exitCondition||"";
+const alhTrig =l=>l.triggerJa||l.trigger||"";
+const alhColor=c=>ALH_CAT_COLORS[c.labelJa||c.label]||"#666";
+
+function loadALH(){
+  fetch("alh_catalog.json").then(r=>r.json()).then(d=>{
+    ALH_DATA=d; ALH_DATA._bySlug={};
+    d.loops.forEach(l=>{ l._type=l.triggerType; ALH_DATA._bySlug[l.slug]=l; });
+    ALH_DATA.catList=d.categories.map(c=>({slug:c.slug,label:c.labelJa||c.label}));
+    const t=$("#alhTabCount"); if(t) t.textContent="("+d.loops.length+")";
+    const kc=$("#alhKpiCount"); if(kc) kc.textContent=d.loops.length;
+    const kcat=$("#alhKpiCats"); if(kcat) kcat.textContent=ALH_DATA.catList.length;
+    if(source==="alh") renderALHGrid();
+  }).catch(()=>{ const t=$("#alhTabCount"); if(t) t.textContent="(読込失敗)"; });
+}
+
+function renderALHGrid(){
+  if(!ALH_DATA) return;
+  const q=alhSearchQ.toLowerCase().trim();
+  let loops=ALH_DATA.loops;
+  if(alhCatFilter!=="all") loops=loops.filter(l=>l.category.slug===alhCatFilter);
+  if(alhTypeFilter!=="all") loops=loops.filter(l=>l._type===alhTypeFilter);
+  if(q) loops=loops.filter(l=>alhTitle(l).toLowerCase().includes(q)||alhDesc(l).toLowerCase().includes(q)||
+    l.title.toLowerCase().includes(q)||(l.fields||[]).some(f=>(f.ja||"").toLowerCase().includes(q)||(f.en||"").toLowerCase().includes(q)));
+  const catEl=$("#alhCatChips");
+  if(catEl){
+    const all=`<button class="ff-chip${alhCatFilter==="all"?" on":""}" data-alhcat="all">すべて (${ALH_DATA.loops.length})</button>`;
+    catEl.innerHTML=all+ALH_DATA.catList.map(c=>{
+      const n=ALH_DATA.loops.filter(l=>l.category.slug===c.slug).length;
+      return `<button class="ff-chip${alhCatFilter===c.slug?" on":""}" data-alhcat="${esc(c.slug)}">${esc(c.label)} (${n})</button>`;
+    }).join("");
+  }
+  const typeEl=$("#alhTypeChips");
+  if(typeEl){
+    const all=`<button class="ff-chip${alhTypeFilter==="all"?" on":""}" data-alhtype="all">全タイプ</button>`;
+    typeEl.innerHTML=all+LOOP_TYPE_ORDER.map(t=>{
+      const n=ALH_DATA.loops.filter(l=>l._type===t).length; if(!n) return "";
+      return `<button class="ff-chip${alhTypeFilter===t?" on":""}" data-alhtype="${t}" title="${esc(typeInfo(t).note)}">${typeInfo(t).icon} ${esc(typeInfo(t).label)} (${n})</button>`;
+    }).join("");
+  }
+  const cnt=$("#alhCount"); if(cnt) cnt.textContent=loops.length;
+  const kf=$("#alhKpiFiltered"); if(kf) kf.textContent=loops.length;
+  const grid=$("#alhGrid"); if(!grid) return;
+  grid.innerHTML=loops.length?loops.map(alhCardHTML).join(""):'<div class="empty"><b>該当するALHループがありません</b></div>';
+}
+
+function alhCardHTML(l){
+  const color=alhColor(l.category), d0=alhDesc(l);
+  const isFav=favorites.has("alh:"+l.slug);
+  return `<article class="card">
+    <div class="badges">
+      <span class="badge cat" style="border-left:3px solid ${color}">${esc(l.category.labelJa||l.category.label)}</span>
+      <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
+      <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">ALH #${l.number}</span>
+    </div>
+    <h4>${esc(alhTitle(l))}</h4>
+    <div class="goal">${esc(d0.substring(0,130))}${d0.length>130?"...":""}</div>
+    <div class="iter-line"><div class="exit"><b>TRIGGER ・ ${esc(alhTrig(l).substring(0,28))}</b>${esc(alhExit(l))}</div></div>
+    <div class="card-foot">
+      <span class="agents">7フィールド仕様</span>
+      <button class="btn fav-btn${isFav?" on":""}" data-fav="alh:${esc(l.slug)}" title="お気に入り">★</button>
+      <button class="btn" data-alhview="${esc(l.slug)}">詳細</button>
+      <button class="btn primary" data-alhcopy="${esc(l.slug)}">Copy</button>
+    </div>
+  </article>`;
+}
+
+// ALH のキックオフは7フィールドから組み立てる
+function alhPrompt(l){
+  const f=k=>(l.fields||[]).find(x=>x.key===k)||{};
+  return [`# ${alhTitle(l)}`,``,
+    `## 目標`, alhDesc(l), ``,
+    `## トリガー`, alhTrig(l), ``,
+    `## 発見（Discover）`, f('discover').ja||"", ``,
+    `## 実行（Act）`, f('act').ja||"", ``,
+    `## 検証（Verify）`, f('verify').ja||"", ``,
+    `## 永続化（Persist）`, f('persist').ja||"", ``,
+    `## 終了条件（Exit）`, alhExit(l)].join("\n");
+}
+
+function openALHModal(loop){
+  currentLoop={_alh:true,...loop};
+  const color=alhColor(loop.category);
+  $("#mBadges").innerHTML=`
+    <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
+    <span class="badge type" title="${esc(typeInfo(loop._type).note)}">${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span>
+    <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">ALH Loop #${loop.number}</span>`;
+  $("#mTitle").textContent=alhTitle(loop);
+  const fields=(loop.fields||[]);
+  const fieldRows=fields.map((f,i)=>
+    `<div class="flow-step"><span class="fno">${i+1}</span><div class="ftx"><b>${esc(f.labelJa)}（${esc(f.label)}）</b><span>${esc(f.ja)}</span></div></div>`
+  ).join("");
+  $("#mBody").innerHTML=`
+    <div class="m-sec tldr">
+      <div class="tldr-lead"><b class="lbl">目標（F1 · Goal）</b><p>${esc(alhDesc(loop))}</p></div>
+      <div class="tldr-meta">
+        <div class="tm"><b>トリガー（F2）</b><span>${esc(alhTrig(loop))}</span></div>
+        <div class="tm"><b>終了条件（F7 · Exit）</b><span>${esc(alhExit(loop))}</span></div>
+        <div class="tm"><b>ライセンス</b><span>MIT</span></div>
+      </div>
+    </div>
+    ${loopGraphBlock(fields.map(f=>({label:f.labelJa, sub:f.label})))}
+    <div class="m-sec">
+      <b class="lbl">7フィールド仕様（F3〜F6）</b>
+      <div class="flow">${fieldRows}<div class="flow-loop"><span class="lc">↺</span><span><b>${esc(alhExit(loop))} まで反復</b></span></div></div>
+    </div>
+    <details class="more">
+      <summary>もっと詳しく見る（英語原文）</summary>
+      <div class="more-body">
+        ${fields.map(f=>`<div class="m-sec"><b class="lbl">${esc(f.label)}</b><p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(f.en)}</p></div>`).join("")}
+        <div class="m-sec">
+          <div class="prompt-head"><b>ループ仕様（コピー用）</b><button class="btn primary" id="mCopy">Copy</button></div>
+          <pre class="prompt" id="mPrompt"></pre>
+        </div>
+      </div>
+    </details>`;
+  $("#mPrompt").textContent=alhPrompt(loop);
+  $("#mCopy").addEventListener("click", e=>copyText(alhPrompt(loop), e.currentTarget));
+  $("#mCust").innerHTML=buildCustPanel();
+  initCustPanel(alhTitle(loop), alhPrompt(loop), alhDesc(loop), loop.url||"");
+  $("#overlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+
+function initALH(){
+  const grid=$("#alhGrid");
+  if(grid) grid.addEventListener("click", e=>{
+    const fv=e.target.closest("[data-fav]");
+    if(fv){ const id=fv.dataset.fav;
+      if(favorites.has(id)){favorites.delete(id);fv.classList.remove("on");}else{favorites.add(id);fv.classList.add("on");}
+      updateFavBar(); return; }
+    const vw=e.target.closest("[data-alhview]");
+    if(vw&&ALH_DATA){ const l=ALH_DATA._bySlug[vw.dataset.alhview]; if(l) openALHModal(l); return; }
+    const cp=e.target.closest("[data-alhcopy]");
+    if(cp&&ALH_DATA){ const l=ALH_DATA._bySlug[cp.dataset.alhcopy]; if(l) copyText(alhPrompt(l), cp); }
+  });
+  const catEl=$("#alhCatChips");
+  if(catEl) catEl.addEventListener("click",e=>{const c=e.target.closest("[data-alhcat]"); if(c){alhCatFilter=c.dataset.alhcat;renderALHGrid();}});
+  const typeEl=$("#alhTypeChips");
+  if(typeEl) typeEl.addEventListener("click",e=>{const c=e.target.closest("[data-alhtype]"); if(c){alhTypeFilter=c.dataset.alhtype;renderALHGrid();}});
+  const q=$("#alhQ");
+  if(q){ const d=debounce(()=>{alhSearchQ=q.value;renderALHGrid();},220);
+    q.addEventListener("input",d); q.addEventListener("search",d);
+    const clr=$("#alhQClear"); if(clr) clr.addEventListener("click",()=>{q.value="";alhSearchQ="";renderALHGrid();}); }
 }
 
 // ---- FF グリッド描画 ----
@@ -2147,6 +2482,10 @@ loadFF();
 initFF();
 loadEL();
 initEL();
+loadAW();
+initAW();
+loadALH();
+initALH();
 switchSource("di"); // 初期状態を明示確定（CSS display:none 問題の保険）
 </script>
 </body>
