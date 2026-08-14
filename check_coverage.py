@@ -67,6 +67,22 @@ for name, local, url, pat in CHECKS:
     for s in extra:
         print(f"       - ローカルのみ(削除済みか?): {s}")
 
+# LE は prompts/*.md のコードブロック数で照合（採用はキュレーション済みのため下限のみ確認）
+try:
+    n_remote = 0
+    for f in ['goal-and-loop', 'loop-contracts', 'ralph-loops', 'automations',
+              'subagents-maker-checker', 'verification-rubrics']:
+        md = fetch('https://raw.githubusercontent.com/invincible04/awesome-loop-engineering/main/prompts/%s.md' % f)
+        n_remote += len(re.findall(r'^```', md, re.M)) // 2
+    n_local = len(local_slugs('le_catalog.json'))
+    # LE は「実用的なブロックのみ採用」なので、極端に取りこぼしていないかだけ見る（6割以上）
+    status = "OK " if n_local >= n_remote * 0.6 else "NG "
+    if n_local < n_remote * 0.6:
+        fail = 1
+    print(f"  {status}LE  Loop Engineering Prompts: 一次情報 {n_remote}ブロック / 採用 {n_local}")
+except Exception as e:
+    print(f"  ?  LE: 取得できず ({e})")
+
 # ALE は HuggingFace データセットの examples/*.json 数で照合
 try:
     meta = json.loads(fetch('https://huggingface.co/api/datasets/cy0307/awesome-loop-engineering'))

@@ -1,0 +1,841 @@
+{
+ "schemaVersion": 1,
+ "name": "Loop Engineering Prompts",
+ "publisher": "invincible04/awesome-loop-engineering + snarktank/ralph",
+ "license": "MIT",
+ "description": "ループ工学の教材プロンプト集＋Ralph原典（日本語訳付き）",
+ "url": "https://invincible04.github.io/awesome-loop-engineering/",
+ "loopCount": 36,
+ "categories": [
+  {
+   "slug": "ops",
+   "label": "運用",
+   "labelJa": "運用"
+  },
+  {
+   "slug": "ci",
+   "label": "CI",
+   "labelJa": "CI"
+  },
+  {
+   "slug": "command",
+   "label": "コマンド",
+   "labelJa": "コマンド"
+  },
+  {
+   "slug": "contract",
+   "label": "契約",
+   "labelJa": "契約"
+  },
+  {
+   "slug": "automation",
+   "label": "自動化",
+   "labelJa": "自動化"
+  },
+  {
+   "slug": "ralph",
+   "label": "Ralph",
+   "labelJa": "Ralph"
+  },
+  {
+   "slug": "verification",
+   "label": "検証",
+   "labelJa": "検証"
+  }
+ ],
+ "loops": [
+  {
+   "number": "01",
+   "slug": "daily-triage-report-only",
+   "title": "Daily triage (report-only)",
+   "titleJa": "日次トリアージ（報告のみ）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/automations.md",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "自動化（cron/CI）",
+   "triggerType": "time",
+   "description": "Why this shape: the heartbeat in its safest form. Discover and report, change nothing.",
+   "descriptionJa": "プロジェクトを日次で調べ、STATE.md に高優先度・監視対象・ノイズを追記する。まず報告だけさせ、自動修正はしない安全な第一段階。",
+   "kickoffPrompt": "Run $loop-triage on this project. Read STATE.md if present.\n\nAppend to STATE.md:\n- High-Priority Items → \"## High Priority\" section\n- Watch Items → \"## Watch List\"\n- Update \"Last run\" timestamp\n\nWeek 1: report only. Do not modify source files.\n\nFlag anything ambiguous for the Triage inbox.",
+   "lang": "text",
+   "keywords": [
+    "運用"
+   ]
+  },
+  {
+   "number": "02",
+   "slug": "issue-triage-quantified",
+   "title": "Issue triage (propose-only, quantified)",
+   "titleJa": "Issueトリアージ（定量・提案のみ）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/automations.md",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "自動化（cron/CI）",
+   "triggerType": "time",
+   "description": "Why this shape: note the count + delta each run (queue health over time) and the explicit needs-human bucket.",
+   "descriptionJa": "Issueを定量的に評価して分類し、提案のみを状態ファイルに記録する。勝手に変更しない。",
+   "kickoffPrompt": "Run $issue-triage on this project. Read issue-triage-state.md if present.\n\nUpdate issue-triage-state.md:\n- Last run timestamp\n- Open actionable count + delta since last run\n- Top 5 prioritized issues with one-sentence summaries\n- Suggested labels (proposed only — do not apply)\n- \"needs human\" bucket for ambiguous, duplicate, or security-sensitive items\n\nWeek 1: report only. Do not modify issues, labels, or source files.\nFlag anything touching auth, payments, or public API for human review.",
+   "lang": "text",
+   "keywords": [
+    "運用"
+   ]
+  },
+  {
+   "number": "03",
+   "slug": "pr-babysitter-capped",
+   "title": "PR babysitter (attempt-capped, propose-never-merge)",
+   "titleJa": "PRお守り（試行上限・マージ禁止）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/automations.md",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "自動化（cron/CI）",
+   "triggerType": "time",
+   "description": "Why this shape: a capped fix loop with a mandatory verifier APPROVE gate and a hard \"propose, never merge\" rule.",
+   "descriptionJa": "オープンPRをレビュー・トリアージするが、試行回数に上限を設け、マージは決して行わず提案に留める。",
+   "kickoffPrompt": "For open PRs on this repo (team-authored or label loop-watch):\n\n1. Run $pr-review-triage\n2. Update pr-babysitter-state.md\n3. If CI red or actionable review comment AND attempts < 3:\n   - Open worktree\n   - Implementer: $minimal-fix\n   - Verifier subagent: must APPROVE\n   - Comment on PR with proposal — do not merge\n4. If attempts >= 3 or high-risk labels: Triage inbox + escalate",
+   "lang": "text",
+   "keywords": [
+    "CI"
+   ]
+  },
+  {
+   "number": "04",
+   "slug": "ci-repair-contract",
+   "title": "CI repair (event-triggered, full contract)",
+   "titleJa": "CI修復（イベント起動・契約付き）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/automations.md",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "自動化（cron/CI）",
+   "triggerType": "proactive",
+   "description": "Why this shape: event trigger plus a nightly backup sweep; one hypothesis per run; the exit code is the only success signal; scope creep is named as the main failure mode.",
+   "descriptionJa": "必須チェックが失敗したときに起動し、契約（目的・トリガー・検証・停止条件）に沿ってCIを修復する。夜間の一括処理も行う。",
+   "kickoffPrompt": "Automation: CI repair triage\nTrigger: when a required check fails on an open PR (and a nightly sweep as backup).\nWorkspace: isolated worktree off the PR branch.\n\nTask:\n1. Reproduce the failing check. Identify the exact failing command or the closest local equivalent.\n2. Read the failing logs and the changed files. Form one hypothesis about the cause.\n3. If the cause is mechanical and in scope, patch only that cause in the worktree.\n4. Rerun the failing command first. Treat its exit code as the only signal of success.\n5. Record the failing log excerpt, the patch, and the passing output in a PR comment.\n\nPermission boundary:\n- Edit only the files implicated by the failure.\n- Do not change CI config, upgrade dependencies, or edit unrelated files.\n- Do not merge, force-push, or alter required checks.\n\nStop conditions:\n- Stop when the failing command passes and the diff is scoped to the cause.\n- Stop after 3 repair attempts.\n- Stop if the failure is outside scope (flaky infra, test design, missing service).\n\nEscalation:\n- If stopped without success, post a PR comment summarizing the failing command,\n  what was tried, and why it is out of scope, then request a human reviewer.",
+   "lang": "text",
+   "keywords": [
+    "CI"
+   ]
+  },
+  {
+   "number": "05",
+   "slug": "morning-digest",
+   "title": "Morning digest (idempotent, miss-tolerant scheduled task)",
+   "titleJa": "朝のダイジェスト（冪等・欠落耐性）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/automations.md",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "自動化（cron/CI）",
+   "triggerType": "time",
+   "description": "Why this shape: idempotent scheduled work driven by a last-run marker. Fail visibly, not silently instead of emitting an empty artifact. ---",
+   "descriptionJa": "平日8:30にリポジトリの状況ダイジェストを生成する。実行が飛んでも破綻しない冪等な設計。",
+   "kickoffPrompt": "Schedule: weekdays at 08:30 local time.\n\nObjective: produce a morning status digest for this repository.\n\nEach run:\n1. In a fresh worktree off the default branch, collect: open PRs needing review,\n   failing checks on main, and issues labeled \"urgent\" opened since the last run.\n2. Verify each item against live GitHub state before including it.\n3. Write the digest to reports/morning-digest-<date>.md with one source link per item.\n4. Record the last-run timestamp in reports/.digest-state so the next run only adds new items.\n\nPermission boundary:\n- Read GitHub state and write only under reports/.\n- Do not modify code, comment on PRs, or change issue state.\n\nEscalation:\n- If GitHub is unreachable, write a short \"digest skipped: <reason>\" note and exit\n  rather than producing an empty or stale digest.",
+   "lang": "text",
+   "keywords": [
+    "運用"
+   ]
+  },
+  {
+   "number": "06",
+   "slug": "goal-textbook-stop",
+   "title": "The textbook stop condition",
+   "titleJa": "教科書的な停止条件",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "goal",
+   "description": "Source: the /goal primitive and this exact example are documented in Addy Osmani, \"Loop Engineering\" (June 7, 2026), where he notes both Claude Code and Codex ship /goal. — /goal keeps working turn after turn until a verifier confirms the condition. The condition must be verifiable — an exit code, a test result — not a vibe.",
+   "descriptionJa": "テストが通りlintがクリーンになるまで実行する、最も基本的な /goal。停止条件は「感覚」ではなく終了コードで判定できるものにする。",
+   "kickoffPrompt": "/goal All tests in test/auth pass and lint is clean",
+   "lang": "bash",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "07",
+   "slug": "goal-scope-bounded",
+   "title": "A scope-bounded /goal",
+   "titleJa": "スコープ限定の /goal",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "goal",
+   "description": "Pattern: bake the scope limit into the goal itself, so \"done\" also means \"didn't sprawl.\" ---",
+   "descriptionJa": "完了条件そのものに「差分が指定ディレクトリ配下のみ」という範囲制限を埋め込み、実装の暴走を防ぐ。",
+   "kickoffPrompt": "/goal All tests in test/auth/ pass, lint is clean, and the diff touches only\nfiles under src/auth/ and test/auth/.",
+   "lang": "bash",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "08",
+   "slug": "loop-stage1-report",
+   "title": "Stage 1: report-only (start every new loop here)",
+   "titleJa": "段階1：報告のみのループ",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "time",
+   "description": "Why this shape: run a new unattended loop in pure report-only mode for a week before you grant it write access. Earn trust before granting autonomy.",
+   "descriptionJa": "新しいループは必ずここから始める。調査して STATE.md にまとめるだけで、コードは変更しない。",
+   "kickoffPrompt": "/loop 1d Run $loop-triage. Read STATE.md. Merge findings into High Priority and\nWatch List. Update Last run. Do not edit code.",
+   "lang": "bash",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "09",
+   "slug": "loop-stage2-autofix",
+   "title": "Stage 2: small auto-fixes, with isolation + a verifier",
+   "titleJa": "段階2：小さな自動修正＋検証者",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "time",
+   "description": "Why this shape: graduating autonomy (L1 → L2) means worktree isolation plus a separate verifier sub-agent before any auto-fix.",
+   "descriptionJa": "単一ファイルのバグ修正に限って実装エージェントを起動し、隔離環境と検証者を伴って自動修正する。",
+   "kickoffPrompt": "/loop 1d Run $loop-triage. For high-priority items that are single-file bugfixes:\nspawn an implementer in a worktree, then a verifier agent. Update STATE.md.\nEscalate ambiguous items.",
+   "lang": "bash",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "10",
+   "slug": "loop-daily-triage-full",
+   "title": "A full daily-triage /loop (skill + worktree + reviewer + connectors)",
+   "titleJa": "日次トリアージ（フル構成）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "time",
+   "description": "Why this shape: one /loop line wiring together every building block: skill → worktree → minimal-fix → reviewer → connectors → escalation.",
+   "descriptionJa": "スキル・ワークツリー・レビュアー・コネクタを組み合わせた本格的な日次トリアージループ。",
+   "kickoffPrompt": "/loop 1d Run the loop-triage skill on the current project. Append high-priority\nitems to STATE.md. For any small, self-contained bugfix or CI failure, open an\nisolated worktree, draft a minimal fix using the minimal-fix skill, and have a\nreviewer sub-agent verify it against project skills and tests. Update the PR or\nticket via connectors if possible. Anything ambiguous or high-risk should be\nclearly flagged for human review in STATE.md.",
+   "lang": "bash",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "11",
+   "slug": "loop-session-contract",
+   "title": "A complete session-scoped /loop contract",
+   "titleJa": "セッション単位のループ契約",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "time",
+   "description": "Why this shape: this is the gold standard for a session-scoped loop. A deterministic exit code as the only \"done\" signal, an explicit permission boundary, an iteration budget, an anti-cheat clause, and a stall stop. Copy it.",
+   "descriptionJa": "15分ごとにテストの緑を保つ。各反復で実行する手順・検証・停止条件を契約として明記した完全な形。",
+   "kickoffPrompt": "/loop every 15m\n\nObjective: keep `npm test` green on the current branch.\n\nEach iteration:\n1. Run `npm test`. Treat its exit code as the only signal of done.\n2. If it passes, stop and say the loop is complete.\n3. If it fails, read the last 80 lines of output and fix only the cause of that failure.\n4. Append one line to LOOP_PROGRESS.md describing what you changed and why.\n5. Read LOOP_PROGRESS.md at the start of each iteration so you do not repeat a failed fix.\n\nPermission boundary:\n- Edit only application and test files under src/ and tests/.\n- Do not change CI config, add dependencies, or touch files outside this repo.\n- Do not weaken or delete tests to make them pass.\n\nStop conditions:\n- Stop when `npm test` passes.\n- Stop after 5 iterations.\n- Stop if the same failure repeats twice with no new evidence.",
+   "lang": "text",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "12",
+   "slug": "loop-high-frequency",
+   "title": "High-frequency cadence loops bound to skills",
+   "titleJa": "高頻度ケイデンス（スキル連動）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/goal-and-loop.md",
+   "category": {
+    "slug": "command",
+    "label": "コマンド",
+    "labelJa": "コマンド"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "/goal と /loop",
+   "triggerType": "time",
+   "description": "The everyday shape: short-cadence loops bound to slash-command skills. ⚠️ Treat the precise /loop 5m … wording as illustrative, not a verbatim quote. Boris Cherny's verified line is that he writes loops, not these exact cadence strings. ---",
+   "descriptionJa": "5分ごとのPR監視、30分ごとのフィードバック収集など、短い間隔でスキルに紐づけて回す。",
+   "kickoffPrompt": "/loop 5m  /pr-babysit check\n/loop 30m /slack-feedback",
+   "lang": "bash",
+   "keywords": [
+    "コマンド"
+   ]
+  },
+  {
+   "number": "13",
+   "slug": "loop-contract-json",
+   "title": "The contract shape",
+   "titleJa": "ループ契約のJSON雛形",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "goal",
+   "description": "Every contract answers the same questions: If one is missing, the loop becomes either a manual prompting habit or an unsafe background automation. The skeleton: ---",
+   "descriptionJa": "goal / when / pick_work / sandbox / checks / memory / limits / hand_off を定義する契約の骨格。すべてのループはこの形に落とせる。",
+   "kickoffPrompt": "{\n  \"loop\":      \"<short name>\",\n  \"goal\":      \"<the one verifiable thing 'done' means>\",\n  \"when\":      { \"on\": \"schedule | event\", \"fires\": \"<cadence or event>\" },\n  \"pick_work\": \"<what this loop may act on, and nothing else>\",\n  \"sandbox\":   { \"where\": \"<isolation>\", \"never\": [\"<off-limits action>\"] },\n  \"checks\":    [\"<a gate the work must pass>\"],\n  \"memory\":    \"<what persists between runs, and where>\",\n  \"limits\":    { \"max_turns\": 0, \"max_minutes\": 0 },\n  \"hand_off\":  { \"when\": [\"<escalation trigger>\"], \"to\": \"<who or where>\" },\n  \"done\":      { \"success\": \"<finished well>\", \"give_up\": \"<stopped without success>\" }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "14",
+   "slug": "contract-pr-babysitter",
+   "title": "PR babysitter",
+   "titleJa": "契約：PRお守り",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "time",
+   "description": "Why this shape: act only on explicit blockers; propose, never merge; escalate on the second repeat of the same failure.",
+   "descriptionJa": "人が張り付かずに1つのPRをマージ可能へ進める契約。作業の選び方・砂場・検査・記憶・上限・引き渡しを明記する。",
+   "kickoffPrompt": "{\n  \"loop\": \"pr-babysitter\",\n  \"goal\": \"Keep one pull request moving toward merge-ready without a human polling comments, CI, conflicts, and stale review threads.\",\n  \"when\": { \"on\": \"schedule\", \"fires\": \"every 2 hours in working hours, plus on requested changes or a failed required check\" },\n  \"pick_work\": \"Act only on explicit blockers: unresolved review comments, failed checks, merge conflicts, or stale reviewer state.\",\n  \"sandbox\": {\n    \"where\": \"a dedicated worktree off the PR branch\",\n    \"never\": [\"force-push\", \"large refactor\", \"dependency upgrade\", \"secrets access\", \"production change\"]\n  },\n  \"checks\": [\"required GitHub checks pass\", \"every unresolved comment is answered or resolved\", \"the diff stays scoped to the blocker\"],\n  \"memory\": \"pr-babysitter-state.md: attempts per PR, last action, open blockers\",\n  \"limits\": { \"max_turns\": 3, \"max_minutes\": 60 },\n  \"hand_off\": {\n    \"when\": [\"an architectural decision is needed\", \"the same failure repeats twice\", \"reviewers disagree\", \"a force-push would be required\"],\n    \"to\": \"a PR comment that tags the human owner\"\n  },\n  \"done\": {\n    \"success\": \"the PR is merge-ready or waiting only on human review\",\n    \"give_up\": \"the loop is blocked, the budget is spent, or the next step needs human judgment\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "15",
+   "slug": "contract-ci-repair",
+   "title": "CI repair",
+   "titleJa": "契約：CI修復",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "proactive",
+   "description": "Why this shape: distinguish real regressions from flakes; the original failing command passing is the only success gate.",
+   "descriptionJa": "失敗したCIシグナルを、小さな検証済み修正か的確なエスカレーションに変える契約。",
+   "kickoffPrompt": "{\n  \"loop\": \"ci-repair\",\n  \"goal\": \"Turn a failing CI signal into a small verified fix or a precise escalation note.\",\n  \"when\": { \"on\": \"event\", \"fires\": \"a required CI check fails on an active pull request\" },\n  \"pick_work\": \"Only failures with a reproducible command or a clear log-backed cause.\",\n  \"sandbox\": {\n    \"where\": \"a worktree off the failing branch\",\n    \"never\": [\"weaken assertions\", \"delete tests\", \"broad reformatting\", \"unrequested dependency upgrade\"]\n  },\n  \"checks\": [\"the original failing command now passes\", \"the patch is limited to the failure's cause\", \"new behavior gets a focused test when one is warranted\"],\n  \"memory\": \"a PR comment trail: the failing log excerpt, the patch, the passing output\",\n  \"limits\": { \"max_turns\": 3, \"max_minutes\": 90 },\n  \"hand_off\": {\n    \"when\": [\"credentials are missing\", \"a third-party outage\", \"the failure is nondeterministic\", \"the fix exceeds scope\"],\n    \"to\": \"a PR comment requesting a human reviewer\"\n  },\n  \"done\": {\n    \"success\": \"the target check passes locally or on rerun CI\",\n    \"give_up\": \"the failure is flaky, not reproducible, environment-blocked, or needs owner approval\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "16",
+   "slug": "contract-incident-response",
+   "title": "Incident response (read-only, diagnose-only)",
+   "titleJa": "契約：インシデント対応（読取専用・診断のみ）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "proactive",
+   "description": "Why this shape: some loops should be forbidden from acting. This one correlates evidence and pages a human, but can never touch production. Note the gate: \"missing telemetry is reported as unknown, never healthy.\"",
+   "descriptionJa": "新規アラートを証拠に基づくトリアージ済みインシデントに変える。読み取り専用で、修正はしない。",
+   "kickoffPrompt": "{\n  \"loop\": \"incident-response\",\n  \"goal\": \"Turn a fresh alert into a triaged, evidence-backed incident with a clear owner and a postmortem trail.\",\n  \"when\": { \"on\": \"event\", \"fires\": \"a pager alert fires or an error-budget burn crosses a threshold; then refresh every 2-5 minutes while the incident is open\" },\n  \"pick_work\": \"Correlate the alert with deploys, logs, traces, and metrics. Diagnose only.\",\n  \"sandbox\": {\n    \"where\": \"read-only access to observability, change logs, and pager state; no remediation surface\",\n    \"never\": [\"roll back\", \"restart services\", \"change config\", \"run any remediation\"]\n  },\n  \"checks\": [\"severity is backed by concrete impact evidence\", \"the suspected cause cites specific deploys, logs, traces, or metrics\", \"missing telemetry is reported as unknown, never as healthy\"],\n  \"memory\": \"an incident timeline: alert, evidence, hypotheses, owner, handoff time\",\n  \"limits\": { \"max_minutes\": 15 },\n  \"hand_off\": {\n    \"when\": [\"a customer-facing outage\", \"data-loss risk\", \"a security signal\", \"missing telemetry\", \"mitigation needs a production action\"],\n    \"to\": \"the on-call owner, via pager, with the evidence timeline\"\n  },\n  \"done\": {\n    \"success\": \"the incident is triaged with severity, suspected cause, and an owner\",\n    \"give_up\": \"evidence is insufficient or any fix would require touching production\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "17",
+   "slug": "contract-dependency-triage",
+   "title": "Dependency triage (risk-bucketed)",
+   "titleJa": "契約：依存トリアージ（リスク別）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "time",
+   "description": "Why this shape: automate only the \"safe patch\" bucket; defer everything riskier with reasons.",
+   "descriptionJa": "依存更新を、安全なパッチ・保留・人的レビューの3バケツに仕分ける契約。",
+   "kickoffPrompt": "{\n  \"loop\": \"dependency-triage\",\n  \"goal\": \"Sort dependency updates into safe patches, deferred upgrades, and human-review items, each with reproducible evidence.\",\n  \"when\": { \"on\": \"schedule\", \"fires\": \"weekly, plus on any security advisory for a package in use\" },\n  \"pick_work\": \"Bucket updates by risk (safe patch, minor feature, major migration, security, blocked). Act automatically only on the safe-patch bucket.\",\n  \"sandbox\": {\n    \"where\": \"a worktree per update group\",\n    \"never\": [\"major version migrations\", \"runtime version changes\", \"security-policy changes\", \"broad multi-group upgrades\"]\n  },\n  \"checks\": [\"lockfile and manifest stay consistent\", \"relevant tests, typecheck, build, and audit pass\", \"no changelog-named migration step is skipped\"],\n  \"memory\": \"dependency-triage-state.md: each update's bucket, decision, and reason\",\n  \"limits\": { \"max_turns\": 2, \"max_minutes\": 45 },\n  \"hand_off\": {\n    \"when\": [\"a major version upgrade\", \"a runtime requirement change\", \"a security advisory with product impact\", \"a licensing concern\"],\n    \"to\": \"an issue or PR comment with the per-bucket reasons\"\n  },\n  \"done\": {\n    \"success\": \"safe patches are applied and verified; everything riskier is filed with reasons\",\n    \"give_up\": \"any update needs a migration plan or a human risk decision\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "18",
+   "slug": "contract-pr-review",
+   "title": "PR review (read-only, comment-only)",
+   "titleJa": "契約：PRレビュー（読取専用・コメントのみ）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "proactive",
+   "description": "Why this shape: comment, never approve. Heterogeneity is the point — a reviewer that is a different agent than the maker catches what self-review can't. (See docs/05 and the four-reviewer case study in docs/11.)",
+   "descriptionJa": "オープンされた全PRに、証拠に基づく実質的な初回レビューを付ける。変更はせずコメントのみ。",
+   "kickoffPrompt": "{\n  \"loop\": \"pr-review\",\n  \"goal\": \"Give every opened PR a substantive, evidence-backed first review without a human reviewer polling the queue.\",\n  \"when\": { \"on\": \"event\", \"fires\": \"a pull request is opened or pushed to\" },\n  \"pick_work\": \"Review the diff only; never the whole repo. Skip vendored/generated paths.\",\n  \"sandbox\": {\n    \"where\": \"read-only checkout of the PR head; no write surface\",\n    \"never\": [\"push commits\", \"approve or merge\", \"request changes as a human\", \"edit the branch\"]\n  },\n  \"checks\": [\"each finding cites a specific file and line\", \"each finding names a concrete failure mode, not a style preference\", \"the reviewer is a different model/agent than any that wrote the code\"],\n  \"memory\": \"review comments on the PR itself; a per-repo learnings file of recurring issues\",\n  \"limits\": { \"max_minutes\": 20 },\n  \"hand_off\": {\n    \"when\": [\"a security-relevant change\", \"an architectural decision\", \"the diff exceeds a human-reviewable size\"],\n    \"to\": \"a PR comment tagging a human reviewer, with the findings so far\"\n  },\n  \"done\": {\n    \"success\": \"the PR has a posted review with concrete, located findings (or an explicit 'no issues found')\",\n    \"give_up\": \"the diff is too large to review meaningfully, or needs human judgment\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "19",
+   "slug": "contract-doc-drift",
+   "title": "Documentation-drift repair",
+   "titleJa": "契約：ドキュメント乖離の修復",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "time",
+   "description": "Why this shape: the loop fixes mechanical drift (a renamed symbol, a dead link) and escalates intent — it must never invent behavior to make a doc \"true.\"",
+   "descriptionJa": "改名・削除されたAPIへの参照など、コードとドキュメントの乖離を検知して直す契約。",
+   "kickoffPrompt": "{\n  \"loop\": \"doc-drift\",\n  \"goal\": \"Keep docs in sync with code: catch references to renamed/removed symbols, dead links, and stale examples, and fix the cheap ones.\",\n  \"when\": { \"on\": \"schedule\", \"fires\": \"nightly, plus on merge to the default branch\" },\n  \"pick_work\": \"Only docs whose referenced symbols, files, commands, or links no longer resolve. One doc per turn.\",\n  \"sandbox\": {\n    \"where\": \"a worktree off the default branch\",\n    \"never\": [\"rewrite docs for tone/style\", \"change code to match the docs\", \"invent behavior the code doesn't have\"]\n  },\n  \"checks\": [\"every code reference in the changed doc resolves\", \"all links return 200\", \"any code example still runs / type-checks\", \"no behavioral claim was added that isn't in the code\"],\n  \"memory\": \"doc-drift-state.md: each doc's last-verified commit and open drift items\",\n  \"limits\": { \"max_turns\": 3, \"max_minutes\": 30 },\n  \"hand_off\": {\n    \"when\": [\"the drift implies a real behavior change to document\", \"the doc's intent is ambiguous\", \"a fix would require deciding what the feature should do\"],\n    \"to\": \"an issue with the drift list and the ambiguous cases flagged\"\n  },\n  \"done\": {\n    \"success\": \"broken references and links are fixed and verified; ambiguous drift is filed\",\n    \"give_up\": \"the correct content requires a human product/intent decision\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "20",
+   "slug": "contract-flaky-hunt",
+   "title": "Flaky-test hunt",
+   "titleJa": "契約：フレーキーテスト狩り",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "contract",
+    "label": "契約",
+    "labelJa": "契約"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "time",
+   "description": "Why this shape: the danger is a maker that \"fixes\" flakiness by deleting the test or adding a retry. The gate is strict — a flake must be proven (pass and fail on one commit), and a deterministic failure is escalated as a bug, never masked. ---",
+   "descriptionJa": "同一コミットで成功も失敗もする本当にフレーキーなテストを特定し、方針に沿って隔離する契約。",
+   "kickoffPrompt": "{\n  \"loop\": \"flaky-hunt\",\n  \"goal\": \"Find and quarantine genuinely flaky tests (pass and fail on the same commit), with reproducible evidence, without masking real regressions.\",\n  \"when\": { \"on\": \"schedule\", \"fires\": \"nightly; re-runs the suite N times on a pinned commit\" },\n  \"pick_work\": \"Only tests that both pass and fail across repeated runs of the SAME commit. A test that fails every time is a real failure, not a flake.\",\n  \"sandbox\": {\n    \"where\": \"a worktree on a pinned commit; the test runner only\",\n    \"never\": [\"delete a test\", \"weaken an assertion\", \"add a blanket retry to hide flakiness\", \"quarantine a test that fails deterministically\"]\n  },\n  \"checks\": [\"the test demonstrably both passed and failed on the same commit across runs\", \"the quarantine is annotated with the run evidence and an owner\", \"no deterministically-failing test was quarantined\"],\n  \"memory\": \"flaky-state.md: per-test pass/fail counts across runs, quarantine decisions, evidence links\",\n  \"limits\": { \"max_minutes\": 60, \"max_reruns\": 20 },\n  \"hand_off\": {\n    \"when\": [\"a 'flake' is actually a deterministic failure (a real bug)\", \"the flake rate is climbing across the suite\", \"the root cause is environmental/infra\"],\n    \"to\": \"an issue with the per-test evidence and the suspected cause\"\n  },\n  \"done\": {\n    \"success\": \"confirmed flakes are quarantined with evidence and an owner; real failures are filed as bugs, not hidden\",\n    \"give_up\": \"the instability is environmental or points to a real regression needing a human\"\n  }\n}",
+   "lang": "json",
+   "keywords": [
+    "契約"
+   ]
+  },
+  {
+   "number": "21",
+   "slug": "shell-cron-gate-first",
+   "title": "A portable shell-cron loop (gate-first)",
+   "titleJa": "シェル/cronループ（ゲート優先）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "automation",
+    "label": "自動化",
+    "labelJa": "自動化"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "time",
+   "description": "When you don't have a hosted automations tab, a cron + a \"gate before acting\" script is enough: Why this shape: gate before acting (skip if already green), a lock dir to prevent overlapping runs, and receipts in a log file. ---",
+   "descriptionJa": "まず検査を実行し、既に通っていれば何もしない。無駄な実行を避ける移植性の高いシェルループ。",
+   "kickoffPrompt": "# Gate first: if the check already passes, there is no work to do.\nif bash -c \"$CHECK_CMD\" >/tmp/loop-check.out 2>&1; then\n  echo \"$(date -u +%FT%TZ) ok: check already green\" >> \"$RECEIPTS\"; exit 0\nfi\n\nprompt=\"The check '$CHECK_CMD' is failing. Latest output:\n$(tail -n 80 /tmp/loop-check.out)\n\nFix only the cause of this failure. Do not change CI config, add dependencies,\nor edit unrelated files. Append one line to loop-receipts.log describing the change.\"\n\n$AGENT_CMD \"$prompt\"\n\n# Re-gate: the deterministic check, not the agent, decides success.",
+   "lang": "sh",
+   "keywords": [
+    "自動化"
+   ]
+  },
+  {
+   "number": "22",
+   "slug": "ralph-one-liner",
+   "title": "A portable shell-cron loop (gate-first)",
+   "titleJa": "Ralph：技法を1行で",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/loop-contracts.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "ループ契約",
+   "triggerType": "time",
+   "description": "When you don't have a hosted automations tab, a cron + a \"gate before acting\" script is enough: Why this shape: gate before acting (skip if already green), a lock dir to prevent overlapping runs, and receipts in a log file. ---",
+   "descriptionJa": "PROMPT.md を延々とエージェントに流し込むだけ、というRalph技法の本質。最小にして原型。",
+   "kickoffPrompt": "0 9 * * 1-5 cd /path/to/repo && CHECK_CMD=\"npm test\" AGENT_CMD=\"claude -p\" ./loop-wrapper.sh",
+   "lang": "cron",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "23",
+   "slug": "ralph-one-thing",
+   "title": "1. The whole technique in one line",
+   "titleJa": "Ralph：1ターンに1つだけ",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "Source: Geoffrey Huntley, ghuntley.com/ralph. — Ralph in its purest form: a bare loop feeding one prompt to a fresh agent forever. \"Deterministically bad in an undeterministic world\" — crude, but it works because each turn re-reads the plan from disk. The loop is agent-agnostic — the same shape drives any headless CLI agent: Source: Ian Nuttall, iannuttall/ralph.",
+   "descriptionJa": "計画から最重要の1件を選び、変更前にコードベースを検索し、そのうえで1つだけ実装する中核指示。",
+   "kickoffPrompt": "# pick your runner — Ralph doesn't care which\nAGENT_CMD=\"claude -p --dangerously-skip-permissions \\\"$(cat PROMPT.md)\\\"\"\nAGENT_CMD=\"codex exec --yolo -\"\nAGENT_CMD=\"opencode run \\\"$(cat PROMPT.md)\\\"\"\nAGENT_CMD=\"droid exec --skip-permissions-unsafe -f PROMPT.md\"",
+   "lang": "bash",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "24",
+   "slug": "ralph-backpressure",
+   "title": "2. The core loop instruction: do ONE thing per turn",
+   "titleJa": "Ralph：変更した単位をテストする（背圧）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "Source: Geoffrey Huntley, ghuntley.com/ralph. — Two lessons in three lines: do exactly one thing per loop (let the model pick which), and search before building so the amnesiac agent doesn't re-implement code that already exists (Ralph's \"Achilles' heel\").",
+   "descriptionJa": "実装や修正の直後に、その単位のテストを実行させる。ループに背圧をかけて暴走を防ぐ。",
+   "kickoffPrompt": "Follow @fix_plan.md and choose the most important thing.\nBefore making changes search codebase (don't assume not implemented)\nusing parallel subagents. Think hard.",
+   "lang": "text",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "25",
+   "slug": "ralph-anti-placeholder",
+   "title": "3. Test the unit you just changed (backpressure)",
+   "titleJa": "Ralph：仮実装の禁止標識",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "Source: Geoffrey Huntley, ghuntley.com/ralph. — Immediate, scoped verification after each change is the wheel that has to turn fast.",
+   "descriptionJa": "プレースホルダや手抜き実装を禁じる強い標識。完全な実装だけを受け入れる。",
+   "kickoffPrompt": "After implementing functionality or resolving problems, run the tests for that\nunit of code that was improved. If functionality is missing then it's your job\nto add it as per the application specifications. Think hard.\n\nIf tests unrelated to your work fail then it's your job to resolve these tests\nas part of the increment of change.",
+   "lang": "text",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "26",
+   "slug": "ralph-self-teaching",
+   "title": "4. The anti-placeholder \"sign\"",
+   "titleJa": "Ralph：ループに学習させる",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "Source: Geoffrey Huntley, ghuntley.com/ralph. — Models chase the reward (compiling code) and will happily stub. Huntley uses loud, escalating-number \"signs\" to counter the placeholder bias. (Yes, it's silly. Yes, it works.)",
+   "descriptionJa": "ビルド方法など運用上の学びを見つけたら AGENT.md を更新させ、次の反復に引き継ぐ。",
+   "kickoffPrompt": "9999999999999999999999999999. DO NOT IMPLEMENT PLACEHOLDER OR SIMPLE\nIMPLEMENTATIONS. WE WANT FULL IMPLEMENTATIONS. DO IT OR I WILL YELL AT YOU",
+   "lang": "text",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "27",
+   "slug": "ralph-generic-prompt",
+   "title": "6. A complete, generic PROMPT.md (the everyday Ralph contract)",
+   "titleJa": "Ralph：汎用PROMPT.md（日常版）",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "Source: RepoMirror, repomirrorhq/repomirror. — The minimal generic Ralph contract: orient → single highest-priority item → verify → update plan + commit. The spec is the source of truth.",
+   "descriptionJa": "仕様を読み、最優先の1件を選び、実装し、テストし、記録する。そのまま使える完全なRalph契約。",
+   "kickoffPrompt": "0a. read everything in specs/\n0b. review the files in src/\n\n1. pick the SINGLE highest priority item from @IMPLEMENTATION_PLAN.md and\n   implement it using up to 50 subagents\n2. ensure the tests and checks are passing\n3. update the @IMPLEMENTATION_PLAN.md with your progress and commit all changes\n   with git add -A && git commit -m \"...\"\n\nif there is a discrepancy in the IMPLEMENTATION_PLAN.md and the spec, always\nupdate the IMPLEMENTATION_PLAN.md to match the spec.",
+   "lang": "text",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "28",
+   "slug": "ralph-two-prompts",
+   "title": "7. The \"two prompts\" pattern: a separate PLAN prompt",
+   "titleJa": "Ralph：計画と実装を分ける2プロンプト",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "Ralph practitioners keep a disposable planning prompt that only does gap analysis (specs vs. code) and rewrites the plan — it implements nothing: Source: Clayton Farr, ClaytonFarr/ralph-playbook (condensed). — Separating \"plan\" from \"build\" keeps each loop turn focused and the plan honest.",
+   "descriptionJa": "実装計画を精査する専用プロンプトと、実装するプロンプトを分離するパターン。",
+   "kickoffPrompt": "Study @IMPLEMENTATION_PLAN.md (it may be incorrect) and use up to 500 subagents\nto study existing source code in src/ and compare it against specs/. Create or\nupdate @IMPLEMENTATION_PLAN.md as a bullet-point list sorted by priority of items\nyet to be implemented. Consider searching for TODO, minimal implementations,\nplaceholders, skipped/flaky tests, and inconsistent patterns.\n\nIMPORTANT: Plan only. Do NOT implement anything. Do NOT assume functionality is\nmissing; confirm with a code search first.",
+   "lang": "text",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "29",
+   "slug": "ralph-stop-signal",
+   "title": "9. Give the loop a real stop signal",
+   "titleJa": "Ralph：本物の停止信号を与える",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "goal",
+   "description": "The bare while :; loop never stops on its own. Production Ralphs add an explicit, machine-detectable exit: Source: Ryan Carson, snarktank/ralph. Source: Frank Bria, frankbria/ralph-claude-code. — A dual gate guards against the agent sounding done without being done.",
+   "descriptionJa": "全ストーリーが passes: true になったら完了マーカーを出力させ、ループを確実に終わらせる。",
+   "kickoffPrompt": "When all stories have `passes: true`, output <promise>COMPLETE</promise> and the\nloop exits.",
+   "lang": "text",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "30",
+   "slug": "ralph-loop-wrapper",
+   "title": "10. A production loop wrapper (mode + iteration cap + push)",
+   "titleJa": "Ralph：本番用ループラッパー",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/ralph-loops.md",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "Ralph 系ループ",
+   "triggerType": "time",
+   "description": "Source: Clayton Farr, ClaytonFarr/ralph-playbook. — A hard iteration cap is the cheapest budget guardrail there is. Always set one. ---",
+   "descriptionJa": "モード指定・反復上限・自動pushを備えた、実運用向けのシェルラッパー。",
+   "kickoffPrompt": "#!/bin/bash\n# Usage: ./loop.sh [plan|build] [max_iterations]\nITERATION=0\nwhile true; do\n    if [ \"$MAX_ITERATIONS\" -gt 0 ] && [ \"$ITERATION\" -ge \"$MAX_ITERATIONS\" ]; then\n        echo \"Reached max iterations: $MAX_ITERATIONS\"; break\n    fi\n    cat \"$PROMPT_FILE\" | claude -p \\\n        --dangerously-skip-permissions \\\n        --output-format=stream-json \\\n        --model opus --verbose\n    git push origin \"$CURRENT_BRANCH\" || git push -u origin \"$CURRENT_BRANCH\"\n    ITERATION=$((ITERATION + 1))\ndone",
+   "lang": "bash",
+   "keywords": [
+    "Ralph"
+   ]
+  },
+  {
+   "number": "31",
+   "slug": "verifier-stronger-model",
+   "title": "Run the checker on a stronger model (Codex sub-agent)",
+   "titleJa": "検証者を上位モデルで動かす",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/subagents-maker-checker.md",
+   "category": {
+    "slug": "verification",
+    "label": "検証",
+    "labelJa": "検証"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "サブエージェント（maker/checker）",
+   "triggerType": "goal",
+   "description": "Why this shape: a common pattern. The maker runs on a fast, cheap model; the checker runs on the strongest model at high reasoning effort, read-only.",
+   "descriptionJa": "検証者を別プロセス・別モデルとして定義し、条件を満たさない修正を却下させる。生成と評価の分離。",
+   "kickoffPrompt": "# .codex/agents/verifier.toml\nname = \"verifier\"\ndescription = \"Rejects loop fixes unless tests pass and scope is minimal\"\ninstructions = \"See loop-verifier SKILL above.\"\nmodel = \"strongest-available\"\nreasoning_effort = \"high\"\nread_only = true",
+   "lang": "toml",
+   "keywords": [
+    "検証"
+   ]
+  },
+  {
+   "number": "32",
+   "slug": "four-role-durable-loop",
+   "title": "The four-role durable loop: PLANNER → IMPLEMENTOR → REVIEWER → JUDGE",
+   "titleJa": "4役の永続ループ",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/subagents-maker-checker.md",
+   "category": {
+    "slug": "verification",
+    "label": "検証",
+    "labelJa": "検証"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "サブエージェント（maker/checker）",
+   "triggerType": "goal",
+   "description": "Adapted from Joel Hooks' joelclaw agent-loop skill. The killer detail: the reviewer writes tests from the acceptance criteria without reading the implementation, so it can't rubber-stamp the maker. ---",
+   "descriptionJa": "PLANNER → IMPLEMENTOR → REVIEWER → 記録 の4役で回す、状態が持続するループ構成。",
+   "kickoffPrompt": "loop start\n  → PLANNER reads prd.json, finds the next unpassed story\n    → IMPLEMENTOR makes changes, commits\n      → REVIEWER writes tests from the acceptance criteria\n                 (independently — does NOT read the implementation)\n        → JUDGE: all green? → mark story passed, go to next\n                 failing?   → retry with feedback (up to maxRetries)\n                 exhausted? → skip, flag for human review, go to next\n\nRules:\n- Acceptance criteria must be machine-verifiable (tests, typecheck, lint).\n- `passes` flips to true only when the JUDGE approves.\n- `skipped: true` is added on max-retry exhaustion (never silently dropped).",
+   "lang": "text",
+   "keywords": [
+    "検証"
+   ]
+  },
+  {
+   "number": "33",
+   "slug": "binary-pass-fail-grader",
+   "title": "A binary PASS/FAIL grader (the simplest useful shape)",
+   "titleJa": "PASS/FAIL の二値判定者",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/verification-rubrics.md",
+   "category": {
+    "slug": "verification",
+    "label": "検証",
+    "labelJa": "検証"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "検証ルーブリック",
+   "triggerType": "goal",
+   "description": "Source: pattern from Clayton Farr, ClaytonFarr/ralph-playbook (\"non-deterministic backpressure\"). — Turns a subjective acceptance criterion into a binary gate a loop can iterate against. Usage in a test:",
+   "descriptionJa": "観測可能な基準1つに対して合否のみを返す、最も単純で有用な判定者。曖昧な評価を排除する。",
+   "kickoffPrompt": "You are a strict reviewer. Evaluate the ARTIFACT against the CRITERIA.\n\nCRITERIA: <one observable, behavioral criterion>\nARTIFACT: <text, or a screenshot path>\n\nReturn JSON only:\n{ \"pass\": <true|false>, \"feedback\": \"<only when pass=false: the single most\n  important reason, specific and actionable>\" }\n\nRules:\n- Judge only against the stated criterion. Do not invent new requirements.\n- If you cannot tell from the artifact, return pass=false with feedback asking\n  for the missing evidence.",
+   "lang": "text",
+   "keywords": [
+    "検証"
+   ]
+  },
+  {
+   "number": "34",
+   "slug": "eval-regression-judge",
+   "title": "An evaluation-regression judge (grounded in traces)",
+   "titleJa": "評価リグレッションの判定者",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/verification-rubrics.md",
+   "category": {
+    "slug": "verification",
+    "label": "検証",
+    "labelJa": "検証"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "検証ルーブリック",
+   "triggerType": "goal",
+   "description": "Why this shape: the judge must ground every verdict in trace evidence plus run IDs, and is explicitly forbidden from \"changing scorers to make failures disappear.\"",
+   "descriptionJa": "失敗トレースを直近の正常時と比較し、劣化の原因を証拠に基づいて特定する。",
+   "kickoffPrompt": "Investigate evaluation regression <run id>.\nCompare failing traces against the last known-good baseline.\nClassify the likely cause BEFORE editing.\nPatch only the smallest prompt, context, harness, scorer, or fixture issue\nsupported by trace evidence.\nRerun targeted evals, record run IDs and score deltas, and escalate if the fix\nrisks overfitting.\n\nVerification gates:\n- Targeted failing tasks improve or return to baseline.\n- No known sentinel tasks regress.\n- Trace evidence supports the claimed cause.\n- Score changes are reported with sample size, variance caveat, and run IDs.",
+   "lang": "text",
+   "keywords": [
+    "検証"
+   ]
+  },
+  {
+   "number": "35",
+   "slug": "security-review-judge",
+   "title": "A security-review judge (read-only, evidence-gated)",
+   "titleJa": "セキュリティレビュー判定者",
+   "url": "https://github.com/invincible04/awesome-loop-engineering/blob/main/prompts/verification-rubrics.md",
+   "category": {
+    "slug": "verification",
+    "label": "検証",
+    "labelJa": "検証"
+   },
+   "author": "awesome-loop-engineering",
+   "topic": "検証ルーブリック",
+   "triggerType": "proactive",
+   "description": "Why this shape: a grader that must distinguish \"exploitable\" from \"speculative\" with repository-specific evidence; default read-only. ---",
+   "descriptionJa": "PR・ブランチ・リリースに対し、読み取り専用でセキュリティレビューを行う。狭い修正以外は変更しない。",
+   "kickoffPrompt": "Run a security review loop for <PR, branch, or release>.\nStay read-only unless a narrow mechanical fix is explicitly safe.\nMap the changed attack surface, run allowed checks, validate each finding with\nevidence, and avoid speculative claims.\nReport impact, evidence, recommended fix, residual risk, and escalation needs.\nDo not access production secrets or perform destructive testing.\n\nGates:\n- Findings cite concrete files, paths, inputs, commands, or traces.\n- Static analysis or tests support the claim when possible.\n- Suggested fixes do not weaken security controls or broaden permissions.",
+   "lang": "text",
+   "keywords": [
+    "検証"
+   ]
+  },
+  {
+   "number": "36",
+   "slug": "ralph-original-prompt",
+   "title": "Ralph Agent Instructions (original)",
+   "titleJa": "Ralph 原典プロンプト",
+   "url": "https://github.com/snarktank/ralph",
+   "category": {
+    "slug": "ralph",
+    "label": "Ralph",
+    "labelJa": "Ralph"
+   },
+   "author": "snarktank/ralph",
+   "topic": "Ralph 原典",
+   "triggerType": "goal",
+   "description": "Ralph is an autonomous AI agent loop that runs repeatedly until all PRD items are complete.",
+   "descriptionJa": "PRD(prd.json)の全項目が完了するまで反復する自律エージェントループの原典。優先度最上位の未完ストーリーを1つ選んで実装し、品質チェックを通し、コミットし、進捗と学びを追記する。",
+   "kickoffPrompt": "# Ralph Agent Instructions\n\nYou are an autonomous coding agent working on a software project.\n\n## Your Task\n\n1. Read the PRD at `prd.json` (in the same directory as this file)\n2. Read the progress log at `progress.txt` (check Codebase Patterns section first)\n3. Check you're on the correct branch from PRD `branchName`. If not, check it out or create from main.\n4. Pick the **highest priority** user story where `passes: false`\n5. Implement that single user story\n6. Run quality checks (e.g., typecheck, lint, test - use whatever your project requires)\n7. Update AGENTS.md files if you discover reusable patterns (see below)\n8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Story Title]`\n9. Update the PRD to set `passes: true` for the completed story\n10. Append your progress to `progress.txt`\n\n## Progress Report Format\n\nAPPEND to progress.txt (never replace, always append):\n```\n## [Date/Time] - [Story ID]\nThread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID\n- What was implemented\n- Files changed\n- **Learnings for future iterations:**\n  - Patterns discovered (e.g., \"this codebase uses X for Y\")\n  - Gotchas encountered (e.g., \"don't forget to update Z when changing W\")\n  - Useful context (e.g., \"the evaluation panel is in component X\")\n---\n```\n\nInclude the thread URL so future iterations can use the `read_thread` tool to reference previous work if needed.\n\nThe learnings section is critical - it helps future iterations avoid repeating mistakes and understand the codebase better.\n\n## Consolidate Patterns\n\nIf you discover a **reusable pattern** that future iterations should know, add it to the `## Codebase Patterns` section at the TOP of progress.txt (create it if it doesn't exist). This section should consolidate the most important learnings:\n\n```\n## Codebase Patterns\n- Example: Use `sql<number>` template for aggregations\n- Example: Always use `IF NOT EXISTS` for migrations\n- Example: Export types from actions.ts for UI components\n```\n\nOnly add patterns that are **general and reusable**, not story-specific details.\n\n## Update AGENTS.md Files\n\nBefore committing, check if any edited files have learnings worth preserving in nearby AGENTS.md files:\n\n1. **Identify directories with edited files** - Look at which directories you modified\n2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directories or parent directories\n3. **Add valuable learnings** - If you discovered something future developers/agents should know:\n   - API patterns or conventions specific to that module\n   - Gotchas or non-obvious requirements\n   - Dependencies between files\n   - Testing approaches for that area\n   - Configuration or environment requirements\n\n**Examples of good AGENTS.md additions:**\n- \"When modifying X, also update Y to keep them in sync\"\n- \"This module uses pattern Z for all API calls\"\n- \"Tests require the dev server running on PORT 3000\"\n- \"Field names must match the template exactly\"\n\n**Do NOT add:**\n- Story-specific implementation details\n- Temporary debugging notes\n- Information already in progress.txt\n\nOnly update AGENTS.md if you have **genuinely reusable knowledge** that would help future work in that directory.\n\n## Quality Requirements\n\n- ALL commits must pass your project's quality checks (typecheck, lint, test)\n- Do NOT commit broken code\n- Keep changes focused and minimal\n- Follow existing code patterns\n\n## Browser Testing (Required for Frontend Stories)\n\nFor any story that changes UI, you MUST verify it works in the browser:\n\n1. Load the `dev-browser` skill\n2. Navigate to the relevant page\n3. Verify the UI changes work as expected\n4. Take a screenshot if helpful for the progress log\n\nA frontend story is NOT complete until browser verification passes.\n\n## Stop Condition\n\nAfter completing a user story, check if ALL stories have `passes: true`.\n\nIf ALL stories are complete and passing, reply with:\n<promise>COMPLETE</promise>\n\nIf there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).\n\n## Important\n\n- Work on ONE story per iteration\n- Commit frequently\n- Keep CI green\n- Read the Codebase Patterns section in progress.txt before starting",
+   "lang": "markdown",
+   "keywords": [
+    "Ralph",
+    "原典"
+   ]
+  }
+ ]
+}

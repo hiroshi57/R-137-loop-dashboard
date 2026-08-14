@@ -447,6 +447,7 @@
   #awSection{display:none}
   #alhSection{display:none}
   #aleSection{display:none}
+  #leSection{display:none}
   /* ALE: 役割分担バッジ */
   .role-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
     padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);
@@ -546,6 +547,7 @@
     <button class="src-tab" data-src="aw" id="tabAW">⭐ AW ループ <span id="awTabCount">（読込中…）</span></button>
     <button class="src-tab" data-src="alh" id="tabALH">🧩 ALH ループ <span id="alhTabCount">（読込中…）</span></button>
     <button class="src-tab" data-src="ale" id="tabALE">📐 ALE ループ <span id="aleTabCount">（読込中…）</span></button>
+    <button class="src-tab" data-src="le" id="tabLE">🎓 LE ループ <span id="leTabCount">（読込中…）</span></button>
   </div>
 
   <!-- ① DI サマリー -->
@@ -742,6 +744,32 @@
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="aleTypeChips"></div>
     <div class="grid" id="aleGrid"></div>
   </div><!-- /aleSection -->
+
+  <!-- LE ループセクション（Loop Engineering 教材＋Ralph原典） -->
+  <div id="leSection">
+    <div class="eyebrow">LE LOOP LIBRARY — Loop Engineering Prompts</div>
+    <div style="font-size:11px;color:var(--faint);margin:-6px 0 14px">
+      出典 <a href="https://github.com/invincible04/awesome-loop-engineering" target="_blank" rel="noopener" style="color:var(--primary)">invincible04/awesome-loop-engineering</a>
+      ＋ <a href="https://github.com/snarktank/ralph" target="_blank" rel="noopener" style="color:var(--primary)">snarktank/ralph</a>（Ralph原典）
+      — いずれも MIT。そのままコピーして使えるループ・プロンプト集。日本語訳はDIによる二次的著作物。
+    </div>
+    <div class="ff-kpi-strip" id="leKpis">
+      <div class="kpi"><div class="v" id="leKpiCount">—</div><div class="l">ループ総数</div></div>
+      <div class="kpi"><div class="v" id="leKpiCats">—</div><div class="l">カテゴリ</div></div>
+      <div class="kpi"><div class="v" id="leKpiFiltered">—</div><div class="l">絞り込み結果</div></div>
+    </div>
+    <div class="ff-filters-row" id="leFiltersRow">
+      <div class="search-box" style="flex:1;min-width:220px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="leQ" type="search" placeholder="タイトル / 説明 / プロンプト本文で検索" autocomplete="off">
+        <button class="search-clear" id="leQClear" aria-label="検索クリア">✕</button>
+      </div>
+      <span class="ff-result-count">該当 <b id="leCount">—</b> 件</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="leCatChips"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="leTypeChips"></div>
+    <div class="grid" id="leGrid"></div>
+  </div><!-- /leSection -->
 
 </main>
 
@@ -1577,18 +1605,20 @@ let source = "di";
 function switchSource(s){
   source=s;
   document.querySelectorAll(".src-tab").forEach(b=>b.classList.toggle("on",b.dataset.src===s));
-  const di=$("#diSection"), ff=$("#ffSection"), el=$("#elSection"), aw=$("#awSection"), alh=$("#alhSection"), ale=$("#aleSection");
+  const di=$("#diSection"), ff=$("#ffSection"), el=$("#elSection"), aw=$("#awSection"), alh=$("#alhSection"), ale=$("#aleSection"), le=$("#leSection");
   if(di) di.style.display=s==="di"?"block":"none";
   if(ff) ff.style.display=s==="ff"?"block":"none";
   if(el) el.style.display=s==="el"?"block":"none";
   if(aw) aw.style.display=s==="aw"?"block":"none";
   if(alh) alh.style.display=s==="alh"?"block":"none";
   if(ale) ale.style.display=s==="ale"?"block":"none";
+  if(le) le.style.display=s==="le"?"block":"none";
   if(s==="ff" && FF_DATA) renderFFGrid();
   if(s==="el" && EL_DATA) renderELGrid();
   if(s==="aw" && AW_DATA) renderAWGrid();
   if(s==="alh" && ALH_DATA) renderALHGrid();
   if(s==="ale" && ALE_DATA) renderALEGrid();
+  if(s==="le" && LE_DATA) renderLEGrid();
 }
 
 /* ========= EL ループ（loops.elorm.xyz） ========= */
@@ -2247,6 +2277,138 @@ function initALE(){
     const clr=$("#aleQClear"); if(clr) clr.addEventListener("click",()=>{q.value="";aleSearchQ="";renderALEGrid();}); }
 }
 
+/* ========= LE ループ（Loop Engineering 教材＋Ralph原典 / MIT） ========= */
+let LE_DATA=null, leCatFilter="all", leTypeFilter="all", leSearchQ="";
+const LE_CAT_COLORS={"運用":"#0E8A5F","CI":"#0E7FA8","コマンド":"#2B4BD8","契約":"#5A38C9",
+  "自動化":"#C77A12","Ralph":"#DC2F55","検証":"#12A594"};
+const leTitle=l=>l.titleJa||l.title;
+const leDesc =l=>l.descriptionJa||l.description||"";
+const leColor=c=>LE_CAT_COLORS[c.labelJa||c.label]||"#666";
+
+function loadLE(){
+  fetch("le_catalog.json").then(r=>r.json()).then(d=>{
+    LE_DATA=d; LE_DATA._bySlug={};
+    d.loops.forEach(l=>{ l._type=l.triggerType; LE_DATA._bySlug[l.slug]=l; });
+    LE_DATA.catList=d.categories.map(c=>({slug:c.slug,label:c.labelJa||c.label}));
+    const t=$("#leTabCount"); if(t) t.textContent="("+d.loops.length+")";
+    const kc=$("#leKpiCount"); if(kc) kc.textContent=d.loops.length;
+    const kcat=$("#leKpiCats"); if(kcat) kcat.textContent=LE_DATA.catList.length;
+    if(source==="le") renderLEGrid();
+  }).catch(()=>{ const t=$("#leTabCount"); if(t) t.textContent="(読込失敗)"; });
+}
+
+function renderLEGrid(){
+  if(!LE_DATA) return;
+  const q=leSearchQ.toLowerCase().trim();
+  let loops=LE_DATA.loops;
+  if(leCatFilter!=="all") loops=loops.filter(l=>l.category.slug===leCatFilter);
+  if(leTypeFilter!=="all") loops=loops.filter(l=>l._type===leTypeFilter);
+  if(q) loops=loops.filter(l=>leTitle(l).toLowerCase().includes(q)||leDesc(l).toLowerCase().includes(q)||
+    l.title.toLowerCase().includes(q)||(l.kickoffPrompt||"").toLowerCase().includes(q));
+  const catEl=$("#leCatChips");
+  if(catEl){
+    const all=`<button class="ff-chip${leCatFilter==="all"?" on":""}" data-lecat="all">すべて (${LE_DATA.loops.length})</button>`;
+    catEl.innerHTML=all+LE_DATA.catList.map(c=>{
+      const n=LE_DATA.loops.filter(l=>l.category.slug===c.slug).length;
+      return `<button class="ff-chip${leCatFilter===c.slug?" on":""}" data-lecat="${esc(c.slug)}">${esc(c.label)} (${n})</button>`;
+    }).join("");
+  }
+  const typeEl=$("#leTypeChips");
+  if(typeEl){
+    const all=`<button class="ff-chip${leTypeFilter==="all"?" on":""}" data-letype="all">全タイプ</button>`;
+    typeEl.innerHTML=all+LOOP_TYPE_ORDER.map(t=>{
+      const n=LE_DATA.loops.filter(l=>l._type===t).length; if(!n) return "";
+      return `<button class="ff-chip${leTypeFilter===t?" on":""}" data-letype="${t}" title="${esc(typeInfo(t).note)}">${typeInfo(t).icon} ${esc(typeInfo(t).label)} (${n})</button>`;
+    }).join("");
+  }
+  const cnt=$("#leCount"); if(cnt) cnt.textContent=loops.length;
+  const kf=$("#leKpiFiltered"); if(kf) kf.textContent=loops.length;
+  const grid=$("#leGrid"); if(!grid) return;
+  grid.innerHTML=loops.length?loops.map(leCardHTML).join(""):'<div class="empty"><b>該当するLEループがありません</b></div>';
+}
+
+function leCardHTML(l){
+  const color=leColor(l.category), d0=leDesc(l);
+  const isFav=favorites.has("le:"+l.slug);
+  const code=(l.kickoffPrompt||"").substring(0,110);
+  return `<article class="card">
+    <div class="badges">
+      <span class="badge cat" style="border-left:3px solid ${color}">${esc(l.category.labelJa||l.category.label)}</span>
+      <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
+      <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">LE #${l.number}</span>
+    </div>
+    <h4>${esc(leTitle(l))}</h4>
+    <div class="goal">${esc(d0.substring(0,130))}${d0.length>130?"...":""}</div>
+    <div class="strat" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">${esc(code)}${(l.kickoffPrompt||"").length>110?"...":""}</div>
+    <div class="card-foot">
+      <span class="agents">${esc(l.topic||"")}</span>
+      <button class="btn fav-btn${isFav?" on":""}" data-fav="le:${esc(l.slug)}" title="お気に入り">★</button>
+      <button class="btn" data-leview="${esc(l.slug)}">詳細</button>
+      <button class="btn primary" data-lecopy="${esc(l.slug)}">Copy</button>
+    </div>
+  </article>`;
+}
+
+function openLEModal(loop){
+  currentLoop={_le:true,...loop};
+  const color=leColor(loop.category);
+  $("#mBadges").innerHTML=`
+    <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
+    <span class="badge type" title="${esc(typeInfo(loop._type).note)}">${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span>
+    <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">LE Loop #${loop.number}</span>
+    <span style="font-size:11px;color:var(--faint)">${esc(loop.author)}</span>`;
+  $("#mTitle").textContent=leTitle(loop);
+  // プロンプト本文の行を、ループのステップとしてグラフ化（番号付き行があればそれを使う）
+  const lines=(loop.kickoffPrompt||"").split("\n").map(s=>s.trim()).filter(Boolean);
+  const numbered=lines.filter(s=>/^\d+[.)]\s/.test(s)).slice(0,6).map(s=>({label:s.replace(/^\d+[.)]\s*/,""),sub:""}));
+  const graphNodes=numbered.length>=2?numbered
+    :[{label:"プロンプト投入",sub:""},{label:"エージェント実行",sub:""},{label:"検証",sub:""},{label:"停止判定",sub:""}];
+  $("#mBody").innerHTML=`
+    <div class="m-sec tldr">
+      <div class="tldr-lead"><b class="lbl">このループがすること</b><p>${esc(leDesc(loop))}</p></div>
+      <div class="tldr-meta">
+        <div class="tm"><b>分類</b><span>${esc(loop.topic||"")}</span></div>
+        <div class="tm"><b>ループタイプ</b><span>${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span></div>
+        <div class="tm"><b>ライセンス</b><span>MIT</span></div>
+      </div>
+    </div>
+    ${loopGraphBlock(graphNodes)}
+    <div class="m-sec">
+      <div class="prompt-head"><b>プロンプト（そのままコピーして使う）</b><button class="btn primary" id="mCopy">Copy</button></div>
+      <pre class="prompt" id="mPrompt"></pre>
+    </div>
+    ${loop.description?`<div class="m-sec"><b class="lbl">解説（原文）</b><p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(loop.description)}</p></div>`:""}
+    <div class="m-sec"><b class="lbl">出典</b><a href="${esc(loop.url)}" target="_blank" rel="noopener" style="color:var(--primary);font-size:12px">${esc(loop.url)}</a></div>`;
+  $("#mPrompt").textContent=loop.kickoffPrompt||"";
+  $("#mCopy").addEventListener("click", e=>copyText(loop.kickoffPrompt||"", e.currentTarget));
+  $("#mCust").innerHTML=buildCustPanel();
+  initCustPanel(leTitle(loop), loop.kickoffPrompt||"", leDesc(loop), loop.url||"");
+  $("#overlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+
+function initLE(){
+  const grid=$("#leGrid");
+  if(grid) grid.addEventListener("click", e=>{
+    const fv=e.target.closest("[data-fav]");
+    if(fv){ const id=fv.dataset.fav;
+      if(favorites.has(id)){favorites.delete(id);fv.classList.remove("on");}else{favorites.add(id);fv.classList.add("on");}
+      updateFavBar(); return; }
+    const vw=e.target.closest("[data-leview]");
+    if(vw&&LE_DATA){ const l=LE_DATA._bySlug[vw.dataset.leview]; if(l) openLEModal(l); return; }
+    const cp=e.target.closest("[data-lecopy]");
+    if(cp&&LE_DATA){ const l=LE_DATA._bySlug[cp.dataset.lecopy]; if(l) copyText(l.kickoffPrompt||leDesc(l), cp); }
+  });
+  const catEl=$("#leCatChips");
+  if(catEl) catEl.addEventListener("click",e=>{const c=e.target.closest("[data-lecat]"); if(c){leCatFilter=c.dataset.lecat;renderLEGrid();}});
+  const typeEl=$("#leTypeChips");
+  if(typeEl) typeEl.addEventListener("click",e=>{const c=e.target.closest("[data-letype]"); if(c){leTypeFilter=c.dataset.letype;renderLEGrid();}});
+  const q=$("#leQ");
+  if(q){ const d=debounce(()=>{leSearchQ=q.value;renderLEGrid();},220);
+    q.addEventListener("input",d); q.addEventListener("search",d);
+    const clr=$("#leQClear"); if(clr) clr.addEventListener("click",()=>{q.value="";leSearchQ="";renderLEGrid();}); }
+}
+
 // ---- FF グリッド描画 ----
 function renderFFGrid(){
   if(!FF_DATA) return;
@@ -2703,6 +2865,8 @@ loadALH();
 initALH();
 loadALE();
 initALE();
+loadLE();
+initLE();
 switchSource("di"); // 初期状態を明示確定（CSS display:none 問題の保険）
 </script>
 </body>

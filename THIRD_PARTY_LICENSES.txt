@@ -73,3 +73,11 @@ SOFTWARE.
    License: MIT (code) / CC BY 4.0 (content)
    Attribution: ChaoYue0307/awesome-loop-engineering contributors
 ----------------------------------------
+
+----------------------------------------
+8. Loop Engineering Prompts (LE Loops, 36 prompts + Japanese translations as derivative work)
+   Sources:
+     - https://github.com/invincible04/awesome-loop-engineering  (License: MIT)
+     - https://github.com/snarktank/ralph                        (License: MIT)
+   Attribution: invincible04 / snarktank (Ralph original prompt)
+----------------------------------------
