@@ -67,6 +67,19 @@ for name, local, url, pat in CHECKS:
     for s in extra:
         print(f"       - ローカルのみ(削除済みか?): {s}")
 
+# ALE は HuggingFace データセットの examples/*.json 数で照合
+try:
+    meta = json.loads(fetch('https://huggingface.co/api/datasets/cy0307/awesome-loop-engineering'))
+    files = [f.get('rfilename', '') for f in meta.get('siblings', [])]
+    n_remote = len([f for f in files if f.startswith('examples/') and f.endswith('.json')])
+    n_local = len(local_slugs('ale_catalog.json'))
+    status = "OK " if n_local >= n_remote else "NG "
+    if n_local < n_remote:
+        fail = 1
+    print(f"  {status}ALE Awesome Loop Engineering: 一次情報 {n_remote} / 取込済 {n_local}")
+except Exception as e:
+    print(f"  ?  ALE: 取得できず ({e})")
+
 # AW は GitHub README の見出し数で照合
 try:
     md = fetch('https://raw.githubusercontent.com/serenakeyitan/awesome-agent-loops/main/README.md')

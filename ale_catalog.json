@@ -1,0 +1,1944 @@
+{
+ "schemaVersion": 1,
+ "name": "Awesome Loop Engineering",
+ "publisher": "ChaoYue0307/awesome-loop-engineering",
+ "license": "MIT (code) / CC BY 4.0 (content)",
+ "description": "ループ契約22本（役割分担・検証ゲート・予算・エスカレーションまで定義）日本語訳付き",
+ "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+ "loopCount": 22,
+ "categories": [
+  {
+   "slug": "quality",
+   "label": "品質",
+   "labelJa": "品質"
+  },
+  {
+   "slug": "security",
+   "label": "セキュリティ",
+   "labelJa": "セキュリティ"
+  },
+  {
+   "slug": "design",
+   "label": "設計",
+   "labelJa": "設計"
+  },
+  {
+   "slug": "perf",
+   "label": "性能",
+   "labelJa": "性能"
+  },
+  {
+   "slug": "ci",
+   "label": "CI",
+   "labelJa": "CI"
+  },
+  {
+   "slug": "ops",
+   "label": "運用",
+   "labelJa": "運用"
+  },
+  {
+   "slug": "data",
+   "label": "データ",
+   "labelJa": "データ"
+  },
+  {
+   "slug": "maintenance",
+   "label": "保守",
+   "labelJa": "保守"
+  },
+  {
+   "slug": "devops",
+   "label": "DevOps",
+   "labelJa": "DevOps"
+  },
+  {
+   "slug": "docs",
+   "label": "ドキュメント",
+   "labelJa": "ドキュメント"
+  },
+  {
+   "slug": "evaluation",
+   "label": "評価",
+   "labelJa": "評価"
+  },
+  {
+   "slug": "marketing",
+   "label": "マーケ",
+   "labelJa": "マーケ"
+  }
+ ],
+ "loops": [
+  {
+   "number": "01",
+   "slug": "accessibility-regression",
+   "title": "Accessibility regression loop",
+   "titleJa": "アクセシビリティ退行ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "quality",
+    "label": "品質",
+    "labelJa": "品質"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "An accessibility check fails on a pull request or deployment preview.",
+   "triggerJa": "PRまたはプレビュー環境でアクセシビリティチェックが失敗したとき",
+   "triggerType": "proactive",
+   "description": "Repair a newly introduced accessibility failure with reproducible automated evidence and required human review.",
+   "descriptionJa": "新たに混入したアクセシビリティの不具合を、再現可能な自動証拠と必須の人的レビューを伴って修復する。",
+   "agents": [
+    {
+     "role": "Reproducer",
+     "responsibility": "Confirm the failure on the exact route, browser, viewport, and interaction."
+    },
+    {
+     "role": "Fixer",
+     "responsibility": "Apply the smallest standards-aligned component or style change."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Rerun the focused automated rule, keyboard path, and adjacent tests."
+    },
+    {
+     "role": "Accessibility reviewer",
+     "responsibility": "Judge manual criteria and ambiguous semantic or assistive-technology behavior."
+    }
+   ],
+   "gates": [
+    "original rule passes in the same environment",
+    "keyboard order and visible focus remain coherent",
+    "accessible name role and state are correct",
+    "no rule or threshold was weakened",
+    "required manual review is approved"
+   ],
+   "gatesJa": [
+    "同じ環境で元のルールが通過する",
+    "キーボード順序と可視フォーカスの一貫性が保たれる",
+    "アクセシブル名・ロール・状態が正しい",
+    "ルールやしきい値を弱めていない",
+    "必要な手動レビューが承認済み"
+   ],
+   "receipts": [
+    "before and after scan",
+    "route browser and viewport",
+    "commands run",
+    "interaction trace or screenshot",
+    "named manual-review decision"
+   ],
+   "exitCondition": "The exact regression is repaired, adjacent checks pass, and required manual criteria are approved.",
+   "exitConditionJa": "当該の退行が修復され、周辺チェックも通り、必要な手動基準が承認される。",
+   "stopCondition": "The issue cannot be reproduced, needs product judgment, conflicts with the design system, or exceeds the retry budget.",
+   "stopConditionJa": "再現できない・製品判断が必要・デザインシステムと衝突・リトライ上限超過。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 90,
+   "escalation": [
+    "manual criterion is ambiguous",
+    "screen-reader behavior requires specialist review",
+    "shared design token must change",
+    "user flow changes materially"
+   ],
+   "escalationTo": "Accessibility reviewer and component owner",
+   "allowedActions": [
+    "run accessibility and interaction tests",
+    "edit the affected component",
+    "add focused regression tests",
+    "record before and after evidence"
+   ],
+   "disallowedActions": [
+    "disable accessibility rules",
+    "hide content from assistive technology",
+    "lower thresholds",
+    "change shared design tokens without owner approval"
+   ],
+   "stateArtifacts": [
+    "accessibility regression note",
+    "test artifact",
+    "manual review record"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "02",
+   "slug": "adversarial-red-team",
+   "title": "Adversarial red-team loop",
+   "titleJa": "敵対的レッドチームループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "security",
+    "label": "セキュリティ",
+    "labelJa": "セキュリティ"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "A bounded pre-release campaign runs after a model, tool, permission, or policy change.",
+   "triggerJa": "モデル・ツール・権限・ポリシーの変更後、リリース前に期間を区切って実施",
+   "triggerType": "time",
+   "description": "Discover and confirm agent-system failures inside an authorized threat model with reproducible evidence and safe disclosure.",
+   "descriptionJa": "認可された脅威モデルの範囲内で、エージェントシステムの failure を再現可能な証拠と安全な開示を伴って発見・確定する。",
+   "agents": [
+    {
+     "role": "Attacker",
+     "responsibility": "Generate and adapt probes inside the written scope and budget."
+    },
+    {
+     "role": "Reproducer",
+     "responsibility": "Confirm candidate failures independently in a clean sandbox."
+    },
+    {
+     "role": "Minimizer",
+     "responsibility": "Reduce confirmed behavior to the smallest safe, reliable test case."
+    },
+    {
+     "role": "Judge",
+     "responsibility": "Classify confirmed, duplicate, expected, or inconclusive behavior against the written policy."
+    }
+   ],
+   "gates": [
+    "behavior reproduces on the recorded target version",
+    "finding cites a violated policy or boundary",
+    "a separate judge confirms the result",
+    "minimized test contains no real secrets or user data",
+    "duplicate and severity review are complete"
+   ],
+   "gatesJa": [
+    "記録した対象バージョンで挙動が再現する",
+    "所見が違反したポリシーや境界を明示している",
+    "別の判定者が結果を確認する",
+    "最小化したテストに実データや秘密情報を含まない",
+    "重複と重大度のレビューが完了している"
+   ],
+   "receipts": [
+    "target version and environment",
+    "seed and probe",
+    "full and minimized traces",
+    "reproduction count",
+    "policy citation",
+    "severity and disclosure status"
+   ],
+   "exitCondition": "A campaign completes with every confirmed failure reproduced, minimized, privately reported, and added to the regression corpus.",
+   "exitConditionJa": "確定した全 failure が再現・最小化・非公開報告され、リグレッション集合に追加されて campaign が完了する。",
+   "stopCondition": "Budget is exhausted, the target is unstable, scope becomes ambiguous, a rate limit is reached, or human intervention is required.",
+   "stopConditionJa": "予算超過・対象が不安定・スコープが曖昧化・レート制限・人的介入が必要。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 120,
+   "escalation": [
+    "critical behavior is confirmed",
+    "production impact is possible",
+    "scope is ambiguous",
+    "containment is unsafe",
+    "real data may be exposed"
+   ],
+   "escalationTo": "Security owner through the private disclosure channel",
+   "allowedActions": [
+    "generate in-scope probes",
+    "run against the sandbox",
+    "reproduce and minimize traces",
+    "write private finding reports"
+   ],
+   "disallowedActions": [
+    "test production",
+    "use real user data",
+    "exfiltrate data",
+    "persist access",
+    "publish unpatched findings"
+   ],
+   "stateArtifacts": [
+    "private campaign ledger",
+    "confirmed finding report",
+    "regression corpus entry"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "03",
+   "slug": "agent-memory-lifecycle",
+   "title": "Agent memory lifecycle loop",
+   "titleJa": "エージェント記憶ライフサイクル",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "design",
+    "label": "設計",
+    "labelJa": "設計"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Weekly consolidation pass, plus a session-end candidate-write hook after each run.",
+   "triggerJa": "週次の統合パス＋各実行終了時の書き込み候補フック",
+   "triggerType": "time",
+   "description": "Carry governed operational memory between recurring agent runs: explicitly written, scoped on recall, audited, consolidated, and deletable.",
+   "descriptionJa": "反復実行をまたぐ運用記憶を統制して引き継ぐ。明示的に書き込み、想起時にスコープを絞り、監査し、統合し、削除可能に保つ。",
+   "agents": [
+    {
+     "role": "recorder",
+     "responsibility": "Distill each finished run into explicit candidate records instead of raw transcripts."
+    },
+    {
+     "role": "auditor",
+     "responsibility": "Flag stale, contradictory, sensitive, or unattributed records and quarantine failures."
+    },
+    {
+     "role": "consolidator",
+     "responsibility": "Merge duplicates, promote repeated lessons to principle-level records, and retire superseded ones."
+    },
+    {
+     "role": "recall gate",
+     "responsibility": "Scope what each future run may read by task and access class, and verify scopes with test recalls."
+    }
+   ],
+   "gates": [
+    "every record carries provenance, scope, and an expiry or review date",
+    "no raw transcript, credential, or policy-barred content in the live store",
+    "contradictory records cannot coexist unresolved",
+    "recall tests retrieve intended records and nothing out of scope",
+    "deletions and redactions are logged and reversible for the review window"
+   ],
+   "gatesJa": [
+    "全レコードが出所・スコープ・失効/見直し日を持つ",
+    "生トランスクリプト・認証情報・ポリシー禁止の内容が本番ストアに無い",
+    "矛盾するレコードが未解決のまま共存しない",
+    "想起テストが意図したレコードのみを取得する",
+    "削除と秘匿がログ化され、見直し期間中は取り消せる"
+   ],
+   "receipts": [
+    "consolidation receipt linking merged, promoted, and retired records",
+    "audit log entries for every write, merge, prune, and redaction"
+   ],
+   "exitCondition": "All candidates processed, audits clean, recall-scope tests pass, and the receipt is written.",
+   "exitConditionJa": "全候補を処理し、監査がクリーンで、想起スコープのテストが通り、記録が書かれる。",
+   "stopCondition": "Churn cap reached or policy failures found; the live store keeps its last audited state.",
+   "stopConditionJa": "更新上限に到達またはポリシー違反を検出。本番ストアは最後に監査済みの状態を保つ。",
+   "maxRetries": 1,
+   "maxRuntimeMinutes": 60,
+   "escalation": [
+    "sensitive or ambiguous records",
+    "contradiction between operator instruction and remembered preference",
+    "retention-policy questions",
+    "records whose provenance does not trace to a legitimate run"
+   ],
+   "escalationTo": "Review queue with the quarantined records and their provenance evidence.",
+   "allowedActions": [
+    "distill run artifacts into candidate records",
+    "deduplicate and merge with provenance",
+    "audit for staleness, contradiction, and scope creep",
+    "apply logged expiries and redactions",
+    "run recall-scope test queries"
+   ],
+   "disallowedActions": [
+    "store raw transcripts or credentials",
+    "delete audited records silently",
+    "write to the live store without promotion",
+    "broaden a record's recall scope without review"
+   ],
+   "stateArtifacts": [
+    "memory store with typed records",
+    "audit log of writes, merges, prunes, and redactions",
+    "consolidation receipts"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "04",
+   "slug": "benchmark-optimization",
+   "title": "Benchmark optimization loop",
+   "titleJa": "ベンチマーク最適化ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "perf",
+    "label": "性能",
+    "labelJa": "性能"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "A bounded overnight experiment window starts against a frozen benchmark baseline.",
+   "triggerJa": "凍結したベンチマーク基準に対し、夜間の実験ウィンドウを区切って実行",
+   "triggerType": "time",
+   "description": "Improve a measurable system outcome through reproducible experiments without weakening correctness or protected secondary metrics.",
+   "descriptionJa": "正しさや保護対象の副次指標を損なわずに、再現可能な実験を通じて計測可能な成果を改善する。",
+   "agents": [
+    {
+     "role": "Experiment designer",
+     "responsibility": "Propose one falsifiable change and its expected effect without repeating a rejected hypothesis."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Apply only the declared candidate change in an isolated workspace."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Run unchanged correctness gates and repeated benchmark measurements."
+    },
+    {
+     "role": "Recorder",
+     "responsibility": "Accept or reject the candidate and persist a reproducible experiment receipt."
+    }
+   ],
+   "gates": [
+    "correctness and safety checks pass unchanged",
+    "benchmark version and environment match the baseline",
+    "primary metric improves by the minimum delta across required repeats",
+    "protected secondary metrics remain within tolerance"
+   ],
+   "gatesJa": [
+    "正しさと安全性のチェックが変更なく通過する",
+    "ベンチマークのバージョンと環境が基準と一致する",
+    "必要な反復回数で主要指標が最小差分以上改善する",
+    "保護対象の副次指標が許容範囲に留まる"
+   ],
+   "receipts": [
+    "hypothesis",
+    "candidate diff",
+    "commands and environment fingerprint",
+    "raw score distribution",
+    "cost",
+    "accept or reject decision"
+   ],
+   "exitCondition": "The target metric is reached reproducibly while correctness and protected metrics remain within policy.",
+   "exitConditionJa": "正しさと保護指標をポリシー内に保ったまま、目標指標を再現可能に達成する。",
+   "stopCondition": "Budget is exhausted, evidence is unstable, hypotheses repeat, or the next change requires owner judgment.",
+   "stopConditionJa": "予算超過・証拠が不安定・仮説が反復・次の変更にオーナー判断が必要。",
+   "maxRetries": 5,
+   "maxRuntimeMinutes": 240,
+   "escalation": [
+    "metric conflicts with observed quality",
+    "benchmark instability exceeds tolerance",
+    "candidate changes the evaluator",
+    "additional permissions or compute are required"
+   ],
+   "escalationTo": "Experiment owner or evaluation lead",
+   "allowedActions": [
+    "read prior experiment receipts",
+    "edit the declared optimization surface",
+    "run correctness checks",
+    "run the frozen benchmark"
+   ],
+   "disallowedActions": [
+    "edit scorers",
+    "inspect holdout answers",
+    "weaken correctness gates",
+    "change multiple variables in one candidate"
+   ],
+   "stateArtifacts": [
+    "versioned accepted baseline",
+    "experiment ledger",
+    "candidate receipt"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "05",
+   "slug": "bug-hunting",
+   "title": "Bug hunting",
+   "titleJa": "バグ探索ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "quality",
+    "label": "品質",
+    "labelJa": "品質"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Weekly on modules with recent churn, and when error logs spike or flaky tests cluster.",
+   "triggerJa": "変更が多いモジュールを週次で。エラーログ急増やフレーキーテストの集中時にも起動",
+   "triggerType": "time",
+   "description": "Find, validate, and report likely bugs with reproducible evidence instead of filing speculative agent-generated issues.",
+   "descriptionJa": "投機的なIssueを乱発せず、再現可能な証拠を伴ってバグを発見・検証・報告する。",
+   "agents": [
+    {
+     "role": "Scout",
+     "responsibility": "Discover suspicious signals and likely affected code paths."
+    },
+    {
+     "role": "Reproducer",
+     "responsibility": "Attempt minimal reproduction in a safe environment."
+    },
+    {
+     "role": "Minimizer",
+     "responsibility": "Reduce the reproduction to the smallest failing case."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "File evidence-backed issues, or a small PR with tests when the cause is clear."
+    }
+   ],
+   "gates": [
+    "reports include reproducible steps or a clear trace link",
+    "patches include a failing test or deterministic reproduction",
+    "duplicate search is recorded",
+    "expected vs actual behavior is grounded in docs or tests"
+   ],
+   "gatesJa": [
+    "報告に再現手順か明確なトレースリンクが含まれる",
+    "パッチに失敗するテストか決定的な再現が付く",
+    "重複検索の記録がある",
+    "期待と実際の挙動がドキュメントやテストに根拠づけられている"
+   ],
+   "receipts": [
+    "modules checked",
+    "signals inspected",
+    "reproduction commands",
+    "expected and actual behavior",
+    "final disposition"
+   ],
+   "exitCondition": "A bug is reproduced and reported with evidence, or a small verified patch is opened.",
+   "exitConditionJa": "バグが再現され証拠付きで報告されるか、小さな検証済みパッチが提出される。",
+   "stopCondition": "The signal is classified as non-bug, retries are exhausted, or owner judgment is needed.",
+   "stopConditionJa": "シグナルがバグでないと分類・リトライ超過・オーナー判断が必要。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 90,
+   "escalation": [
+    "production-only bug",
+    "privacy-sensitive logs",
+    "security-sensitive finding",
+    "possible data loss",
+    "fix needs architectural judgment"
+   ],
+   "escalationTo": "Module owner via issue; private channel for security-sensitive findings",
+   "allowedActions": [
+    "run tests and local fixtures",
+    "static search",
+    "non-production reproduction",
+    "file evidence-backed issues or small PRs"
+   ],
+   "disallowedActions": [
+    "production data access",
+    "destructive fuzzing",
+    "speculative mass issue creation",
+    "broad refactors"
+   ],
+   "stateArtifacts": [
+    "bug-hunt log",
+    "false-positive ledger"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "06",
+   "slug": "ci-repair",
+   "title": "CI repair loop",
+   "titleJa": "CI修復ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "A required CI check fails on an active pull request.",
+   "triggerJa": "アクティブなPRで必須CIチェックが失敗したとき",
+   "triggerType": "proactive",
+   "description": "Turn a failing CI signal into a small verified fix or a precise escalation note.",
+   "descriptionJa": "失敗したCIシグナルを、小さな検証済み修正か的確なエスカレーションノートに変える。",
+   "agents": [
+    {
+     "role": "Investigator",
+     "responsibility": "Extract the failing command, error, and likely affected files."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Make the smallest patch consistent with the failure evidence."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Rerun the failing command and adjacent cheap checks."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Summarize evidence and residual risk."
+    }
+   ],
+   "gates": [
+    "original failing command passes",
+    "patch is limited to the failure cause",
+    "new behavior has a focused test when needed"
+   ],
+   "gatesJa": [
+    "元の失敗コマンドが通過する",
+    "パッチが失敗原因に限定されている",
+    "必要なら新挙動に的を絞ったテストがある"
+   ],
+   "receipts": [
+    "failing log excerpt",
+    "commands run",
+    "passing output",
+    "diff summary"
+   ],
+   "exitCondition": "The target check passes locally or in rerun CI.",
+   "exitConditionJa": "対象チェックがローカルまたは再実行CIで通過する。",
+   "stopCondition": "Failure is flaky, not reproducible, blocked by environment, or requires owner approval.",
+   "stopConditionJa": "フレーキー・再現不能・環境要因でブロック・オーナー承認が必要。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 90,
+   "escalation": [
+    "missing credentials",
+    "third-party outage",
+    "nondeterministic failure",
+    "fix exceeds scope"
+   ],
+   "escalationTo": "PR comment or issue assigned to the owning team",
+   "allowedActions": [
+    "inspect logs",
+    "run test commands",
+    "apply narrow fixes",
+    "add focused tests"
+   ],
+   "disallowedActions": [
+    "weaken assertions",
+    "delete tests",
+    "broad formatting",
+    "unrequested dependency upgrade"
+   ],
+   "stateArtifacts": [
+    "CI repair progress note",
+    "PR comment"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "07",
+   "slug": "cost-control",
+   "title": "Cost control",
+   "titleJa": "コスト統制ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Daily or weekly usage review, and when spend, tokens, retries, or runtime exceed thresholds for a workflow.",
+   "triggerJa": "日次または週次の使用量レビュー。支出・トークン・リトライ・実行時間がしきい値を超えたときにも起動",
+   "triggerType": "time",
+   "description": "Keep long-running agent workflows within budget by measuring usage, identifying waste, and proposing scoped efficiency improvements.",
+   "descriptionJa": "使用量を計測し、無駄を特定し、範囲を絞った効率改善を提案して、長時間のエージェント作業を予算内に保つ。",
+   "agents": [
+    {
+     "role": "Analyst",
+     "responsibility": "Cluster usage by workflow, task type, model, tool, and retry cause."
+    },
+    {
+     "role": "Investigator",
+     "responsibility": "Inspect traces for context bloat, repeated failures, and missing stop conditions."
+    },
+    {
+     "role": "Optimizer",
+     "responsibility": "Propose the smallest change: smaller context, cheaper routing, caching, batching, or early exit."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Rerun sample tasks or evals to confirm quality is preserved."
+    }
+   ],
+   "gates": [
+    "before/after usage measured on a comparable task mix",
+    "quality gates and evals still pass",
+    "savings estimates include uncertainty and sample size",
+    "verification and escalation remain intact"
+   ],
+   "gatesJa": [
+    "同等のタスク構成で前後の使用量を計測している",
+    "品質ゲートと評価が依然通過する",
+    "削減見積もりに不確実性とサンプル数が含まれる",
+    "検証とエスカレーションの仕組みが維持されている"
+   ],
+   "receipts": [
+    "baseline spend",
+    "usage clusters",
+    "trace samples",
+    "before/after metrics",
+    "verification results"
+   ],
+   "exitCondition": "Spend returns below threshold, or a verified scoped optimization is proposed with evidence.",
+   "exitConditionJa": "支出がしきい値を下回るか、証拠付きの検証済み最適化が提案される。",
+   "stopCondition": "The cause is explained but the fix requires owner approval, or retries are exhausted.",
+   "stopConditionJa": "原因は説明できたが修正にオーナー承認が必要・リトライ超過。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 60,
+   "escalation": [
+    "quality tradeoff required",
+    "model-routing policy change",
+    "customer impact",
+    "unknown spend source"
+   ],
+   "escalationTo": "Workflow owner with before/after evidence and rollout plan",
+   "allowedActions": [
+    "analyze usage",
+    "inspect traces",
+    "propose config or prompt changes",
+    "verify against representative tasks"
+   ],
+   "disallowedActions": [
+    "silent quality-reducing changes",
+    "disabling verification gates",
+    "production routing changes"
+   ],
+   "stateArtifacts": [
+    "cost review report",
+    "accepted-exception ledger"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "08",
+   "slug": "data-quality",
+   "title": "Data quality",
+   "titleJa": "データ品質ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "data",
+    "label": "データ",
+    "labelJa": "データ"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "After each dataset or knowledge-base refresh, or nightly; also when the source schema changes or a freshness SLA is breached.",
+   "triggerJa": "データセット更新のたび、または夜間。スキーマ変更や鮮度SLA違反でも起動",
+   "triggerType": "proactive",
+   "description": "Keep a recurring dataset or knowledge base trustworthy by validating each refresh against explicit quality rules before it is published.",
+   "descriptionJa": "各更新を明示的な品質ルールで検証してから公開し、反復利用するデータセットや知識ベースを信頼できる状態に保つ。",
+   "agents": [
+    {
+     "role": "Profiler",
+     "responsibility": "Compute counts, distributions, null rates, and freshness for the new version."
+    },
+    {
+     "role": "Validator",
+     "responsibility": "Check the profile against quality rules and the prior accepted baseline."
+    },
+    {
+     "role": "Investigator",
+     "responsibility": "Classify each failure as a defect, an accepted shift, or a rule bug."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Record results, quarantine bad versions, and propose rule fixes."
+    }
+   ],
+   "gates": [
+    "hard rules pass before a version is promotable",
+    "distribution shifts beyond threshold are flagged with the delta",
+    "every quarantine cites the failing rule and a sample",
+    "accepted exceptions are recorded"
+   ],
+   "gatesJa": [
+    "昇格の前に必須ルールが通過する",
+    "しきい値を超える分布変化が差分付きでフラグされる",
+    "隔離のたびに違反ルールとサンプルを明示する",
+    "許容した例外が記録される"
+   ],
+   "receipts": [
+    "dataset version",
+    "profile metrics",
+    "rule results",
+    "quarantine status with samples"
+   ],
+   "exitCondition": "The version is validated against all hard rules and ready for promotion.",
+   "exitConditionJa": "当該バージョンが全必須ルールを満たし、昇格可能になる。",
+   "stopCondition": "The version is quarantined with evidence, or a shift needs owner judgment.",
+   "stopConditionJa": "証拠付きで隔離、または分布変化にオーナー判断が必要。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 90,
+   "escalation": [
+    "ambiguous distribution shift",
+    "schema change needing a data-contract update",
+    "repeated upstream failure",
+    "regulated or PII-bearing fields",
+    "a rule that may itself be wrong"
+   ],
+   "escalationTo": "Dataset owner via the data-quality channel",
+   "allowedActions": [
+    "run validation queries",
+    "profile the data",
+    "write a quality report",
+    "quarantine a failing version"
+   ],
+   "disallowedActions": [
+    "edit source data",
+    "publish to production",
+    "relax rules without review"
+   ],
+   "stateArtifacts": [
+    "quality report",
+    "accepted-exception ledger"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "09",
+   "slug": "dependency-triage",
+   "title": "Dependency triage",
+   "titleJa": "依存トリアージループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "maintenance",
+    "label": "保守",
+    "labelJa": "保守"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Weekly, and on Dependabot, Renovate, or advisory-driven update PRs.",
+   "triggerJa": "週次、および Dependabot・Renovate・勧告由来の更新PR時",
+   "triggerType": "time",
+   "description": "Classify dependency updates into safe patches, deferred upgrades, or human-review items with reproducible evidence.",
+   "descriptionJa": "依存更新を、安全なパッチ・保留するアップグレード・人的レビュー対象に、再現可能な証拠付きで分類する。",
+   "agents": [
+    {
+     "role": "Classifier",
+     "responsibility": "Group updates by risk, security relevance, version change, and blast radius."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Apply low-risk updates and resolve lockfile conflicts."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Run targeted tests, typechecks, builds, and package audits."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Record accepted, deferred, and human-review updates with reasons."
+    }
+   ],
+   "gates": [
+    "lockfile and manifest are consistent",
+    "relevant tests, typecheck, build, and audit pass",
+    "no skipped migration steps named in changelogs",
+    "diff is limited to the intended group"
+   ],
+   "gatesJa": [
+    "ロックファイルとマニフェストが整合している",
+    "関連テスト・型チェック・ビルド・監査が通過する",
+    "変更履歴に記載された移行手順を飛ばしていない",
+    "差分が意図したグループに限定されている"
+   ],
+   "receipts": [
+    "package versions and changelog links",
+    "commands run with output",
+    "deferred reasons",
+    "reviewer questions"
+   ],
+   "exitCondition": "Safe updates are verified and merged or review-ready, and risky updates are deferred with reasons.",
+   "exitConditionJa": "安全な更新が検証されマージ可能になり、リスクある更新は理由付きで保留される。",
+   "stopCondition": "Verification fails repeatedly or remaining updates all require human review.",
+   "stopConditionJa": "検証が繰り返し失敗、または残る更新がすべて人的レビュー必須。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 60,
+   "escalation": [
+    "major version upgrade",
+    "runtime requirement change",
+    "security advisory with product impact",
+    "licensing concern",
+    "repeated verification failure"
+   ],
+   "escalationTo": "Issue assigned to the repository owner with the blocked group and evidence",
+   "allowedActions": [
+    "run package manager commands",
+    "run tests, typechecks, and builds",
+    "apply low-risk updates",
+    "comment on PRs"
+   ],
+   "disallowedActions": [
+    "major version migrations",
+    "runtime version changes",
+    "security-policy changes",
+    "broad multi-group upgrades"
+   ],
+   "stateArtifacts": [
+    "triage report comment",
+    "processed-update ledger"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "10",
+   "slug": "deploy-verifier",
+   "title": "Deploy verifier",
+   "titleJa": "デプロイ検証ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "devops",
+    "label": "DevOps",
+    "labelJa": "DevOps"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Deployment starts, canary advances, feature flag flips, or release tag is created; then poll every 5-15 minutes during the rollout window.",
+   "triggerJa": "デプロイ開始・カナリア進行・フラグ切替・タグ作成時。以後は5〜15分間隔でポーリング",
+   "triggerType": "proactive",
+   "description": "Watch a rollout after deployment, compare live signals against release expectations, and escalate quickly when anomalies appear.",
+   "descriptionJa": "デプロイ後のロールアウトを監視し、稼働シグナルをリリース期待値と比較し、異常があれば速やかにエスカレーションする。",
+   "agents": [
+    {
+     "role": "Observer",
+     "responsibility": "Gather metrics, logs, traces, and check status on the polling cadence."
+    },
+    {
+     "role": "Comparator",
+     "responsibility": "Compare observed signals against release expectations, thresholds, and baseline."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Write concise rollout status: stable, degraded, blocked, or unknown."
+    }
+   ],
+   "gates": [
+    "synthetic checks pass",
+    "error rate, latency, and saturation stay within thresholds",
+    "no new dominant failure mode in logs or traces",
+    "deployment phase matches expectations"
+   ],
+   "gatesJa": [
+    "合成監視が通過する",
+    "エラー率・レイテンシ・飽和度がしきい値内に留まる",
+    "ログやトレースに新たな支配的障害パターンが出ていない",
+    "デプロイ段階が期待と一致する"
+   ],
+   "receipts": [
+    "dashboards checked",
+    "baseline window",
+    "anomalies with evidence links",
+    "status decisions with timestamps"
+   ],
+   "exitCondition": "The rollout window completes with all signals stable.",
+   "exitConditionJa": "ロールアウト期間が全シグナル安定のまま完了する。",
+   "stopCondition": "The deploy is rolled back, paused, or handed to an incident owner.",
+   "stopConditionJa": "ロールバック・一時停止・インシデント担当への引き渡し。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 120,
+   "escalation": [
+    "threshold breach",
+    "missing telemetry",
+    "migration errors",
+    "customer-impacting regression",
+    "rollback criteria met"
+   ],
+   "escalationTo": "On-call channel with evidence links and the rollback checklist",
+   "allowedActions": [
+    "read metrics, logs, and traces",
+    "write rollout status updates",
+    "create issues"
+   ],
+   "disallowedActions": [
+    "rollback",
+    "config change",
+    "traffic shifting",
+    "database action",
+    "incident declaration"
+   ],
+   "stateArtifacts": [
+    "rollout status report",
+    "checked-signal log"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "11",
+   "slug": "docs-drift",
+   "title": "Docs drift collector",
+   "titleJa": "ドキュメント乖離収集ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "docs",
+    "label": "ドキュメント",
+    "labelJa": "ドキュメント"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Weekly, and after release branches, CLI flag changes, public API changes, or docs-related issues.",
+   "triggerJa": "週次。リリースブランチ作成・CLIフラグ変更・公開API変更・ドキュメント関連Issue後にも起動",
+   "triggerType": "time",
+   "description": "Find documentation that no longer matches code, tests, CLI behavior, API schemas, screenshots, or examples, then propose small verified patches.",
+   "descriptionJa": "コード・テスト・CLI挙動・APIスキーマ・スクリーンショット・例と一致しなくなったドキュメントを見つけ、小さな検証済みパッチを提案する。",
+   "agents": [
+    {
+     "role": "Explorer",
+     "responsibility": "Map changed behavior to docs that mention it."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Patch only confirmed docs drift."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Run docs tests, examples, link checks, or CLI comparisons."
+    },
+    {
+     "role": "Reviewer",
+     "responsibility": "Check tone, accuracy, and scope."
+    }
+   ],
+   "gates": [
+    "updated examples run or match current output",
+    "link checker passes",
+    "diff is scoped to confirmed drift"
+   ],
+   "gatesJa": [
+    "更新した例が実行できる、または現在の出力と一致する",
+    "リンクチェッカーが通過する",
+    "差分が確認済みの乖離に限定されている"
+   ],
+   "receipts": [
+    "changed docs",
+    "runtime output used as evidence",
+    "commands run",
+    "false positives recorded"
+   ],
+   "exitCondition": "All high-confidence drift items are patched and verified.",
+   "exitConditionJa": "確度の高い乖離項目がすべてパッチされ検証される。",
+   "stopCondition": "Remaining items require owner judgment or verification cannot run.",
+   "stopConditionJa": "残る項目にオーナー判断が必要、または検証が実行できない。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 60,
+   "escalation": [
+    "docs conflict with product decisions",
+    "examples require credentials",
+    "screenshots need design approval"
+   ],
+   "escalationTo": "docs owner issue or PR comment",
+   "allowedActions": [
+    "edit docs",
+    "edit examples",
+    "add docs tests",
+    "run link and example checks"
+   ],
+   "disallowedActions": [
+    "change product behavior",
+    "edit generated files manually",
+    "change public APIs without approval"
+   ],
+   "stateArtifacts": [
+    "docs drift report",
+    "processed item list"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "12",
+   "slug": "enterprise-approval",
+   "title": "Enterprise approval",
+   "titleJa": "エンタープライズ承認ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Every 1-4 hours during business hours while an approval is open, and when a gate completes or an approver is assigned.",
+   "triggerJa": "承認が開いている間、営業時間中1〜4時間ごと。ゲート完了時や承認者アサイン時にも起動",
+   "triggerType": "time",
+   "description": "Move a permissioned change through its required approvals without a human chasing reviewers, while keeping every gate, approver, and decision on the record.",
+   "descriptionJa": "人がレビュアーを追いかけずに、権限を要する変更を必要な承認プロセスに通し、全ゲート・承認者・決定を記録に残す。",
+   "agents": [
+    {
+     "role": "Explorer",
+     "responsibility": "Summarize the change and which gates and approvers still block it."
+    },
+    {
+     "role": "Coordinator",
+     "responsibility": "Route the request to the next required gate or approver and track SLAs."
+    },
+    {
+     "role": "Reviewer",
+     "responsibility": "Check that attached evidence satisfies each named policy gate."
+    },
+    {
+     "role": "Judge",
+     "responsibility": "Decide whether to advance, request changes, or escalate to a human owner."
+    }
+   ],
+   "gates": [
+    "every required gate has a recorded pass, fail, or waiver with evidence",
+    "each approval is attributable to a named human",
+    "the change does not advance while any gate is unmet"
+   ],
+   "gatesJa": [
+    "必須ゲートごとに合格・不合格・免除が証拠付きで記録される",
+    "各承認が実在の人物に帰属する",
+    "ゲート未達の間は変更が前に進まない"
+   ],
+   "receipts": [
+    "change request ID",
+    "gate status with evidence links",
+    "approver decisions and conditions",
+    "timestamps"
+   ],
+   "exitCondition": "The change is fully approved with a complete audit trail, or cleanly rejected.",
+   "exitConditionJa": "完全な監査証跡を伴って承認されるか、明確に却下される。",
+   "stopCondition": "The loop is blocked on a human decision, a failed gate, or an unresponsive approver.",
+   "stopConditionJa": "人的判断待ち・ゲート不合格・承認者が応答しない。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 240,
+   "escalation": [
+    "approver unresponsive past SLA",
+    "a gate fails",
+    "policy is ambiguous",
+    "a waiver is requested",
+    "regulated data or production access is involved"
+   ],
+   "escalationTo": "Named human owner via the change-management channel",
+   "allowedActions": [
+    "read approval state",
+    "attach sourced evidence",
+    "request reviews",
+    "update status fields"
+   ],
+   "disallowedActions": [
+    "self-approve",
+    "bypass a gate",
+    "edit policy",
+    "merge or ship the change"
+   ],
+   "stateArtifacts": [
+    "approval ledger entry",
+    "gate and approver status record"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "13",
+   "slug": "evaluation-regression",
+   "title": "Evaluation regression",
+   "titleJa": "評価リグレッションループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "evaluation",
+    "label": "評価",
+    "labelJa": "評価"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Nightly after eval completion, and when benchmark scores drop or trace graders fail.",
+   "triggerJa": "夜間の評価完了後。ベンチマークスコア低下やトレース採点の失敗時にも起動",
+   "triggerType": "time",
+   "description": "Detect regressions in agent behavior, connect them to recent prompt, context, or harness changes, and produce a verified repair proposal.",
+   "descriptionJa": "エージェント挙動の劣化を検知し、直近のプロンプト・コンテキスト・ハーネス変更に結びつけ、検証済みの修復案を作る。",
+   "agents": [
+    {
+     "role": "Investigator",
+     "responsibility": "Compare failing traces against passing baseline traces."
+    },
+    {
+     "role": "Hypothesis writer",
+     "responsibility": "Classify the likely cause: model behavior, context, tool, scorer, fixture, or harness."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Patch the smallest plausible cause supported by trace evidence."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Rerun targeted evals, then a smoke suite, and check for new regressions."
+    },
+    {
+     "role": "Judge",
+     "responsibility": "Decide whether evidence supports merging, deferring, or escalating."
+    }
+   ],
+   "gates": [
+    "targeted failing tasks return to baseline",
+    "no sentinel tasks regress",
+    "trace evidence supports the claimed cause",
+    "score deltas include run IDs and variance caveats"
+   ],
+   "gatesJa": [
+    "対象の失敗タスクが基準値に戻る",
+    "監視用タスクが劣化しない",
+    "トレース証拠が主張する原因を裏付ける",
+    "スコア差分に実行IDと分散の注意書きが含まれる"
+   ],
+   "receipts": [
+    "eval run IDs",
+    "trace excerpts",
+    "hypotheses considered",
+    "rerun scores"
+   ],
+   "exitCondition": "The regression is repaired with verified reruns, or classified as flaky or scorer drift with evidence.",
+   "exitConditionJa": "検証済みの再実行で劣化が修復されるか、フレーキーや採点ドリフトと証拠付きで分類される。",
+   "stopCondition": "Artifacts are missing, retries are exhausted, or the tradeoff requires product judgment.",
+   "stopConditionJa": "成果物が欠落・リトライ超過・トレードオフに製品判断が必要。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 120,
+   "escalation": [
+    "scorer bug",
+    "benchmark methodology change",
+    "missing private traces",
+    "model-provider incident",
+    "fix risks overfitting"
+   ],
+   "escalationTo": "Issue or PR tagged for the eval owner with reproducible evidence",
+   "allowedActions": [
+    "targeted eval reruns",
+    "scorer inspection",
+    "small prompt, context, or fixture patches",
+    "report generation"
+   ],
+   "disallowedActions": [
+    "scorer changes that hide failures",
+    "benchmark cherry-picking",
+    "broad prompt rewrites",
+    "leaderboard claims"
+   ],
+   "stateArtifacts": [
+    "regression investigation notes",
+    "patch-attempt log"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "14",
+   "slug": "feedback-clusterer",
+   "title": "Feedback clusterer",
+   "titleJa": "フィードバック集約ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "marketing",
+    "label": "マーケ",
+    "labelJa": "マーケ"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Daily or weekly, and after a launch, incident, release, or support backlog spike.",
+   "triggerJa": "日次または週次。ローンチ・障害・リリース・問い合わせ急増の後にも起動",
+   "triggerType": "time",
+   "description": "Turn noisy feedback streams into a small set of actionable themes with evidence, owners, and suggested next steps.",
+   "descriptionJa": "ノイズの多いフィードバックを、証拠・担当・次アクション付きの少数の実行可能テーマに変える。",
+   "agents": [
+    {
+     "role": "Collector",
+     "responsibility": "Gather feedback items and preserve stable source links."
+    },
+    {
+     "role": "Clusterer",
+     "responsibility": "Group items by user problem and attach representative examples."
+    },
+    {
+     "role": "Skeptic",
+     "responsibility": "Check clusters for overgeneralization and missing counterexamples."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Produce ranked themes with confidence, owners, and next actions."
+    }
+   ],
+   "gates": [
+    "every cluster has source links",
+    "high-impact claims include representative examples",
+    "frequency is reported separately from severity",
+    "processed IDs are recorded"
+   ],
+   "gatesJa": [
+    "各クラスタに出典リンクがある",
+    "影響の大きい主張に代表例が付く",
+    "頻度と深刻度を分けて報告する",
+    "処理済みIDが記録される"
+   ],
+   "receipts": [
+    "query windows and filters",
+    "processed item IDs",
+    "cluster names with example links",
+    "confidence and owner per theme"
+   ],
+   "exitCondition": "Clusters are stable and the ranked theme report with next actions is published.",
+   "exitConditionJa": "クラスタが安定し、次アクション付きの優先度別テーマ報告が公開される。",
+   "stopCondition": "Source rate limits block collection or themes require product judgment.",
+   "stopConditionJa": "取得元のレート制限で収集がブロック、またはテーマに製品判断が必要。",
+   "maxRetries": 1,
+   "maxRuntimeMinutes": 90,
+   "escalation": [
+    "security or legal concerns in feedback",
+    "sensitive data exposure",
+    "customer-specific commitments",
+    "prioritization conflicts"
+   ],
+   "escalationTo": "Product owner triage channel",
+   "allowedActions": [
+    "read feedback sources",
+    "create summary docs",
+    "create or update issues and labels"
+   ],
+   "disallowedActions": [
+    "close user reports",
+    "change priorities",
+    "send customer-facing replies"
+   ],
+   "stateArtifacts": [
+    "theme report",
+    "processed-ID ledger"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "15",
+   "slug": "fleet-coordination",
+   "title": "Fleet coordination loop",
+   "titleJa": "フリート協調ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Continuous while the task backlog is non-empty, within a wall-clock window.",
+   "triggerJa": "タスクのバックログが空でない限り、実時間の枠内で継続実行",
+   "triggerType": "proactive",
+   "description": "Land many parallel agent-authored changes on one codebase without collisions, duplicate work, or unverified merges.",
+   "descriptionJa": "多数の並列なエージェント変更を、衝突・重複作業・未検証マージなしに1つのコードベースへ着地させる。",
+   "agents": [
+    {
+     "role": "dispatcher",
+     "responsibility": "Claim and assign tasks, reconcile stale claims, and enforce the concurrency cap."
+    },
+    {
+     "role": "worker",
+     "responsibility": "Implement one bounded task in an isolated workspace and submit a candidate change."
+    },
+    {
+     "role": "verifier",
+     "responsibility": "Run the landing gate on every candidate independently of the worker that produced it."
+    },
+    {
+     "role": "integrator",
+     "responsibility": "Serialize landings through the merge queue, rebasing and re-verifying on conflict."
+    }
+   ],
+   "gates": [
+    "full landing gate passes after the candidate's final rebase",
+    "diff stays inside the claimed task scope",
+    "no two live claims cover the same task or protected files",
+    "integration branch stays green; a red landing halts the queue",
+    "every landing has a receipt linking task, worker, gate results, and commit"
+   ],
+   "gatesJa": [
+    "最終リベース後に着地ゲート一式が通過する",
+    "差分が申告したタスク範囲に収まる",
+    "同一タスクや保護ファイルを2つの作業が同時に占有しない",
+    "統合ブランチがグリーンを維持する",
+    "着地の失敗はキューを停止させる",
+    "着地ごとにタスク・作業者・ゲート結果・コミットを紐づけた記録が残る"
+   ],
+   "receipts": [
+    "landing receipt linking task, worker, gate results, and commit",
+    "fleet telemetry snapshot per wave"
+   ],
+   "exitCondition": "Backlog empty with all landings receipted and the integration branch green.",
+   "exitConditionJa": "バックログが空になり、全着地に記録があり、統合ブランチがグリーン。",
+   "stopCondition": "Budget spent or the branch cannot be kept green; remaining tasks return to the backlog with evidence.",
+   "stopConditionJa": "予算超過、またはブランチをグリーンに保てない。残タスクは証拠付きでバックログへ戻す。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 480,
+   "escalation": [
+    "a task fails its gate repeatedly",
+    "two tasks genuinely require the same files",
+    "gate infrastructure breaks",
+    "landing order forces a product decision"
+   ],
+   "escalationTo": "Escalation queue with the candidate branch, gate evidence, and claim history.",
+   "allowedActions": [
+    "claim a task through the ledger",
+    "implement the task in the owned workspace",
+    "submit a candidate branch",
+    "run the landing gate",
+    "land serially through the merge queue"
+   ],
+   "disallowedActions": [
+    "push directly to the integration branch",
+    "work an unclaimed task",
+    "edit files claimed by another live task",
+    "land a candidate that has not passed the gate after final rebase"
+   ],
+   "stateArtifacts": [
+    "claim ledger",
+    "merge-queue state and landing receipts",
+    "fleet telemetry"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "16",
+   "slug": "incident-response",
+   "title": "Incident response",
+   "titleJa": "インシデント対応ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "ops",
+    "label": "運用",
+    "labelJa": "運用"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "A pager alert fires or an error budget burn crosses a threshold; then refresh every 2-5 minutes while the incident is open.",
+   "triggerJa": "ページャ通知またはエラーバジェット消費がしきい値を超えたとき。以後は2〜5分ごとに更新",
+   "triggerType": "proactive",
+   "description": "Turn a fresh alert into a triaged, evidence-backed incident with a clear owner and a postmortem trail, without an engineer doing the mechanical correlation by hand.",
+   "descriptionJa": "エンジニアが手作業で相関を取らずに、新規アラートを証拠に基づくトリアージ済みインシデントと担当・事後検証の記録に変える。",
+   "agents": [
+    {
+     "role": "Observer",
+     "responsibility": "Gather metrics, logs, traces, and the recent change timeline."
+    },
+    {
+     "role": "Correlator",
+     "responsibility": "Link the alert to likely causes such as a deploy, dependency, or saturation."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Write a concise incident summary with severity, impact, and hypothesis."
+    },
+    {
+     "role": "Escalator",
+     "responsibility": "Page the right owner and hand off when mitigation is required."
+    }
+   ],
+   "gates": [
+    "severity is backed by concrete impact evidence",
+    "the correlated cause cites specific deploys, logs, traces, or metrics",
+    "missing telemetry is reported as unknown, never healthy"
+   ],
+   "gatesJa": [
+    "重大度が具体的な影響の証拠に裏付けられる",
+    "相関づけた原因が特定のデプロイ・ログ・トレース・メトリクスを引用する",
+    "欠落したテレメトリは『不明』として報告し、決して正常扱いしない"
+   ],
+   "receipts": [
+    "incident ID and severity",
+    "signal timeline",
+    "correlated cause with evidence links",
+    "owner handoff record"
+   ],
+   "exitCondition": "A human owner accepts the incident, or it auto-resolves with a recorded evidence trail.",
+   "exitConditionJa": "人間の担当者がインシデントを引き受けるか、証拠の記録を残して自動収束する。",
+   "stopCondition": "Mitigation is required, telemetry is missing, or correlation cannot be grounded in evidence.",
+   "stopConditionJa": "緩和措置が必要・テレメトリ欠落・相関を証拠づけられない。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 120,
+   "escalation": [
+    "customer-facing outage",
+    "data loss risk",
+    "security signal",
+    "missing telemetry",
+    "mitigation requires production action"
+   ],
+   "escalationTo": "On-call owner via pager with the evidence timeline",
+   "allowedActions": [
+    "read metrics, logs, and traces",
+    "open or update an incident record",
+    "post status",
+    "page the on-call owner"
+   ],
+   "disallowedActions": [
+    "roll back",
+    "restart services",
+    "change config",
+    "run remediation"
+   ],
+   "stateArtifacts": [
+    "incident record",
+    "postmortem seed timeline"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "17",
+   "slug": "knowledge-freshness",
+   "title": "Knowledge freshness loop",
+   "titleJa": "ナレッジ鮮度ループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "data",
+    "label": "データ",
+    "labelJa": "データ"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Daily refresh of changed or expired sources in the approved registry.",
+   "triggerJa": "承認済みレジストリのうち、変更または失効したソースを日次で更新",
+   "triggerType": "time",
+   "description": "Keep an agent retrieval corpus current, attributable, policy-compliant, and measurably useful before atomic promotion.",
+   "descriptionJa": "エージェントの検索コーパスを、最新・出所明示・ポリシー適合・有用性が計測された状態に保ち、原子的に昇格する。",
+   "agents": [
+    {
+     "role": "Source monitor",
+     "responsibility": "Detect additions, changes, removals, and expired freshness windows."
+    },
+    {
+     "role": "Curator",
+     "responsibility": "Resolve authority, scope, duplicates, metadata, and quarantine decisions."
+    },
+    {
+     "role": "Indexer",
+     "responsibility": "Build a versioned candidate corpus and retrieval index."
+    },
+    {
+     "role": "Evaluator",
+     "responsibility": "Gate freshness, provenance, retrieval quality, grounded answers, and sensitive-data leakage."
+    }
+   ],
+   "gates": [
+    "every item maps to an approved canonical source",
+    "required sources meet freshness windows and removals are tombstoned",
+    "retrieval and grounded-answer quality meet baseline",
+    "sensitive or revoked content is absent",
+    "promotion is atomic and reversible"
+   ],
+   "gatesJa": [
+    "全項目が承認済みの正典ソースに対応する",
+    "必須ソースが鮮度期間を満たし、削除は墓標を残す",
+    "検索と根拠付き回答の品質が基準を満たす",
+    "機微または失効した内容が含まれない",
+    "昇格が原子的かつ可逆である"
+   ],
+   "receipts": [
+    "source manifest diff",
+    "checksums and fetch times",
+    "parser and index versions",
+    "evaluation results",
+    "promotion or quarantine decision"
+   ],
+   "exitCondition": "The versioned candidate passes provenance, freshness, policy, and retrieval gates and is promoted atomically.",
+   "exitConditionJa": "版管理された候補が出所・鮮度・ポリシー・検索の各ゲートを通過し、原子的に昇格される。",
+   "stopCondition": "No sources changed, a hard gate fails, the budget is exhausted, or owner judgment is required.",
+   "stopConditionJa": "ソース変更なし・必須ゲート不合格・予算超過・オーナー判断が必要。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 120,
+   "escalation": [
+    "authoritative sources conflict",
+    "access policy changes",
+    "sensitive data is detected",
+    "parser corruption affects coverage",
+    "freshness and retrieval quality trade off"
+   ],
+   "escalationTo": "Knowledge owner, data steward, or security reviewer",
+   "allowedActions": [
+    "fetch approved sources",
+    "parse and deduplicate content",
+    "build a candidate index",
+    "run retrieval and leakage evaluations",
+    "write a promotion receipt"
+   ],
+   "disallowedActions": [
+    "add unapproved domains",
+    "change source access policy",
+    "write directly to production",
+    "retain revoked content"
+   ],
+   "stateArtifacts": [
+    "accepted source manifest",
+    "versioned index",
+    "tombstone ledger",
+    "refresh receipt",
+    "rollback pointer"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "18",
+   "slug": "model-routing",
+   "title": "Model routing",
+   "titleJa": "モデルルーティングループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "design",
+    "label": "設計",
+    "labelJa": "設計"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Daily or weekly review; also when a new model ships or a cost or latency threshold is crossed.",
+   "triggerJa": "日次または週次のレビュー。新モデル登場やコスト・レイテンシのしきい値超過時にも起動",
+   "triggerType": "time",
+   "description": "Keep agent work on the right model for each task by routing on measured quality, latency, privacy, and cost rather than pinning everything to one model.",
+   "descriptionJa": "すべてを1モデルに固定せず、計測した品質・レイテンシ・プライバシー・コストでルーティングし、各タスクを適切なモデルに載せ続ける。",
+   "agents": [
+    {
+     "role": "Analyst",
+     "responsibility": "Cluster tasks by class and measure quality, latency, and cost per model."
+    },
+    {
+     "role": "Proposer",
+     "responsibility": "Suggest routing changes such as cheaper models for easy classes or fallbacks for hard ones."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Replay a representative sample on the proposed routing to confirm quality holds."
+    },
+    {
+     "role": "Reporter",
+     "responsibility": "Record the proposed policy, evidence, and privacy constraints checked."
+    }
+   ],
+   "gates": [
+    "proposed routes are replayed on a representative sample",
+    "quality stays within tolerance of baseline",
+    "privacy and residency constraints are checked per rerouted class",
+    "cost and latency deltas include sample size and variance"
+   ],
+   "gatesJa": [
+    "提案ルートを代表サンプルで再生検証する",
+    "品質が基準の許容範囲に留まる",
+    "再ルーティングする分類ごとにプライバシーと所在地の制約を確認する",
+    "コストとレイテンシの差分にサンプル数と分散が含まれる"
+   ],
+   "receipts": [
+    "task-class metrics",
+    "proposed routes",
+    "replay results",
+    "privacy checks"
+   ],
+   "exitCondition": "A replay-verified routing proposal preserves quality and privacy, or current routing is already optimal.",
+   "exitConditionJa": "再生検証済みのルーティング案が品質とプライバシーを維持する、または現行が既に最適。",
+   "stopCondition": "A quality, cost, or privacy tradeoff needs owner approval.",
+   "stopConditionJa": "品質・コスト・プライバシーのトレードオフにオーナー承認が必要。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 120,
+   "escalation": [
+    "quality-versus-cost tradeoff",
+    "privacy-tier change",
+    "data-residency question",
+    "model deprecation forcing migration",
+    "customer-impacting latency change"
+   ],
+   "escalationTo": "Workflow owner via the routing-policy proposal",
+   "allowedActions": [
+    "cluster tasks by class",
+    "measure per-model quality, latency, and cost",
+    "run offline replays",
+    "open a routing-policy proposal"
+   ],
+   "disallowedActions": [
+    "change production routing",
+    "move a task to a non-approved model",
+    "cross a privacy tier without review"
+   ],
+   "stateArtifacts": [
+    "routing-policy proposal",
+    "routing decision log"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "19",
+   "slug": "performance-regression",
+   "title": "Performance regression loop",
+   "titleJa": "性能リグレッションループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "perf",
+    "label": "性能",
+    "labelJa": "性能"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "A benchmark or service-level metric regresses beyond the declared noise tolerance.",
+   "triggerJa": "ベンチマークまたはSLI指標が、宣言したノイズ許容度を超えて劣化したとき",
+   "triggerType": "proactive",
+   "description": "Turn a reproducible performance regression into a profiled, narrow fix that restores the budget without weakening correctness.",
+   "descriptionJa": "再現可能な性能劣化を、プロファイルに基づく狭い修正に変え、正しさを損なわずに予算を回復する。",
+   "agents": [
+    {
+     "role": "Reproducer",
+     "responsibility": "Confirm the regression under the frozen workload and environment."
+    },
+    {
+     "role": "Profiler",
+     "responsibility": "Localize time, allocation, I/O, or contention hotspots before edits."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Apply one evidence-backed change to the measured bottleneck."
+    },
+    {
+     "role": "Verifier",
+     "responsibility": "Run correctness and compare repeated performance distributions and protected metrics."
+    }
+   ],
+   "gates": [
+    "correctness and safety checks pass unchanged",
+    "baseline and candidate share workload and environment fingerprint",
+    "change exceeds noise tolerance",
+    "tail latency memory throughput and cost remain within protected budgets"
+   ],
+   "gatesJa": [
+    "正しさと安全性のチェックが変更なく通過する",
+    "基準と候補が同じ負荷と環境の指紋を共有する",
+    "変化がノイズ許容度を超える",
+    "テールレイテンシ・メモリ・スループット・コストが保護予算内に留まる"
+   ],
+   "receipts": [
+    "environment fingerprint",
+    "raw baseline and candidate measurements",
+    "profile",
+    "commands",
+    "candidate diff",
+    "accept or reject decision"
+   ],
+   "exitCondition": "The target performance budget is restored reproducibly with correctness and protected metrics intact.",
+   "exitConditionJa": "正しさと保護指標を保ったまま、目標の性能予算が再現可能に回復する。",
+   "stopCondition": "The regression cannot be reproduced, measurements are too noisy, budget is exhausted, or an architectural decision is required.",
+   "stopConditionJa": "再現不能・計測ノイズが大きすぎる・予算超過・アーキテクチャ判断が必要。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 180,
+   "escalation": [
+    "regression is production-only",
+    "benchmark environment is unstable",
+    "fix trades correctness for speed",
+    "architectural or capacity decision is required"
+   ],
+   "escalationTo": "Performance owner or service architect",
+   "allowedActions": [
+    "run profiles",
+    "run repeated benchmarks",
+    "edit the measured bottleneck",
+    "add focused performance tests"
+   ],
+   "disallowedActions": [
+    "edit the benchmark workload",
+    "reduce sample count",
+    "disable correctness tests",
+    "change production systems"
+   ],
+   "stateArtifacts": [
+    "performance investigation ledger",
+    "profile artifact",
+    "measurement bundle"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "20",
+   "slug": "pr-babysitter",
+   "title": "PR babysitter",
+   "titleJa": "PRお守りループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "ci",
+    "label": "CI",
+    "labelJa": "CI"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "Every 2 hours during working hours, and after requested changes or failed required checks.",
+   "triggerJa": "営業時間中2時間ごと。変更要求や必須チェック失敗の後にも起動",
+   "triggerType": "time",
+   "description": "Keep one pull request moving toward merge readiness without repeatedly requiring a human to poll comments, CI, conflicts, and stale review threads.",
+   "descriptionJa": "人が繰り返しコメント・CI・競合・滞ったレビューを見に行かなくても、1つのPRをマージ可能へ前進させ続ける。",
+   "agents": [
+    {
+     "role": "Explorer",
+     "responsibility": "Summarize blockers and identify the smallest actionable work item."
+    },
+    {
+     "role": "Implementer",
+     "responsibility": "Patch only the explicit blocker in the isolated workspace."
+    },
+    {
+     "role": "Reviewer",
+     "responsibility": "Check that the diff is narrow and review comments were addressed."
+    }
+   ],
+   "gates": [
+    "required GitHub checks pass",
+    "unresolved comments are answered or resolved",
+    "diff is scoped to the blocker"
+   ],
+   "gatesJa": [
+    "必須のGitHubチェックが通過する",
+    "未解決コメントに回答または解決済み",
+    "差分がブロッカーに限定されている"
+   ],
+   "receipts": [
+    "commands run",
+    "check URLs",
+    "changed files",
+    "remaining blockers"
+   ],
+   "exitCondition": "PR is merge-ready or waiting only on human review.",
+   "exitConditionJa": "PRがマージ可能、または人的レビュー待ちのみの状態になる。",
+   "stopCondition": "Loop is blocked, budget is exhausted, or the next action requires human judgment.",
+   "stopConditionJa": "ループがブロック・予算超過・次アクションに人的判断が必要。",
+   "maxRetries": 3,
+   "maxRuntimeMinutes": 60,
+   "escalation": [
+    "architectural decision needed",
+    "same failure repeats twice",
+    "reviewer disagreement",
+    "force push required"
+   ],
+   "escalationTo": "PR comment tagging the human owner",
+   "allowedActions": [
+    "Read PR metadata",
+    "apply narrow fixes",
+    "run relevant checks",
+    "write a progress comment"
+   ],
+   "disallowedActions": [
+    "force push",
+    "large refactor",
+    "dependency upgrade",
+    "secrets access",
+    "production change"
+   ],
+   "stateArtifacts": [
+    "PR progress comment",
+    "local PROGRESS.md"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "21",
+   "slug": "release-note",
+   "title": "Release note",
+   "titleJa": "リリースノートループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "docs",
+    "label": "ドキュメント",
+    "labelJa": "ドキュメント"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "A release branch is cut or a tag is created; also a weekly draft for the next release during active development.",
+   "triggerJa": "リリースブランチ作成またはタグ生成時。開発中は次期リリースの週次ドラフトも作成",
+   "triggerType": "proactive",
+   "description": "Assemble accurate, human-readable release notes from the merged commits, issues, and PRs in a release, drafted from evidence rather than memory.",
+   "descriptionJa": "記憶ではなく証拠から、マージ済みのコミット・Issue・PRを組み立てて、正確で読みやすいリリースノートを作る。",
+   "agents": [
+    {
+     "role": "Collector",
+     "responsibility": "Gather merged PRs, issues, and commits in the release range with stable links."
+    },
+    {
+     "role": "Classifier",
+     "responsibility": "Group changes into features, fixes, breaking changes, and docs."
+    },
+    {
+     "role": "Writer",
+     "responsibility": "Draft user-facing notes that explain impact and migrations."
+    },
+    {
+     "role": "Reviewer",
+     "responsibility": "Check each note against its source and flag user-affecting items for a human."
+    }
+   ],
+   "gates": [
+    "every entry links to a merged PR, issue, or commit",
+    "breaking changes and migrations are called out explicitly",
+    "noise is excluded",
+    "processed IDs are recorded"
+   ],
+   "gatesJa": [
+    "各項目がマージ済みPR・Issue・コミットにリンクする",
+    "破壊的変更と移行手順が明示される",
+    "ノイズが除外される",
+    "処理済みIDが記録される"
+   ],
+   "receipts": [
+    "release range",
+    "processed PR and issue IDs",
+    "section mapping",
+    "draft changelog link"
+   ],
+   "exitCondition": "A review-ready draft changelog links every entry to its source and calls out breaking changes.",
+   "exitConditionJa": "全項目が出典にリンクし破壊的変更を明示した、レビュー可能なドラフトができる。",
+   "stopCondition": "The draft is blocked on product wording or a security advisory.",
+   "stopConditionJa": "文言の製品判断またはセキュリティ勧告でブロック。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 60,
+   "escalation": [
+    "security advisory",
+    "ambiguous breaking change",
+    "customer-commitment wording",
+    "license-relevant change",
+    "release scope needing product judgment"
+   ],
+   "escalationTo": "Release owner via the draft changelog PR",
+   "allowedActions": [
+    "read commit and PR metadata",
+    "draft changelog entries",
+    "open a draft changelog PR",
+    "link entries to sources"
+   ],
+   "disallowedActions": [
+    "publish the release",
+    "edit tags",
+    "reword security advisories unreviewed"
+   ],
+   "stateArtifacts": [
+    "draft changelog PR",
+    "processed-ID ledger"
+   ],
+   "keywords": []
+  },
+  {
+   "number": "22",
+   "slug": "security-review",
+   "title": "Security review",
+   "titleJa": "セキュリティレビューループ",
+   "url": "https://chaoyue0307.github.io/awesome-loop-engineering/",
+   "category": {
+    "slug": "security",
+    "label": "セキュリティ",
+    "labelJa": "セキュリティ"
+   },
+   "author": "Awesome Loop Engineering",
+   "trigger": "PRs touching auth, permissions, infrastructure, dependencies, cryptography, or data handling; plus a weekly pass on active branches.",
+   "triggerJa": "認証・権限・インフラ・依存・暗号・データ取扱いに触れるPR時。加えてアクティブブランチを週次で",
+   "triggerType": "proactive",
+   "description": "Continuously review scoped code changes for security risks, validate findings with evidence, and escalate sensitive decisions to humans.",
+   "descriptionJa": "範囲を絞ったコード変更のセキュリティリスクを継続的にレビューし、所見を証拠で検証し、機微な判断は人にエスカレーションする。",
+   "agents": [
+    {
+     "role": "Explorer",
+     "responsibility": "Map attack surfaces and sensitive changes in the diff."
+    },
+    {
+     "role": "Reviewer",
+     "responsibility": "Check for vulnerability classes and missing controls."
+    },
+    {
+     "role": "Validator",
+     "responsibility": "Distinguish exploitable findings from speculative concerns."
+    },
+    {
+     "role": "Judge",
+     "responsibility": "Decide whether to open a narrow PR, file an issue, or escalate."
+    }
+   ],
+   "gates": [
+    "findings cite concrete files, paths, inputs, or traces",
+    "static analysis or tests support claims where possible",
+    "suggested fixes do not weaken controls or broaden permissions",
+    "sensitive actions are human-approved"
+   ],
+   "gatesJa": [
+    "所見が具体的なファイル・パス・入力・トレースを引用する",
+    "可能な範囲で静的解析やテストが主張を裏付ける",
+    "提案する修正が制御を弱めたり権限を広げたりしない",
+    "機微な操作は人が承認する"
+   ],
+   "receipts": [
+    "reviewed commit SHA",
+    "sensitive paths checked",
+    "commands run",
+    "findings with severity and evidence",
+    "recorded false positives"
+   ],
+   "exitCondition": "High-confidence findings are reported with evidence, or no evidence-backed issues remain.",
+   "exitConditionJa": "確度の高い所見が証拠付きで報告されるか、証拠に基づく問題が残っていない。",
+   "stopCondition": "Validation retries are exhausted or the next step requires human approval.",
+   "stopConditionJa": "検証リトライ超過、または次のステップに人的承認が必要。",
+   "maxRetries": 2,
+   "maxRuntimeMinutes": 90,
+   "escalation": [
+    "production credentials involved",
+    "exploitability uncertain",
+    "authentication or cryptography design questions",
+    "compliance impact",
+    "severity disagreement"
+   ],
+   "escalationTo": "Private security triage channel, never a public issue",
+   "allowedActions": [
+    "static analysis",
+    "tests against safe fixtures",
+    "dependency audit",
+    "evidence-backed reporting"
+   ],
+   "disallowedActions": [
+    "secret exfiltration",
+    "production access",
+    "destructive testing",
+    "public disclosure",
+    "broad rewrites"
+   ],
+   "stateArtifacts": [
+    "security review report",
+    "false-positive ledger"
+   ],
+   "keywords": []
+  }
+ ]
+}

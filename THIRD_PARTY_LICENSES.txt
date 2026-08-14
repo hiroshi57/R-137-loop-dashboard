@@ -64,3 +64,12 @@ SOFTWARE.
    Source: https://agentloophub.com/
    License: MIT
 ----------------------------------------
+
+----------------------------------------
+7. Awesome Loop Engineering (ALE Loops, 22 loop contracts + Japanese translations as derivative work)
+   Source: https://chaoyue0307.github.io/awesome-loop-engineering/
+   Repository: https://github.com/ChaoYue0307/awesome-loop-engineering
+   Dataset: https://huggingface.co/datasets/cy0307/awesome-loop-engineering
+   License: MIT (code) / CC BY 4.0 (content)
+   Attribution: ChaoYue0307/awesome-loop-engineering contributors
+----------------------------------------

@@ -446,6 +446,15 @@
   #elSection{display:none}
   #awSection{display:none}
   #alhSection{display:none}
+  #aleSection{display:none}
+  /* ALE: 役割分担バッジ */
+  .role-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+    padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+  .gate-list{margin:0;padding-left:20px;font-size:12.5px;line-height:1.8;color:var(--sub)}
+  .deny-chip{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;margin:2px 3px 0 0;
+    background:color-mix(in srgb,var(--err) 10%,transparent);color:var(--err);
+    border:1px solid color-mix(in srgb,var(--err) 30%,transparent)}
   /* ===== ループ＝グラフ可視化（プロンプト→エージェント→ループ→グラフ） ===== */
   .flowchain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 14px;
     padding:12px 14px;background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius-sm)}
@@ -536,6 +545,7 @@
     <button class="src-tab" data-src="el" id="tabEL">⚙️ EL ループ <span id="elTabCount">（読込中…）</span></button>
     <button class="src-tab" data-src="aw" id="tabAW">⭐ AW ループ <span id="awTabCount">（読込中…）</span></button>
     <button class="src-tab" data-src="alh" id="tabALH">🧩 ALH ループ <span id="alhTabCount">（読込中…）</span></button>
+    <button class="src-tab" data-src="ale" id="tabALE">📐 ALE ループ <span id="aleTabCount">（読込中…）</span></button>
   </div>
 
   <!-- ① DI サマリー -->
@@ -707,6 +717,31 @@
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="alhTypeChips"></div>
     <div class="grid" id="alhGrid"></div>
   </div><!-- /alhSection -->
+
+  <!-- ALE ループセクション（Awesome Loop Engineering） -->
+  <div id="aleSection">
+    <div class="eyebrow">ALE LOOP LIBRARY — Awesome Loop Engineering</div>
+    <div style="font-size:11px;color:var(--faint);margin:-6px 0 14px">
+      出典 <a href="https://chaoyue0307.github.io/awesome-loop-engineering/" target="_blank" rel="noopener" style="color:var(--primary)">Awesome Loop Engineering</a>
+      — ループ契約（役割分担・検証ゲート・予算・エスカレーション・禁止操作まで定義）。日本語訳はDIによる二次的著作物。
+    </div>
+    <div class="ff-kpi-strip" id="aleKpis">
+      <div class="kpi"><div class="v" id="aleKpiCount">—</div><div class="l">ループ総数</div></div>
+      <div class="kpi"><div class="v" id="aleKpiCats">—</div><div class="l">カテゴリ</div></div>
+      <div class="kpi"><div class="v" id="aleKpiFiltered">—</div><div class="l">絞り込み結果</div></div>
+    </div>
+    <div class="ff-filters-row" id="aleFiltersRow">
+      <div class="search-box" style="flex:1;min-width:220px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="aleQ" type="search" placeholder="タイトル / 目的 / 役割 / ゲートで検索" autocomplete="off">
+        <button class="search-clear" id="aleQClear" aria-label="検索クリア">✕</button>
+      </div>
+      <span class="ff-result-count">該当 <b id="aleCount">—</b> 件</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="aleCatChips"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="aleTypeChips"></div>
+    <div class="grid" id="aleGrid"></div>
+  </div><!-- /aleSection -->
 
 </main>
 
@@ -1542,16 +1577,18 @@ let source = "di";
 function switchSource(s){
   source=s;
   document.querySelectorAll(".src-tab").forEach(b=>b.classList.toggle("on",b.dataset.src===s));
-  const di=$("#diSection"), ff=$("#ffSection"), el=$("#elSection"), aw=$("#awSection"), alh=$("#alhSection");
+  const di=$("#diSection"), ff=$("#ffSection"), el=$("#elSection"), aw=$("#awSection"), alh=$("#alhSection"), ale=$("#aleSection");
   if(di) di.style.display=s==="di"?"block":"none";
   if(ff) ff.style.display=s==="ff"?"block":"none";
   if(el) el.style.display=s==="el"?"block":"none";
   if(aw) aw.style.display=s==="aw"?"block":"none";
   if(alh) alh.style.display=s==="alh"?"block":"none";
+  if(ale) ale.style.display=s==="ale"?"block":"none";
   if(s==="ff" && FF_DATA) renderFFGrid();
   if(s==="el" && EL_DATA) renderELGrid();
   if(s==="aw" && AW_DATA) renderAWGrid();
   if(s==="alh" && ALH_DATA) renderALHGrid();
+  if(s==="ale" && ALE_DATA) renderALEGrid();
 }
 
 /* ========= EL ループ（loops.elorm.xyz） ========= */
@@ -2032,6 +2069,184 @@ function initALH(){
     const clr=$("#alhQClear"); if(clr) clr.addEventListener("click",()=>{q.value="";alhSearchQ="";renderALHGrid();}); }
 }
 
+/* ========= ALE ループ（Awesome Loop Engineering） ========= */
+let ALE_DATA=null, aleCatFilter="all", aleTypeFilter="all", aleSearchQ="";
+const ALE_CAT_COLORS={"品質":"#5A38C9","セキュリティ":"#DC2F55","設計":"#2B4BD8","性能":"#B0379B","CI":"#0E7FA8",
+  "運用":"#0E8A5F","データ":"#3A6FB0","保守":"#C77A12","DevOps":"#12A594","ドキュメント":"#D8266E","評価":"#7A5AF8","マーケ":"#E07A1F"};
+const aleTitle=l=>l.titleJa||l.title;
+const aleDesc =l=>l.descriptionJa||l.description||"";
+const aleExit =l=>l.exitConditionJa||l.exitCondition||"";
+const aleStop =l=>l.stopConditionJa||l.stopCondition||"";
+const aleTrig =l=>l.triggerJa||l.trigger||"";
+const aleGates=l=>(l.gatesJa&&l.gatesJa.length)?l.gatesJa:(l.gates||[]);
+const aleColor=c=>ALE_CAT_COLORS[c.labelJa||c.label]||"#666";
+
+function loadALE(){
+  fetch("ale_catalog.json").then(r=>r.json()).then(d=>{
+    ALE_DATA=d; ALE_DATA._bySlug={};
+    d.loops.forEach(l=>{ l._type=l.triggerType; ALE_DATA._bySlug[l.slug]=l; });
+    ALE_DATA.catList=d.categories.map(c=>({slug:c.slug,label:c.labelJa||c.label}));
+    const t=$("#aleTabCount"); if(t) t.textContent="("+d.loops.length+")";
+    const kc=$("#aleKpiCount"); if(kc) kc.textContent=d.loops.length;
+    const kcat=$("#aleKpiCats"); if(kcat) kcat.textContent=ALE_DATA.catList.length;
+    if(source==="ale") renderALEGrid();
+  }).catch(()=>{ const t=$("#aleTabCount"); if(t) t.textContent="(読込失敗)"; });
+}
+
+function renderALEGrid(){
+  if(!ALE_DATA) return;
+  const q=aleSearchQ.toLowerCase().trim();
+  let loops=ALE_DATA.loops;
+  if(aleCatFilter!=="all") loops=loops.filter(l=>l.category.slug===aleCatFilter);
+  if(aleTypeFilter!=="all") loops=loops.filter(l=>l._type===aleTypeFilter);
+  if(q) loops=loops.filter(l=>aleTitle(l).toLowerCase().includes(q)||aleDesc(l).toLowerCase().includes(q)||
+    l.title.toLowerCase().includes(q)||(l.agents||[]).some(a=>(a.role||"").toLowerCase().includes(q))||
+    aleGates(l).some(g=>g.toLowerCase().includes(q)));
+  const catEl=$("#aleCatChips");
+  if(catEl){
+    const all=`<button class="ff-chip${aleCatFilter==="all"?" on":""}" data-alecat="all">すべて (${ALE_DATA.loops.length})</button>`;
+    catEl.innerHTML=all+ALE_DATA.catList.map(c=>{
+      const n=ALE_DATA.loops.filter(l=>l.category.slug===c.slug).length;
+      return `<button class="ff-chip${aleCatFilter===c.slug?" on":""}" data-alecat="${esc(c.slug)}">${esc(c.label)} (${n})</button>`;
+    }).join("");
+  }
+  const typeEl=$("#aleTypeChips");
+  if(typeEl){
+    const all=`<button class="ff-chip${aleTypeFilter==="all"?" on":""}" data-aletype="all">全タイプ</button>`;
+    typeEl.innerHTML=all+LOOP_TYPE_ORDER.map(t=>{
+      const n=ALE_DATA.loops.filter(l=>l._type===t).length; if(!n) return "";
+      return `<button class="ff-chip${aleTypeFilter===t?" on":""}" data-aletype="${t}" title="${esc(typeInfo(t).note)}">${typeInfo(t).icon} ${esc(typeInfo(t).label)} (${n})</button>`;
+    }).join("");
+  }
+  const cnt=$("#aleCount"); if(cnt) cnt.textContent=loops.length;
+  const kf=$("#aleKpiFiltered"); if(kf) kf.textContent=loops.length;
+  const grid=$("#aleGrid"); if(!grid) return;
+  grid.innerHTML=loops.length?loops.map(aleCardHTML).join(""):'<div class="empty"><b>該当するALEループがありません</b></div>';
+}
+
+function aleCardHTML(l){
+  const color=aleColor(l.category), d0=aleDesc(l);
+  const isFav=favorites.has("ale:"+l.slug);
+  const budget=[l.maxRetries!=null?("最大"+l.maxRetries+"回"):"", l.maxRuntimeMinutes?(l.maxRuntimeMinutes+"分"):""].filter(Boolean).join(" / ");
+  return `<article class="card">
+    <div class="badges">
+      <span class="badge cat" style="border-left:3px solid ${color}">${esc(l.category.labelJa||l.category.label)}</span>
+      <span class="badge type" title="${esc(typeInfo(l._type).note)}">${typeInfo(l._type).icon} ${esc(typeInfo(l._type).label)}</span>
+      <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">ALE #${l.number}</span>
+    </div>
+    <h4>${esc(aleTitle(l))}</h4>
+    <div class="goal">${esc(d0.substring(0,130))}${d0.length>130?"...":""}</div>
+    <div class="kpi-tags">${(l.agents||[]).map(a=>`<span class="role-chip">👤 ${esc(a.role)}</span>`).join("")}</div>
+    <div class="iter-line"><div class="exit"><b>予算 ${esc(budget)} ・ EXIT WHEN</b>${esc(aleExit(l))}</div></div>
+    <div class="card-foot">
+      <span class="agents">ゲート${aleGates(l).length}件</span>
+      <button class="btn fav-btn${isFav?" on":""}" data-fav="ale:${esc(l.slug)}" title="お気に入り">★</button>
+      <button class="btn" data-aleview="${esc(l.slug)}">詳細</button>
+      <button class="btn primary" data-alecopy="${esc(l.slug)}">Copy</button>
+    </div>
+  </article>`;
+}
+
+// ALE のループ契約をプロンプト化
+function alePrompt(l){
+  const L=[`# ${aleTitle(l)}`,``,`## 目的`,aleDesc(l),``,`## トリガー`,aleTrig(l),``];
+  if((l.agents||[]).length){
+    L.push(`## 役割分担（独立した検証者を含む）`);
+    l.agents.forEach(a=>L.push(`- ${a.role}: ${a.responsibility}`));
+    L.push(``);
+  }
+  L.push(`## 検証ゲート（すべて満たすこと）`);
+  aleGates(l).forEach(g=>L.push(`  ☐ ${g}`));
+  L.push(``,`## 予算`);
+  L.push(`最大リトライ ${l.maxRetries!=null?l.maxRetries:"—"} 回 / 最大実行 ${l.maxRuntimeMinutes||"—"} 分`);
+  if((l.disallowedActions||[]).length){
+    L.push(``,`## 禁止操作`);
+    l.disallowedActions.forEach(a=>L.push(`  ✕ ${a}`));
+  }
+  if((l.escalation||[]).length){
+    L.push(``,`## エスカレーション条件`);
+    l.escalation.forEach(a=>L.push(`  ▸ ${a}`));
+    if(l.escalationTo) L.push(`  → 通知先: ${l.escalationTo}`);
+  }
+  L.push(``,`## 終了条件`,`成功: ${aleExit(l)}`,`不成立で停止: ${aleStop(l)}`);
+  return L.join("\n");
+}
+
+function openALEModal(loop){
+  currentLoop={_ale:true,...loop};
+  const color=aleColor(loop.category);
+  $("#mBadges").innerHTML=`
+    <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
+    <span class="badge type" title="${esc(typeInfo(loop._type).note)}">${typeInfo(loop._type).icon} ${esc(typeInfo(loop._type).label)}</span>
+    <span class="badge trg" style="background:none;border:1px solid var(--line2);color:var(--sub)">ALE Loop #${loop.number}</span>`;
+  $("#mTitle").textContent=aleTitle(loop);
+  const agents=(loop.agents||[]);
+  const agentRows=agents.map((a,i)=>
+    `<div class="flow-step"><span class="fno">${i+1}</span><div class="ftx"><b>${esc(a.role)}</b><span>${esc(a.responsibility)}</span></div></div>`).join("");
+  const gates=aleGates(loop);
+  const deny=(loop.disallowedActions||[]);
+  $("#mBody").innerHTML=`
+    <div class="m-sec tldr">
+      <div class="tldr-lead"><b class="lbl">このループの目的</b><p>${esc(aleDesc(loop))}</p></div>
+      <div class="tldr-meta">
+        <div class="tm"><b>トリガー</b><span>${esc(aleTrig(loop))}</span></div>
+        <div class="tm"><b>予算</b><span>最大 ${loop.maxRetries!=null?loop.maxRetries:"—"} リトライ / ${loop.maxRuntimeMinutes||"—"} 分</span></div>
+        <div class="tm"><b>成功で終了</b><span>${esc(aleExit(loop))}</span></div>
+        <div class="tm"><b>不成立で停止</b><span>${esc(aleStop(loop))}</span></div>
+      </div>
+    </div>
+    ${loopGraphBlock(agents.map(a=>({label:a.role, sub:""})))}
+    <div class="m-sec">
+      <b class="lbl">役割分担 <span class="lbl-note">＝生成と検証を別エージェントに分離</span></b>
+      <div class="flow">${agentRows}<div class="flow-loop"><span class="lc">↺</span><span><b>全ゲートを満たすまで反復</b></span></div></div>
+    </div>
+    <div class="m-sec">
+      <b class="lbl">検証ゲート（${gates.length}件・すべて満たすこと）</b>
+      <ul class="gate-list">${gates.map(g=>`<li>${esc(g)}</li>`).join("")}</ul>
+    </div>
+    ${deny.length?`<div class="m-sec"><b class="lbl">禁止操作</b><div>${deny.map(a=>`<span class="deny-chip">✕ ${esc(a)}</span>`).join("")}</div></div>`:""}
+    ${(loop.escalation||[]).length?`<div class="m-sec"><b class="lbl">エスカレーション条件</b><ul class="gate-list">${loop.escalation.map(e=>`<li>${esc(e)}</li>`).join("")}</ul>${loop.escalationTo?`<div style="font-size:12px;color:var(--faint);margin-top:6px">通知先: ${esc(loop.escalationTo)}</div>`:""}</div>`:""}
+    <details class="more">
+      <summary>もっと詳しく見る（英語原文・ループ契約）</summary>
+      <div class="more-body">
+        <div class="m-sec"><b class="lbl">Objective</b><p style="color:var(--sub);font-size:13px;line-height:1.7">${esc(loop.description||"")}</p></div>
+        <div class="m-sec"><b class="lbl">Gates</b><ul class="gate-list">${(loop.gates||[]).map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>
+        <div class="m-sec">
+          <div class="prompt-head"><b>ループ契約（コピー用）</b><button class="btn primary" id="mCopy">Copy</button></div>
+          <pre class="prompt" id="mPrompt"></pre>
+        </div>
+      </div>
+    </details>`;
+  $("#mPrompt").textContent=alePrompt(loop);
+  $("#mCopy").addEventListener("click", e=>copyText(alePrompt(loop), e.currentTarget));
+  $("#mCust").innerHTML=buildCustPanel();
+  initCustPanel(aleTitle(loop), alePrompt(loop), aleDesc(loop), loop.url||"");
+  $("#overlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+
+function initALE(){
+  const grid=$("#aleGrid");
+  if(grid) grid.addEventListener("click", e=>{
+    const fv=e.target.closest("[data-fav]");
+    if(fv){ const id=fv.dataset.fav;
+      if(favorites.has(id)){favorites.delete(id);fv.classList.remove("on");}else{favorites.add(id);fv.classList.add("on");}
+      updateFavBar(); return; }
+    const vw=e.target.closest("[data-aleview]");
+    if(vw&&ALE_DATA){ const l=ALE_DATA._bySlug[vw.dataset.aleview]; if(l) openALEModal(l); return; }
+    const cp=e.target.closest("[data-alecopy]");
+    if(cp&&ALE_DATA){ const l=ALE_DATA._bySlug[cp.dataset.alecopy]; if(l) copyText(alePrompt(l), cp); }
+  });
+  const catEl=$("#aleCatChips");
+  if(catEl) catEl.addEventListener("click",e=>{const c=e.target.closest("[data-alecat]"); if(c){aleCatFilter=c.dataset.alecat;renderALEGrid();}});
+  const typeEl=$("#aleTypeChips");
+  if(typeEl) typeEl.addEventListener("click",e=>{const c=e.target.closest("[data-aletype]"); if(c){aleTypeFilter=c.dataset.aletype;renderALEGrid();}});
+  const q=$("#aleQ");
+  if(q){ const d=debounce(()=>{aleSearchQ=q.value;renderALEGrid();},220);
+    q.addEventListener("input",d); q.addEventListener("search",d);
+    const clr=$("#aleQClear"); if(clr) clr.addEventListener("click",()=>{q.value="";aleSearchQ="";renderALEGrid();}); }
+}
+
 // ---- FF グリッド描画 ----
 function renderFFGrid(){
   if(!FF_DATA) return;
@@ -2486,6 +2701,8 @@ loadAW();
 initAW();
 loadALH();
 initALH();
+loadALE();
+initALE();
 switchSource("di"); // 初期状態を明示確定（CSS display:none 問題の保険）
 </script>
 </body>
