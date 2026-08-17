@@ -474,6 +474,11 @@
   /* 戻り辺のラベル：縦書きで重ならないように */
   .lg-back-label{fill:var(--primary);font-size:11px;font-weight:600;font-family:"Noto Sans JP",sans-serif;
     writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.02em}
+  /* ダウンロード／スキル化 */
+  .dl-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .dl-label{font-size:11px;color:var(--faint);font-weight:600}
+  .dl-btn{font-size:11.5px;padding:5px 11px}
+  .dl-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
   .lg-edge{fill:none;stroke:var(--line2);stroke-width:2}
   .lg-edge.back{stroke:var(--primary);stroke-dasharray:5 4}
   .lg-arrowhead{fill:var(--line2)}
@@ -781,6 +786,8 @@
 <div class="fav-bar" id="favBar" style="display:none" role="region" aria-label="お気に入り">
   <span id="favCount">0件 選択中</span>
   <button class="btn primary" id="favExport">まとめてコピー（提案書用）</button>
+  <button class="btn dl-btn" id="favDlSkills" title="選択中のループを SKILL.md として個別に保存">🧩 スキル一括DL</button>
+  <button class="btn dl-btn" id="favDlMd" title="選択中のループを1つの Markdown にまとめて保存">📄 まとめて.md</button>
   <button class="btn" id="favClear">すべて解除</button>
 </div>
 
@@ -793,6 +800,12 @@
       <div class="m-title">
         <div class="badges" id="mBadges"></div>
         <h3 id="mTitle"></h3>
+        <div class="dl-bar">
+          <span class="dl-label">案件に組み込む：</span>
+          <button class="btn dl-btn" id="dlSkill" title="Claude Code / Cursor のスキルとして .claude/skills/ に置けるファイル">🧩 SKILL.md</button>
+          <button class="btn dl-btn" id="dlMd" title="仕様書・提案書に貼れる Markdown">📄 Markdown</button>
+          <button class="btn dl-btn" id="dlJson" title="プログラムから扱える JSON">{ } JSON</button>
+        </div>
       </div>
       <button class="m-close" id="mClose" aria-label="閉じる">✕</button>
     </div>
@@ -1075,6 +1088,10 @@ function buildStatic(){
 
   // モーダル
   $("#mClose").addEventListener("click", closeModal);
+  // ダウンロード／スキル化
+  $("#dlSkill").addEventListener("click", ()=>downloadCurrent("skill"));
+  $("#dlMd").addEventListener("click",    ()=>downloadCurrent("md"));
+  $("#dlJson").addEventListener("click",  ()=>downloadCurrent("json"));
   $("#overlay").addEventListener("click", e=>{ if(e.target===$("#overlay")) closeModal(); });
   document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 
@@ -1095,6 +1112,8 @@ function buildStatic(){
 
   // お気に入りバー
   $("#favExport").addEventListener("click", exportFavorites);
+  $("#favDlSkills").addEventListener("click", ()=>exportFavoriteFiles("skill"));
+  $("#favDlMd").addEventListener("click", ()=>exportFavoriteFiles("md"));
   $("#favClear").addEventListener("click", ()=>{ favorites.clear(); renderGrid(); updateFavBar(); });
 }
 
@@ -1761,6 +1780,178 @@ function loopGraphSVG(nodes){
     (n>1?`<text class="lg-back-label" x="${ex+11}" y="${midY}" text-anchor="middle">未達なら再実行 ↺</text>`:"");
   return `<svg class="lg-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMinYMin meet" role="img" aria-label="ループのグラフ表現">${edges}${back}${nodeSVG}</svg>`;
 }
+/* ========= ダウンロード／スキル化（全ソース共通） ========= */
+// ファイルとして保存する
+function downloadFile(filename, text, mime){
+  try{
+    const blob=new Blob([text], {type:(mime||"text/plain")+";charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    return true;
+  }catch(e){ toast("ダウンロードに失敗しました"); return false; }
+}
+// ファイル名に使える文字へ（日本語は残す）
+function safeName(s){
+  return String(s||"loop").trim().replace(/[\\\/:*?"<>|]/g,"").replace(/\s+/g,"-").substring(0,60);
+}
+// 各ソースのループを共通形に正規化する
+function normalizeLoop(l){
+  if(!l) return null;
+  const o={ slug:l.slug||l.id||"loop", title:"", desc:"", when:"", steps:[], exit:"",
+            prompt:"", gates:[], guardrails:[], source:"", url:l.url||"",
+            category:"", type:l._type||l.triggerType||"", maxIterations:l.maxIterations||null };
+  if(l._ff){ o.source="Forward Future (FF)"; o.title=ffTitle(l); o.desc=ffDesc(l); o.when=ffWhen(l);
+    o.steps=ffSteps(l).map(String); o.exit=(ffVer(l).title||"")+(ffVer(l).detail?" ／ "+ffVer(l).detail:"");
+    o.prompt=l.prompt||""; o.category=ffCatLabel(l.category); }
+  else if(l._el){ o.source="loops! (EL)"; o.title=elTitle(l); o.desc=elDesc(l); o.exit=elExit(l);
+    o.steps=(l.steps||[]).map(s=>elStepName(s)+"："+elStepPrompt(s)+(s.shellCheck?`（確認: ${s.shellCheck}）`:""));
+    o.prompt=l.kickoffPrompt||""; o.category=elCatLabel(l.category);
+    o.guardrails=(l.guardrailsJa&&l.guardrailsJa.length)?l.guardrailsJa:(l.guardrails||[]); }
+  else if(l._alh){ o.source="Agent Loop Hub (ALH)"; o.title=alhTitle(l); o.desc=alhDesc(l); o.exit=alhExit(l);
+    o.when=alhTrig(l); o.steps=(l.fields||[]).map(f=>`${f.labelJa}（${f.label}）：${f.ja}`);
+    o.prompt=alhPrompt(l); o.category=l.category.labelJa||l.category.label; }
+  else if(l._ale){ o.source="Awesome Loop Engineering (ALE)"; o.title=aleTitle(l); o.desc=aleDesc(l);
+    o.when=aleTrig(l); o.exit=aleExit(l)+(aleStop(l)?" ／ 停止: "+aleStop(l):"");
+    o.steps=(l.agents||[]).map(a=>`${a.role}：${a.responsibility}`);
+    o.gates=aleGates(l); o.guardrails=(l.disallowedActions||[]).map(x=>"禁止: "+x);
+    o.prompt=alePrompt(l); o.category=l.category.labelJa||l.category.label; }
+  else if(l._aw){ o.source="Awesome Agent Loops (AW)"; o.title=awTitle(l); o.desc=awDesc(l);
+    o.when=l.commandLabel||""; o.prompt=l.kickoffPrompt||""; o.category=l.category.labelJa||l.category.label; }
+  else if(l._le){ o.source="Loop Engineering Prompts (LE)"; o.title=leTitle(l); o.desc=leDesc(l);
+    o.when=l.topic||""; o.prompt=l.kickoffPrompt||""; o.category=l.category.labelJa||l.category.label; }
+  else { // DI
+    o.source="DI Loop Library"; o.title=l.title||""; o.desc=l.goal||""; o.when=cleanTriggerDetail(l.triggerDetail||"");
+    o.exit=l.exitCondition||""; o.steps=(l.tactics||[]).map(String); o.prompt=l.kickoffPrompt||"";
+    o.guardrails=l.guardrails||[]; o.category=l.category||"";
+    o.url=o.url||"https://loop-dashboard-swart.vercel.app/"; }
+  return o;
+}
+// 独立検証ステップ（自己採点バイアス対策）＝生成物に必ず入れる
+const VERIFY_BLOCK=[
+"## 独立検証（必須・自己承認を防ぐ）",
+"",
+"> 実行したエージェント自身にレビューさせないこと。生成と評価が同じ文脈を共有すると、",
+"> 評価はほぼ必ず「合格」に偏る（自己採点バイアス）。",
+"",
+"1. 別のエージェント／別セッションを「検証者」として立てる。",
+"2. 検証者への指示：「この出力は誤っている前提で、却下すべき理由を探せ。理由が1つも見つからない時だけ合格とせよ。」",
+"3. 下のチェックリストを1項目ずつ YES/NO で判定する（1つでもNOなら却下）。",
+"4. 却下する場合は「最初に失敗した項目」を理由として明記して差し戻す（reason-carrying requeue）。",
+"5. 却下ゼロになった時だけ完了とみなす。"];
+
+// Claude Code / Cursor のスキル（SKILL.md）として出力
+function toSkillMd(o){
+  // スキル名は英数字ハイフンのみ。日本語しかない場合は落ちて空になるため安全な名前を作る
+  let name=(o.slug||"").toString().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+  if(name.replace(/-/g,"").length<3){
+    const tag=(o.source||"").match(/\(([A-Z]+)\)/);
+    name="loop-"+(tag?tag[1].toLowerCase()+"-":"")+Math.abs([...(o.title||"loop")].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7)).toString(36);
+  }
+  const oneLine=s=>String(s||"").replace(/\s*\n\s*/g," ").replace(/"/g,"'").trim();
+  const L=[];
+  L.push("---");
+  L.push(`name: ${name}`);
+  // description は「何をするか＋いつ使うか」。エージェントがスキル選択に使う
+  L.push(`description: ${oneLine(o.title+"。"+(o.desc||"")+(o.when?" 使うタイミング: "+o.when:"")).substring(0,320)}`);
+  L.push("---");
+  L.push("");
+  L.push(`# ${o.title}`);
+  L.push("");
+  if(o.desc){ L.push(o.desc); L.push(""); }
+  if(o.when){ L.push("## 使うタイミング"); L.push(o.when); L.push(""); }
+  if(o.steps.length){
+    L.push("## 手順（完了条件を満たすまで繰り返す）");
+    o.steps.forEach((s,i)=>L.push(`${i+1}. ${s}`));
+    L.push("");
+  }
+  if(o.exit){ L.push("## 完了条件"); L.push(o.exit); if(o.maxIterations) L.push(`（最大 ${o.maxIterations} 回で打ち切る）`); L.push(""); }
+  if(o.gates.length){ L.push("## 合格ゲート（すべて満たすこと）"); o.gates.forEach(g=>L.push(`- [ ] ${g}`)); L.push(""); }
+  if(o.guardrails.length){ L.push("## 守ること"); o.guardrails.forEach(g=>L.push(`- ${g}`)); L.push(""); }
+  L.push(...VERIFY_BLOCK);
+  L.push("");
+  L.push("- [ ] 主張・数値に出典／根拠が紐づいているか");
+  L.push("- [ ] 必須項目に空欄が残っていないか");
+  L.push("- [ ] 完了条件を満たしているか");
+  L.push("- [ ] 既存の成果物に副作用を起こしていないか");
+  L.push("");
+  if(o.prompt){
+    L.push("## 起動プロンプト");
+    L.push("```text");
+    L.push(o.prompt);
+    L.push("```");
+    L.push("");
+  }
+  L.push("---");
+  L.push(`出典: ${o.source}${o.url?" — "+o.url:""}`);
+  L.push(`書き出し: DI Loop Library / ${new Date().toLocaleDateString("ja-JP")}`);
+  return L.join("\n");
+}
+// 提案書・仕様書向け Markdown
+function toMarkdownDoc(o){
+  const L=[`# ${o.title}`,""];
+  L.push(`| 項目 | 内容 |`,`|---|---|`);
+  L.push(`| 出典 | ${o.source} |`);
+  if(o.category) L.push(`| カテゴリ | ${o.category} |`);
+  if(o.type) L.push(`| ループタイプ | ${typeInfo(o.type).label} |`);
+  if(o.when) L.push(`| 使うタイミング | ${String(o.when).replace(/\n/g," ")} |`);
+  if(o.exit) L.push(`| 完了条件 | ${String(o.exit).replace(/\n/g," ")} |`);
+  if(o.maxIterations) L.push(`| 最大反復 | ${o.maxIterations} 回 |`);
+  L.push("");
+  if(o.desc){ L.push("## 概要"); L.push(o.desc); L.push(""); }
+  if(o.steps.length){ L.push("## 進め方"); o.steps.forEach((s,i)=>L.push(`${i+1}. ${s}`)); L.push(""); }
+  if(o.gates.length){ L.push("## 合格ゲート"); o.gates.forEach(g=>L.push(`- [ ] ${g}`)); L.push(""); }
+  if(o.guardrails.length){ L.push("## 守ること"); o.guardrails.forEach(g=>L.push(`- ${g}`)); L.push(""); }
+  L.push(...VERIFY_BLOCK); L.push("");
+  if(o.prompt){ L.push("## 起動プロンプト"); L.push("```text"); L.push(o.prompt); L.push("```"); L.push(""); }
+  if(o.url) L.push(`出典: ${o.url}`);
+  return L.join("\n");
+}
+// お気に入りID（"ff:slug" 等）から元ループを引き、正規化して返す
+function resolveFavorite(id){
+  const s=String(id);
+  const p=s.indexOf(":");
+  if(p<0){ const l=DATA&&DATA.loops.find(x=>x.id===s); return l?normalizeLoop(l):null; }
+  const src=s.substring(0,p), slug=s.substring(p+1);
+  const M={ff:FF_DATA, el:EL_DATA, aw:AW_DATA, alh:ALH_DATA, ale:ALE_DATA, le:LE_DATA};
+  const d=M[src]; if(!d||!d._bySlug) return null;
+  const l=d._bySlug[slug]; if(!l) return null;
+  const flag={}; flag["_"+src]=true;
+  return normalizeLoop(Object.assign(flag, l));
+}
+// お気に入りを一括で書き出す
+function exportFavoriteFiles(kind){
+  const objs=[...favorites].map(resolveFavorite).filter(Boolean);
+  if(!objs.length){ toast("お気に入りがありません"); return; }
+  if(kind==="md"){
+    const now=new Date().toLocaleDateString("ja-JP");
+    const L=[`# AIエージェントループ 導入セット`,`生成日: ${now} / ${objs.length}件`,"",
+             "> 各ループは「完了条件を満たすまで繰り返す」設計です。","",
+             "---",""];
+    objs.forEach((o,i)=>{ L.push(toMarkdownDoc(o).replace(/^# /, `## [${i+1}] `)); L.push(""); L.push("---"); L.push(""); });
+    downloadFile(`loop-set-${objs.length}件.md`, L.join("\n"), "text/markdown");
+    toast(`${objs.length}件を1つのMarkdownにまとめました`);
+    return;
+  }
+  // SKILL.md は1ループ1ファイル。ブラウザのブロックを避けるため間隔を空けて保存する
+  objs.forEach((o,i)=>setTimeout(()=>{
+    downloadFile(`${safeName(o.title)}.SKILL.md`, toSkillMd(o), "text/markdown");
+  }, i*250));
+  toast(`${objs.length}件のSKILL.mdを保存します（.claude/skills/ に配置）`);
+}
+
+// 現在開いているループを取得して書き出す
+function downloadCurrent(kind){
+  const o=normalizeLoop(currentLoop);
+  if(!o){ toast("ループが選択されていません"); return; }
+  const base=safeName(o.title);
+  if(kind==="skill") downloadFile(`${base}.SKILL.md`, toSkillMd(o), "text/markdown");
+  else if(kind==="md") downloadFile(`${base}.md`, toMarkdownDoc(o), "text/markdown");
+  else downloadFile(`${base}.json`, JSON.stringify(o, null, 1), "application/json");
+  toast(kind==="skill"?"SKILL.md を保存しました（.claude/skills/ に配置）":"ファイルを保存しました");
+}
+
 // 「プロンプト→エージェント→ループ→グラフ」の共通ブロック（DI/FF/EL 共用）
 function loopGraphBlock(nodes){
   if(!nodes||!nodes.length) return "";
@@ -2640,6 +2831,10 @@ function buildCustPanel(){
           <button class="btn primary" id="custCopy">📋 コピー</button>
         </div>
         <pre class="cust-out" id="custOut"></pre>
+        <div class="dl-bar" style="margin-top:8px">
+          <button class="btn dl-btn" id="custDlSkill" title="Claude Code / Cursor の .claude/skills/ に置けるスキル">🧩 SKILL.md</button>
+          <button class="btn dl-btn" id="custDlMd" title="仕様書・提案書に貼れる Markdown">📄 .md</button>
+        </div>
       </div>
     </div>
   </div>`;
@@ -2829,6 +3024,28 @@ function initCustPanel(title, basePrompt, description, sourceUrl){
     outEl.textContent=output;
     preview.style.display="";
     copyBtn.onclick=()=>copyText(output, copyBtn);
+
+    // 自作ループの書き出し（スキル化 / Markdown）
+    const custTitle=`${title}（カスタマイズ版）`;
+    const custObj={
+      slug: safeName(title).toLowerCase().replace(/[^a-z0-9-]/g,"-")+"-custom",
+      title: custTitle,
+      desc: description||"",
+      when: timing||"",
+      steps: [],           // 本文に手順を内包しているため空
+      exit: accept||"",
+      prompt: output,      // 生成物そのものを起動プロンプトにする
+      gates: accept?accept.split(/\r?\n/).map(s=>s.replace(/^[\s・\-*▸]+/,"").trim()).filter(Boolean):[],
+      guardrails: risk?[risk]:[],
+      source: "DI Loop Library（カスタマイザーで生成）",
+      url: sourceUrl||"",
+      category: "", type: ltype||"", maxIterations: null
+    };
+    const dS=$("#custDlSkill"), dM=$("#custDlMd");
+    if(dS) dS.onclick=()=>{ downloadFile(safeName(custTitle)+".SKILL.md", toSkillMd(custObj), "text/markdown");
+      toast("SKILL.md を保存しました（.claude/skills/ に配置）"); };
+    if(dM) dM.onclick=()=>{ downloadFile(safeName(custTitle)+".md", toMarkdownDoc(custObj), "text/markdown");
+      toast("Markdown を保存しました"); };
   });
 }
 
