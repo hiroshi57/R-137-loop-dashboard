@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """全ソース横断の品質監査：翻訳漏れ・必須フィールド欠落・分類漏れ・重複を検出する。"""
-import json, sys, collections, re
+import json, sys, collections, re, os
 sys.stdout.reconfigure(encoding='utf-8')
 
 SOURCES = [
@@ -92,5 +92,20 @@ print(f'OK  DI  loops_1000.json      {len(dl):>4}本 （日本語原本）')
 print('-' * 62)
 tot = sum(len(json.load(open(p, encoding='utf-8'))['loops']) for _, p in SOURCES) + len(dl)
 print(f' 合計 {tot} 本 / 7ソース')
+# スキル用の索引が最新かを確認する（カタログを更新したのに索引が古いと提案に反映されない）
+IDX = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                   '.claude', 'skills', 'loop-advisor', 'loops_index.jsonl')
+if os.path.exists(IDX):
+    with open(IDX, encoding='utf-8') as f:
+        n_idx = sum(1 for l in f if l.strip())
+    if n_idx != tot:
+        issues.append(('IDX', 'スキル索引が古い', [f'索引{n_idx}件 / カタログ{tot}件']))
+        print(f'NG  索引 loops_index.jsonl      {n_idx:>4}本 '
+              f'→ カタログと不一致。python build_loop_index.py を実行すること')
+    else:
+        print(f'OK  索引 loops_index.jsonl      {n_idx:>4}本 （スキル loop-advisor 用）')
+else:
+    print('--  索引 loops_index.jsonl      未生成（python build_loop_index.py で作成）')
+
 print(f' 監査結果: {"問題なし" if not issues else str(len(issues)) + " 件の指摘"}')
 sys.exit(1 if issues else 0)
