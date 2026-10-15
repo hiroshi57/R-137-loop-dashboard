@@ -479,6 +479,14 @@
   .dl-label{font-size:11px;color:var(--faint);font-weight:600}
   .dl-btn{font-size:11.5px;padding:5px 11px}
   .dl-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  /* 実行結果の記録 */
+  .run-bar{margin-top:6px;padding-top:8px;border-top:1px dashed var(--line)}
+  .run-btn{font-size:11.5px;padding:5px 10px}
+  .run-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft)}
+  .run-btn.ok:hover{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+  .run-btn.ng:hover{border-color:var(--err);color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+  .run-btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
+  .run-hint{font-size:10.5px;color:var(--faint);margin-left:4px}
   .lg-edge{fill:none;stroke:var(--line2);stroke-width:2}
   .lg-edge.back{stroke:var(--primary);stroke-dasharray:5 4}
   .lg-arrowhead{fill:var(--line2)}
@@ -806,6 +814,15 @@
           <button class="btn dl-btn" id="dlMd" title="仕様書・提案書に貼れる Markdown">📄 Markdown</button>
           <button class="btn dl-btn" id="dlJson" title="プログラムから扱える JSON">{ } JSON</button>
         </div>
+        <div class="dl-bar run-bar">
+          <span class="dl-label">回した結果：</span>
+          <button class="btn run-btn ok"  data-stop="success"     title="完了条件を満たして終わった">✅ 成功</button>
+          <button class="btn run-btn"     data-stop="max_turns"   title="回数上限に達した">🔁 回数上限</button>
+          <button class="btn run-btn"     data-stop="budget"      title="予算・時間の上限に達した">💰 予算上限</button>
+          <button class="btn run-btn"     data-stop="no_progress" title="成果物に変化がなくなった">➖ 無進展</button>
+          <button class="btn run-btn ng"  data-stop="abort"       title="異常パターンで打ち切った">⚠️ 異常</button>
+          <span class="run-hint" id="runHint">※ どの条件で止まったかを残すと、効くループが分かります</span>
+        </div>
       </div>
       <button class="m-close" id="mClose" aria-label="閉じる">✕</button>
     </div>
@@ -1092,6 +1109,24 @@ function buildStatic(){
   $("#dlSkill").addEventListener("click", ()=>downloadCurrent("skill"));
   $("#dlMd").addEventListener("click",    ()=>downloadCurrent("md"));
   $("#dlJson").addEventListener("click",  ()=>downloadCurrent("json"));
+  // 回した結果を記録する（どの停止条件で止まったか）
+  document.querySelectorAll(".run-btn[data-stop]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const o=normalizeLoop(currentLoop);
+      if(!o){ toast("ループが選択されていません"); return; }
+      const reason=b.dataset.stop;
+      const turnsRaw=prompt("何回（反復）で止まりましたか？ 不明なら空のままで構いません。","");
+      if(turnsRaw===null) return; // キャンセル
+      const turns=parseInt(turnsRaw,10);
+      trackEvent("loop_run", { loopId:o.slug, src:srcTagOf(currentLoop), stopReason:reason,
+                               turns: Number.isFinite(turns)?turns:undefined });
+      document.querySelectorAll(".run-btn").forEach(x=>x.classList.remove("done"));
+      b.classList.add("done");
+      const label={success:"成功",max_turns:"回数上限",budget:"予算上限",no_progress:"無進展",abort:"異常"}[reason]||reason;
+      const h=$("#runHint"); if(h) h.textContent=`記録しました（${label}）。利用状況ページで集計されます。`;
+      toast(`実行結果を記録しました：${label}`);
+    });
+  });
   $("#overlay").addEventListener("click", e=>{ if(e.target===$("#overlay")) closeModal(); });
   document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 
@@ -1388,7 +1423,7 @@ function exportFavorites(){
 let currentLoop=null;
 function openModal(l){
   currentLoop=l;
-  trackEvent("loop_view", { loopId: l.id ?? l.title });
+  trackEvent("loop_view", { loopId: l.id ?? l.title, src: "DI" });
   const sc=SVC_COLORS[l.serviceKey]||"#666", ic=IND_COLORS[l.industryKey]||"#666";
   $("#mBadges").innerHTML = `
     <span class="badge svc" style="background:${sc}">${esc(l.service)}</span>
@@ -1519,7 +1554,7 @@ function openModal(l){
       </div>
     </details>`;
   $("#mPrompt").textContent = l.kickoffPrompt;
-  $("#mCopy").addEventListener("click", e=>{ copyText(l.kickoffPrompt, e.currentTarget); trackEvent("loop_copy", { loopId: l.id ?? l.title }); });
+  $("#mCopy").addEventListener("click", e=>{ copyText(l.kickoffPrompt, e.currentTarget); trackEvent("loop_copy", { loopId: l.id ?? l.title, src: "DI" }); });
   // カスタマイザーを右カラムに注入
   $("#mCust").innerHTML = buildCustPanel();
   initCustPanel(l.title, l.kickoffPrompt, l.goal, "");
@@ -1530,6 +1565,10 @@ function closeModal(){
   $("#overlay").classList.remove("show");
   document.body.style.overflow="";
   const mc=$("#mCust"); if(mc) mc.innerHTML="";
+  // 実行結果の記録UIを初期状態に戻す（次に開くループへ持ち越さない）
+  document.querySelectorAll(".run-btn").forEach(x=>x.classList.remove("done"));
+  const h=$("#runHint");
+  if(h) h.textContent="※ どの条件で止まったかを残すと、効くループが分かります";
   currentLoop=null;
 }
 
@@ -1980,6 +2019,13 @@ function downloadCurrent(kind){
   else if(kind==="md") downloadFile(`${base}.md`, toMarkdownDoc(o), "text/markdown");
   else downloadFile(`${base}.json`, JSON.stringify(o, null, 1), "application/json");
   toast(kind==="skill"?"SKILL.md を保存しました（.claude/skills/ に配置）":"ファイルを保存しました");
+  trackEvent("loop_download", { loopId:o.slug, src:srcTagOf(currentLoop), fmt:kind });
+}
+// currentLoop からソース種別（DI/FF/EL…）を取り出す
+function srcTagOf(l){
+  if(!l) return undefined;
+  for(const k of ["ff","el","le","alh","ale","aw"]) if(l["_"+k]) return k.toUpperCase();
+  return "DI";
 }
 
 // 「プロンプト→エージェント→ループ→グラフ」の共通ブロック（DI/FF/EL 共用）
@@ -2002,6 +2048,7 @@ function loopGraphBlock(nodes){
 
 function openELModal(loop){
   currentLoop={_el:true,...loop};
+  trackEvent("loop_view", { loopId: loop.slug, src: "EL" });
   const color=elColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(elCatLabel(loop.category))}</span>
@@ -2141,6 +2188,7 @@ function awCardHTML(l){
 
 function openAWModal(loop){
   currentLoop={_aw:true,...loop};
+  trackEvent("loop_view", { loopId: loop.slug, src: "AW" });
   const color=awColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
@@ -2282,6 +2330,7 @@ function alhPrompt(l){
 
 function openALHModal(loop){
   currentLoop={_alh:true,...loop};
+  trackEvent("loop_view", { loopId: loop.slug, src: "ALH" });
   const color=alhColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
@@ -2451,6 +2500,7 @@ function alePrompt(l){
 
 function openALEModal(loop){
   currentLoop={_ale:true,...loop};
+  trackEvent("loop_view", { loopId: loop.slug, src: "ALE" });
   const color=aleColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
@@ -2598,6 +2648,7 @@ function leCardHTML(l){
 
 function openLEModal(loop){
   currentLoop={_le:true,...loop};
+  trackEvent("loop_view", { loopId: loop.slug, src: "LE" });
   const color=leColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(loop.category.labelJa||loop.category.label)}</span>
@@ -2725,7 +2776,7 @@ function ffCardHTML(l){
 // ---- FF モーダル ----
 function openFFModal(loop){
   currentLoop={_ff:true,...loop};
-  trackEvent("loop_view", { loopId: loop.slug ?? ffTitle(loop) });
+  trackEvent("loop_view", { loopId: loop.slug ?? ffTitle(loop), src: "FF" });
   const color=ffColor(loop.category);
   $("#mBadges").innerHTML=`
     <span class="badge cat" style="border-left:3px solid ${color}">${esc(ffCatLabel(loop.category))}</span>
@@ -2779,7 +2830,7 @@ function openFFModal(loop){
       </div>
     </details>`;
   $("#mPrompt").textContent=loop.prompt||"";
-  $("#mCopy").addEventListener("click", e=>{ copyText(loop.prompt||"", e.currentTarget); trackEvent("loop_copy", { loopId: loop.slug ?? ffTitle(loop) }); });
+  $("#mCopy").addEventListener("click", e=>{ copyText(loop.prompt||"", e.currentTarget); trackEvent("loop_copy", { loopId: loop.slug ?? ffTitle(loop), src: "FF" }); });
   // カスタマイザーを右カラムに注入
   $("#mCust").innerHTML = buildCustPanel();
   initCustPanel(ffTitle(loop), loop.prompt||"", ffDesc(loop), loop.url||"");

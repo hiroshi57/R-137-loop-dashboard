@@ -2,7 +2,15 @@ const GH_REPO = 'hiroshi57/loop-dashboard';
 const GH_BRANCH = 'main';
 const LOG_PATH = 'data/analytics.jsonl';
 
-const ALLOWED_EVENTS = new Set(['page_view', 'loop_view', 'loop_copy', 'pain_select']);
+const ALLOWED_EVENTS = new Set([
+  'page_view', 'loop_view', 'loop_copy', 'pain_select',
+  'loop_download',  // SKILL.md / Markdown / JSON として持ち出した
+  'loop_run',       // ループを実際に回した結果（成功・停止理由を記録する）
+]);
+
+// loop_run の停止理由。記事の「どの条件で止まったかを残す」に対応する
+const STOP_REASONS = new Set(['success', 'max_turns', 'budget', 'no_progress', 'abort', 'manual']);
+const SOURCES = new Set(['DI', 'FF', 'EL', 'LE', 'ALH', 'ALE', 'AW', 'custom']);
 
 /**
  * ダッシュボードの利用状況（どのループが見られているか）を記録する。
@@ -34,10 +42,29 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // ソース種別（DI/FF/EL/…）。どのソースのループが使われているかの判断に使う
+  const src = SOURCES.has(body.src) ? body.src : undefined;
+  // 持ち出し形式（skill / md / json）
+  const fmt = typeof body.fmt === 'string' ? body.fmt.slice(0, 20) : undefined;
+  // 実行結果（loop_run のときだけ）
+  const stopReason = STOP_REASONS.has(body.stopReason) ? body.stopReason : undefined;
+  const turns = Number.isFinite(body.turns) ? Math.min(Math.max(0, body.turns | 0), 9999) : undefined;
+  const note = typeof body.note === 'string' ? body.note.slice(0, 200) : undefined;
+
+  if (event === 'loop_run' && !stopReason) {
+    res.status(400).json({ error: 'loop_run requires stopReason' });
+    return;
+  }
+
   const entry = {
     event,
     loopId,
     painId,
+    src,
+    fmt,
+    stopReason,
+    turns,
+    note,
     trackedAt: new Date().toISOString(),
   };
 

@@ -31,8 +31,18 @@ function summarize(lines) {
   const loopViews = {};
   const loopCopies = {};
   const painSelects = {};
+  const loopDownloads = {};   // 持ち出された回数
+  const bySource = {};        // ソース別の閲覧・コピー・持ち出し・実行
+  const stopReasons = {};     // 停止理由の内訳（success / max_turns / budget / ...）
+  const runsByLoop = {};      // ループ別の実行結果（成功数・総数・合計ターン）
   let earliestAt = null;
   let latestAt = null;
+
+  const bumpSrc = (src, key) => {
+    if (!src) return;
+    if (!bySource[src]) bySource[src] = { views: 0, copies: 0, downloads: 0, runs: 0 };
+    bySource[src][key] += 1;
+  };
 
   for (const line of lines) {
     let entry;
@@ -49,10 +59,28 @@ function summarize(lines) {
         break;
       case 'loop_view':
         if (entry.loopId) loopViews[entry.loopId] = (loopViews[entry.loopId] || 0) + 1;
+        bumpSrc(entry.src, 'views');
         break;
       case 'loop_copy':
         if (entry.loopId) loopCopies[entry.loopId] = (loopCopies[entry.loopId] || 0) + 1;
+        bumpSrc(entry.src, 'copies');
         break;
+      case 'loop_download':
+        if (entry.loopId) loopDownloads[entry.loopId] = (loopDownloads[entry.loopId] || 0) + 1;
+        bumpSrc(entry.src, 'downloads');
+        break;
+      case 'loop_run': {
+        const r = entry.stopReason || 'unknown';
+        stopReasons[r] = (stopReasons[r] || 0) + 1;
+        bumpSrc(entry.src, 'runs');
+        if (entry.loopId) {
+          const s = runsByLoop[entry.loopId] || (runsByLoop[entry.loopId] = { runs: 0, success: 0, turns: 0 });
+          s.runs += 1;
+          if (r === 'success') s.success += 1;
+          if (Number.isFinite(entry.turns)) s.turns += entry.turns;
+        }
+        break;
+      }
       case 'pain_select':
         if (entry.painId) painSelects[entry.painId] = (painSelects[entry.painId] || 0) + 1;
         break;
@@ -69,5 +97,9 @@ function summarize(lines) {
     loopViews,
     loopCopies,
     painSelects,
+    loopDownloads,
+    bySource,
+    stopReasons,
+    runsByLoop,
   };
 }

@@ -32,7 +32,24 @@
     <div class="card"><h2>ページビュー</h2><div class="stat" id="pv">-</div></div>
     <div class="card"><h2>ループ閲覧（詳細を開いた回数）</h2><div class="stat" id="lv">-</div></div>
     <div class="card"><h2>キックオフプロンプトのコピー</h2><div class="stat" id="lc">-</div></div>
+    <div class="card"><h2>持ち出し（SKILL.md等）</h2><div class="stat" id="ld">-</div></div>
+    <div class="card"><h2>実行の記録</h2><div class="stat" id="lr">-</div></div>
+    <div class="card"><h2>実行の成功率</h2><div class="stat" id="sr">-</div></div>
   </div>
+
+  <div class="section-title">どの停止条件で止まったか</div>
+  <div class="card">
+    <table id="stopTable"><thead><tr><th>停止理由</th><th class="count">件数</th><th class="count">割合</th></tr></thead><tbody></tbody></table>
+    <div class="empty" id="stopEmpty" style="display:none">
+      まだ実行の記録がありません。ループ詳細の「回した結果」から記録すると、ここに集計されます。
+    </div>
+  </div>
+
+  <div class="section-title">ソース別の使われ方</div>
+  <div class="card"><table id="srcTable"><thead><tr><th>ソース</th><th class="count">閲覧</th><th class="count">コピー</th><th class="count">持ち出し</th><th class="count">実行</th></tr></thead><tbody></tbody></table></div>
+
+  <div class="section-title">実行されたループ（成功率つき）</div>
+  <div class="card"><table id="runTable"><thead><tr><th>ループ</th><th class="count">実行</th><th class="count">成功</th><th class="count">成功率</th><th class="count">平均反復</th></tr></thead><tbody></tbody></table></div>
 
   <div class="section-title">よく見られているループ TOP10</div>
   <div class="card"><table id="topTable"><thead><tr><th>ループ</th><th class="count">閲覧数</th></tr></thead><tbody></tbody></table></div>
@@ -49,6 +66,11 @@ async function main(){
     fetch("/api/insights").then(r=>r.json()).catch(()=>null),
     fetch("./loops_1000.json").then(r=>r.json()).catch(()=>null),
   ]);
+  // 外部6ソースも名前解決に使う（DI以外のループIDを「不明」にしないため）
+  const EXT = [["FF","ff_catalog.json"],["EL","el_catalog.json"],["LE","le_catalog.json"],
+               ["ALH","alh_catalog.json"],["ALE","ale_catalog.json"],["AW","aw_catalog.json"]];
+  const extCatalogs = await Promise.all(
+    EXT.map(([,f])=>fetch("./"+f).then(r=>r.json()).catch(()=>null)));
 
   if(!insightsRes){
     document.getElementById("range").textContent = "解析データを取得できませんでした（/api/insights）";
@@ -57,6 +79,19 @@ async function main(){
 
   const loops = loopsRes && loopsRes.loops ? loopsRes.loops : [];
   const loopById = Object.fromEntries(loops.map(l => [l.id, l]));
+  // slug -> タイトル（外部ソース分）。DI は id、外部は slug で記録される
+  const nameBySlug = {};
+  extCatalogs.forEach((d,i)=>{
+    if(!d || !d.loops) return;
+    const tag = EXT[i][0];
+    d.loops.forEach(l => { nameBySlug[l.slug] = { title: l.titleJa || l.title, src: tag }; });
+  });
+  // 記録されたIDを人が読める名前にする
+  const nameOf = id => {
+    if(loopById[id]) return loopById[id].title;
+    if(nameBySlug[id]) return `${nameBySlug[id].title}（${nameBySlug[id].src}）`;
+    return id;
+  };
 
   document.getElementById("range").textContent =
     insightsRes.range && insightsRes.range.from
@@ -67,15 +102,61 @@ async function main(){
   document.getElementById("lv").textContent = Object.values(insightsRes.loopViews||{}).reduce((a,b)=>a+b,0);
   document.getElementById("lc").textContent = Object.values(insightsRes.loopCopies||{}).reduce((a,b)=>a+b,0);
 
+  const runs = insightsRes.runsByLoop || {};
+  const stops = insightsRes.stopReasons || {};
+  const totalRuns = Object.values(stops).reduce((a,b)=>a+b,0);
+  const totalSuccess = stops.success || 0;
+
+  document.getElementById("ld").textContent = Object.values(insightsRes.loopDownloads||{}).reduce((a,b)=>a+b,0);
+  document.getElementById("lr").textContent = totalRuns;
+  document.getElementById("sr").textContent = totalRuns ? Math.round(totalSuccess/totalRuns*100)+"%" : "-";
+
+  // 停止理由の内訳
+  const STOP_JA = { success:"✅ 成功（完了条件を満たした）", max_turns:"🔁 回数上限",
+                    budget:"💰 予算・時間の上限", no_progress:"➖ 無進展",
+                    abort:"⚠️ 異常パターン", manual:"手動で停止", unknown:"不明" };
+  const stopBody = document.querySelector("#stopTable tbody");
+  const stopEntries = Object.entries(stops).sort((a,b)=>b[1]-a[1]);
+  if(stopEntries.length){
+    document.getElementById("stopEmpty").style.display = "none";
+    stopBody.innerHTML = stopEntries.map(([k,v])=>
+      `<tr><td>${escapeHtml(STOP_JA[k]||k)}</td><td class="count">${v}</td>`+
+      `<td class="count">${Math.round(v/totalRuns*100)}%</td></tr>`).join("");
+  } else {
+    stopBody.innerHTML = "";
+    document.getElementById("stopEmpty").style.display = "";
+  }
+
+  // ソース別の使われ方
+  const bySrc = insightsRes.bySource || {};
+  const srcBody = document.querySelector("#srcTable tbody");
+  const srcEntries = Object.entries(bySrc).sort((a,b)=>(b[1].views||0)-(a[1].views||0));
+  srcBody.innerHTML = srcEntries.length
+    ? srcEntries.map(([s,v])=>
+        `<tr><td>${escapeHtml(s)}</td><td class="count">${v.views||0}</td>`+
+        `<td class="count">${v.copies||0}</td><td class="count">${v.downloads||0}</td>`+
+        `<td class="count">${v.runs||0}</td></tr>`).join("")
+    : `<tr><td colspan="5" class="empty">まだ記録がありません</td></tr>`;
+
+  // 実行されたループ（成功率つき）
+  const runBody = document.querySelector("#runTable tbody");
+  const runEntries = Object.entries(runs).sort((a,b)=>b[1].runs-a[1].runs).slice(0,20);
+  runBody.innerHTML = runEntries.length
+    ? runEntries.map(([id,s])=>{
+        const rate = s.runs ? Math.round(s.success/s.runs*100) : 0;
+        const avg = s.runs ? (s.turns/s.runs).toFixed(1) : "-";
+        return `<tr><td>${escapeHtml(nameOf(id))}</td><td class="count">${s.runs}</td>`+
+               `<td class="count">${s.success}</td><td class="count">${rate}%</td>`+
+               `<td class="count">${avg}</td></tr>`;
+      }).join("")
+    : `<tr><td colspan="5" class="empty">まだ実行の記録がありません</td></tr>`;
+
   // TOP10
   const topEntries = Object.entries(insightsRes.loopViews||{}).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const topBody = document.querySelector("#topTable tbody");
   topBody.innerHTML = topEntries.length
-    ? topEntries.map(([id,count])=>{
-        const l = loopById[id];
-        const title = l ? l.title : id;
-        return `<tr><td>${escapeHtml(title)}</td><td class="count">${count}</td></tr>`;
-      }).join("")
+    ? topEntries.map(([id,count])=>
+        `<tr><td>${escapeHtml(nameOf(id))}</td><td class="count">${count}</td></tr>`).join("")
     : `<tr><td colspan="2" class="empty">まだ記録がありません</td></tr>`;
 
   // 見られていないループ
