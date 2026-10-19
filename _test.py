@@ -141,6 +141,33 @@ ok("D-2-logic", "AND検索ロジック実装済み") if "q.every(group=>group.so
 # スパムシノニム追加確認
 ok("D-3-spam", "スパムシノニム追加済み") if chr(0x30b9)+chr(0x30d1)+chr(0x30e0) in html and "SYNONYMS" in html else fail("D-3-spam", "スパムシノニム欠損")
 
+# --- ループ連結（スタッキング）---
+ok("CH-1", "連結モーダル存在") if "chainOverlay" in html and "favChain" in html else fail("CH-1", "連結モーダル欠損")
+ok("CH-2", "直列・入れ子の両モード") if 'value="sequential"' in html and 'value="nested"' in html else fail("CH-2", "モード欠損")
+ok("CH-3", "全体の停止条件") if all(x in html for x in ["chainMaxTurns", "chainBudget", "chainEscalate"]) else fail("CH-3", "停止条件欠損")
+ok("CH-4", "連結の書き出し") if "chainDlSkill" in html and "chainDlMd" in html else fail("CH-4", "書き出し欠損")
+ok("CH-5", "2本未満のガード") if "chainReady" in html and "objs.length<2" in html else fail("CH-5", "ガード欠損")
+
+# 連結テンプレ（B-3）の参照先が実在するか。カタログ更新で壊れたらここで落とす
+_pm = re.search(r"const CHAIN_PRESETS=\[(.*?)\n\];", html, re.S)
+if not _pm:
+    fail("CH-6", "CHAIN_PRESETS が見つからない")
+else:
+    _slugs = {}
+    for _tag, _f in [("ff", "ff_catalog.json"), ("el", "el_catalog.json"), ("le", "le_catalog.json"),
+                     ("alh", "alh_catalog.json"), ("ale", "ale_catalog.json"), ("aw", "aw_catalog.json")]:
+        try:
+            _slugs[_tag] = {l["slug"] for l in json.load(open(_f, encoding="utf-8"))["loops"]}
+        except Exception:
+            _slugs[_tag] = set()
+    _groups = re.findall(r"ids:\[(.*?)\]", _pm.group(1), re.S)
+    _miss = [i for g in _groups for i in re.findall(r'"([^"]+)"', g)
+             if ":" not in i or i.split(":", 1)[1] not in _slugs.get(i.split(":", 1)[0], set())]
+    ok("CH-6", f"連結テンプレ{len(_groups)}件の参照先が全て実在") if not _miss and _groups \
+        else fail("CH-6", "テンプレの参照先が不明: " + ", ".join(_miss[:5]))
+    _short = [g for g in _groups if len(re.findall(r'"([^"]+)"', g)) < 2]
+    ok("CH-7", "各テンプレが2本以上") if not _short else fail("CH-7", f"{len(_short)}件が2本未満")
+
 # --- 結果 ---
 passed=[r for r in results if r[0]=="PASS"]
 failed=[r for r in results if r[0]=="FAIL"]
