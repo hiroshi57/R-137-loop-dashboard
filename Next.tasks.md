@@ -2,7 +2,7 @@
 
 最終更新: 2026-06-13
 
-公開URL: https://loop-dashboard-swart.vercel.app/ ／ リポジトリ: github.com/hiroshi57/loop-dashboard
+公開URL: https://loop-dashboard-swart.vercel.app/ ／ リポジトリ: github.com/hiroshi57/R-137-loop-dashboard
 
 ---
 

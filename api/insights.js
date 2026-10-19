@@ -1,4 +1,4 @@
-const GH_REPO = 'hiroshi57/loop-dashboard';
+const GH_REPO = 'hiroshi57/R-137-loop-dashboard';
 const GH_BRANCH = 'main';
 const LOG_PATH = 'data/analytics.jsonl';
 
